@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                                        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                                        http://www.springframework.org/schema/context
+                                        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--
+        The controllers are autodetected POJOs labeled with the @Controller annotation
+    -->
+    <context:component-scan base-package="org.wf.arnos.controller"/>
+
+    <!-- views -->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"
+        p:order="1">
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json" />
+                <entry key="xml" value="application/xml" />
+            </map>
+        </property>
+        <property name="defaultViews">
+            <list>
+                <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+                <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+                    <constructor-arg>
+                        <bean class="org.springframework.oxm.xstream.XStreamMarshaller" />
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="ignoreAcceptHeader" value="false" />
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- JMX Beans -->
+    <bean id="exporter"
+          class="org.springframework.jmx.export.MBeanExporter"
+          lazy-init="false">
+        <property name="autodetect" value="true"></property>
+        <property name="namingStrategy" ref="namingStrategy"></property>
+        <property name="assembler" ref="assembler"></property>
+    </bean>
+
+    <bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+    <bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+        <property name="attributeSource" ref="attributeSource"/>
+    </bean>
+
+    <bean id="namingStrategy"
+          class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+        <property name="attributeSource" ref="attributeSource"/>
+    </bean>
+</beans>

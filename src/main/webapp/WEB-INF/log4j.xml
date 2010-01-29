@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration>
+
+    <!--
+            *** APPENDERS ***
+    -->
+
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{ISO8601}] %-5p %c %m %n" />
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="DEBUG"/>
+            <param name="LevelMax" value="INFO"/>
+        </filter>
+    </appender>
+
+    <appender name="STDERR"  class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.err" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+              value="[%d{ISO8601}] %-5p %c %m %n" />
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="WARN"/>
+            <param name="LevelMax" value="FATAL"/>
+        </filter>
+    </appender>
+
+    <appender name="RollingFileAppender" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="./tmp/output.log"/>
+        <param name="MaxFileSize" value="5MB"/>
+        <param name="Append" value="true" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ISO8601} %-5p %c{1} %x - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="INFO"/>
+            <param name="LevelMax" value="FATAL"/>
+        </filter>
+    </appender>
+
+
+    <!--
+            *** LOGGERS ***
+    -->
+
+    <!-- configure Tomcat -->
+    <logger name="log4j.logger.org.apache.catalina">
+        <level value="warn"/>
+    </logger >
+
+    <!-- configure Spring framework -->
+    <logger name="org.springframework">
+        <level value="info" />
+    </logger>
+
+
+    <!--
+	Setup log4j's root logger
+    -->
+    <root>
+        <priority value="debug"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
+        <!--<appender-ref ref="EMAIL" />-->
+    </root>
+</log4j:configuration>

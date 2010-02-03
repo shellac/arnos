@@ -32,6 +32,7 @@
 package org.wf.arnos.controller.model;
 
 import java.io.File;
+import java.util.Date;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -79,7 +80,8 @@ public class ProjectsManagerTest {
 
         assertEquals("Persistance not enabled",0, manager.getProjects().size());
 
-        manager.addProject(null);
+        Project p = null;
+        manager.addProject(p);
         
         assertEquals("Null no added",0, manager.getProjects().size());
 
@@ -99,7 +101,7 @@ public class ProjectsManagerTest {
 
         assertEquals("Deplicate removal",1, manager.getProjects().size());
 
-        manager.removeProject(null);
+        manager.removeProject(p);
 
         assertEquals("Removing null",1, manager.getProjects().size());
 
@@ -178,4 +180,41 @@ public class ProjectsManagerTest {
 
     }
 
+    @Test
+    public void testManagementViaProjectNames()
+    {
+        manager = new ProjectsManager();
+        manager.addProject(p1);
+        manager.addProject(p2);
+
+        assertEquals("Two project added",2, manager.getProjects().size());
+
+        String uniqueName = "project_"+new Date().getTime();
+        boolean result = manager.addProject(uniqueName);
+
+        assertTrue("Successfully added third project", result);
+        assertEquals("Unique third project added",3, manager.getProjects().size());
+
+        result = manager.addProject(projectName1);
+
+        assertFalse("Duplicate project name not added", result);
+
+        result = manager.removeProject("x"+uniqueName);
+
+        assertFalse("Unknown project not removed", result);
+
+        assertNotNull(manager.getProject(projectName2));
+        
+        result = manager.removeProject(projectName2);
+
+        assertTrue("Project 2 removed", result);
+
+        assertNull(manager.getProject(projectName2));
+
+        result = manager.removeProject(uniqueName);
+        assertTrue("Unique project name removed", result);
+
+        assertEquals("One project remaining",1, manager.getProjects().size());
+        assertNotNull(manager.getProject(projectName1));
+    }
 }

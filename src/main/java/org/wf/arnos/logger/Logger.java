@@ -29,68 +29,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-package org.wf.arnos.controller.model;
+package org.wf.arnos.logger;
 
 /**
- *
+ * Defines the logger annotation.
+ * See: http://www.tzavellas.com/techblog/2007/03/31/implementing-seam-style-logger-injection-with-spring/
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class Endpoint
-{
-    /**
-     * A SPARQL endpoint URI.
-     */
-    private String location = "";
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    /**
-     * @return the URI
-     */
-    public final String getLocation()
-    {
-        return location;
-    }
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-    /**
-     * @param paramURI the URI to set
-     */
-    public final void setLocation(final String paramURI)
-    {
-        this.location = paramURI;
-    }
-
-    /**
-     * Default constructor.
-     * @param uri URI for this endpoint
-     */
-    public Endpoint(final String uri)
-    {
-        this.location = uri;
-    }
-
-    @Override
-    public final boolean equals(final Object obj)
-    {
-        if (this == obj) return false;
-
-        if (!(obj instanceof Endpoint)) return false;
-
-        Endpoint other = (Endpoint) obj;
-
-        if (this.location.equals(other.getLocation())) return true;
-        return false;
-    }
-
-    @Override
-    public final int hashCode()
-    {
-        int hash = 0;
-        if (location != null) hash += location.hashCode();
-        return hash;
-    }
-
-    @Override
-    public final String toString()
-    {
-        return "Endpoint:" + this.location;
-    }
-}
+@Retention(RUNTIME)
+@Target(FIELD)
+@Documented
+public @interface Logger { }

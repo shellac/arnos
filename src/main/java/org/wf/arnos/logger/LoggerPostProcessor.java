@@ -29,68 +29,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-package org.wf.arnos.controller.model;
+package org.wf.arnos.logger;
+
+import java.lang.reflect.Field;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.util.ReflectionUtils;
+
+import static org.springframework.util.ReflectionUtils.FieldCallback;
 
 /**
- *
+ * Before each bean gets initialized (right after it gets constructed), this
+ * bean will iterate over the fields of the bean to detect any @Logger
+ * annotations and construct and inject a new logger instance.
+ * See: http://www.tzavellas.com/techblog/2007/03/31/implementing-seam-style-logger-injection-with-spring/
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class Endpoint
+public class LoggerPostProcessor implements BeanPostProcessor
 {
-    /**
-     * A SPARQL endpoint URI.
-     */
-    private String location = "";
 
-    /**
-     * @return the URI
-     */
-    public final String getLocation()
+    public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException
     {
-        return location;
+        return bean;
     }
 
-    /**
-     * @param paramURI the URI to set
-     */
-    public final void setLocation(final String paramURI)
+    public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException
     {
-        this.location = paramURI;
-    }
-
-    /**
-     * Default constructor.
-     * @param uri URI for this endpoint
-     */
-    public Endpoint(final String uri)
-    {
-        this.location = uri;
-    }
-
-    @Override
-    public final boolean equals(final Object obj)
-    {
-        if (this == obj) return false;
-
-        if (!(obj instanceof Endpoint)) return false;
-
-        Endpoint other = (Endpoint) obj;
-
-        if (this.location.equals(other.getLocation())) return true;
-        return false;
-    }
-
-    @Override
-    public final int hashCode()
-    {
-        int hash = 0;
-        if (location != null) hash += location.hashCode();
-        return hash;
-    }
-
-    @Override
-    public final String toString()
-    {
-        return "Endpoint:" + this.location;
+        ReflectionUtils.doWithFields(bean.getClass(), new FieldCallback()
+        {
+            public void doWith(final Field field) throws IllegalArgumentException, IllegalAccessException
+            {
+                if (field.getAnnotation(Logger.class) != null) {
+                    Log log = LogFactory.getLog(bean.getClass());
+                    ReflectionUtils.makeAccessible(field);
+                    field.set(bean, log);
+                }
+            }
+        });
+        return bean;
     }
 }

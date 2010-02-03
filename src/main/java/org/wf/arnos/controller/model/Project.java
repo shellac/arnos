@@ -110,7 +110,7 @@ public class Project
     @Override
     public final boolean equals(final Object obj)
     {
-        if (this == obj) return false;
+        if (this == obj) return true;
 
         if (!(obj instanceof Project)) return false;
 
@@ -126,5 +126,11 @@ public class Project
         int hash = 0;
         if (name != null) hash += name.hashCode();
         return hash;
+    }
+
+    @Override
+    public final String toString()
+    {
+        return "Project:" + this.name;
     }
 }

@@ -37,6 +37,7 @@ import com.thoughtworks.xstream.XStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -72,6 +73,22 @@ public class ProjectsManager
         return projects;
     }
 
+    /**
+     * Returns a list of projects to aid management via JMX
+     * @return
+     */
+    @ManagedOperation
+    public final List<String> listAllProjects()
+    {
+        ArrayList<String> projectNames = new ArrayList<String>();
+        for (Project p : projects)
+        {
+            projectNames.add(p.getName());
+        }
+
+        Collections.sort(projectNames);
+        return projectNames;
+    }
     /**
      * Sets list of managed projects.
      * @param projectsList the projects to set

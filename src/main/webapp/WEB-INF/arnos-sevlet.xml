@@ -68,4 +68,5 @@
         <property name="attributeSource" ref="attributeSource"/>
     </bean>
 
+    <bean class="org.wf.arnos.logger.Log4jMBean"/>
 </beans>

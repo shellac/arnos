@@ -63,19 +63,9 @@ public class ProjectsManager
      */
     private List<Project> projects;
 
-
     /**
-     * Returns all projects managed.
-     * @return the projects
-     */
-    public final List<Project> getProjects()
-    {
-        return projects;
-    }
-
-    /**
-     * Returns a list of projects to aid management via JMX
-     * @return
+     * Returns a list of projects to aid management via JMX.
+     * @return String list of all project names
      */
     @ManagedOperation
     public final List<String> listAllProjects()
@@ -88,14 +78,6 @@ public class ProjectsManager
 
         Collections.sort(projectNames);
         return projectNames;
-    }
-    /**
-     * Sets list of managed projects.
-     * @param projectsList the projects to set
-     */
-    public final void setProjects(final List<Project> projectsList)
-    {
-        this.projects = projectsList;
     }
 
     /**
@@ -149,9 +131,9 @@ public class ProjectsManager
     {
         if (p == null) return false;
 
-        if (getProjects().contains(p)) return false;
+        if (projects.contains(p)) return false;
 
-        getProjects().add(p);
+        projects.add(p);
 
         boolean b = true;
 
@@ -230,7 +212,7 @@ public class ProjectsManager
      * @param projectName Name of project to search for
      * @return Managed project if found, <code>null</code> otherwise
      */
-    public final Project getProject(final String projectName)
+    private Project getProject(final String projectName)
     {
         if (StringUtils.isEmpty(projectName)) return null;
 
@@ -242,13 +224,83 @@ public class ProjectsManager
     }
 
     /**
+     * Adds an endpoint from a managed project.
+     * @param projectName Project name
+     * @param uri Endpoint location to add
+     */
+    public final void addEndpoint(final String projectName, final String uri)
+    {
+        Project p = getProject(projectName);
+
+        if (p == null) return;
+
+        p.addEndpoint(uri);
+
+        save();
+    }
+
+    /**
+     * Removes an endpoint from a managed project.
+     * @param projectName Project name
+     * @param uri Endpoint location to remove
+     */
+    public final void removeEndpoint(final String projectName, final String uri)
+    {
+        Project p = getProject(projectName);
+
+        if (p == null) return;
+
+        p.removeEndpoint(uri);
+
+        save();
+    }
+
+    /**
+     * Gets the list of endpoints for a given project.
+     * @param projectName Project name
+     * @return List of endpoints, or null if no project with supplied name found
+     */
+    public final List<Endpoint> getEndpoints(final String projectName)
+    {
+        Project p = getProject(projectName);
+
+        if (p == null) return null;
+
+        return p.getEndpoints();
+    }
+
+    /**
+     * Returns the number of managed projects.
+     * @return number of projects
+     */
+    public final int getProjectCount()
+    {
+        return projects.size();
+    }
+
+    /**
+     * Public method to determin if this project is managed.
+     * @param projectName Project name
+     * @return <code>true</code> if there is a managed project with
+     *                  this name, <code>false</code> otherwise
+     */
+    public final boolean hasProject(final String projectName)
+    {
+        Project p = getProject(projectName);
+
+        if (p == null) return false;
+
+        return true;
+    }
+
+    /**
      * This method will push internal model to a persistant storage layer.
      * @return boolean value indicating if save was successful
      */
     private boolean save()
     {
         XStream xstream = new XStream();
-        String xmlString = xstream.toXML(getProjects());
+        String xmlString = xstream.toXML(projects);
 
         try
         {
@@ -280,7 +332,7 @@ public class ProjectsManager
             XStream xstream = new XStream();
             try
             {
-                setProjects((List<Project>) xstream.fromXML(xmlString));
+                projects = ((List<Project>) xstream.fromXML(xmlString));
                 if (LOG.isDebugEnabled()) LOG.debug("Projects model loaded");
                 return true;
             }

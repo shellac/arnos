@@ -107,6 +107,19 @@ public class Project
         }
     }
 
+    /**
+     * Removes a endpoint to this project.
+     * @param uri Endpoint URI
+     */
+    public final void removeEndpoint(final String uri)
+    {
+        Endpoint e = new Endpoint(uri);
+        if (endpoints.contains(e))
+        {
+            endpoints.remove(e);
+        }
+    }
+
     @Override
     public final boolean equals(final Object obj)
     {

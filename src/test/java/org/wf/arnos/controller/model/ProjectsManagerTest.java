@@ -78,36 +78,36 @@ public class ProjectsManagerTest {
     public void testAddAndRemoveProject() {
         manager = new ProjectsManager();
 
-        assertEquals("Persistance not enabled",0, manager.getProjects().size());
+        assertEquals("Persistance not enabled",0, manager.getProjectCount());
 
         Project p = null;
         manager.addProject(p);
         
-        assertEquals("Null no added",0, manager.getProjects().size());
+        assertEquals("Null no added",0, manager.getProjectCount());
 
         manager.addProject(p1);
 
-        assertEquals("First project added",1, manager.getProjects().size());
+        assertEquals("First project added",1, manager.getProjectCount());
 
         manager.addProject(p2);
 
-        assertEquals("Second project added",2, manager.getProjects().size());
+        assertEquals("Second project added",2, manager.getProjectCount());
 
         manager.removeProject(p1);
 
-        assertEquals("First project removed",1, manager.getProjects().size());
+        assertEquals("First project removed",1, manager.getProjectCount());
 
         manager.removeProject(p1);
 
-        assertEquals("Deplicate removal",1, manager.getProjects().size());
+        assertEquals("Deplicate removal",1, manager.getProjectCount());
 
         manager.removeProject(p);
 
-        assertEquals("Removing null",1, manager.getProjects().size());
+        assertEquals("Removing null",1, manager.getProjectCount());
 
         manager.removeProject(p2);
 
-        assertEquals("Second project removed",0, manager.getProjects().size());
+        assertEquals("Second project removed",0, manager.getProjectCount());
     }
 
     @Test
@@ -115,26 +115,26 @@ public class ProjectsManagerTest {
     {
         manager = new ProjectsManager();
 
-        assertEquals("Persistance not enabled",0, manager.getProjects().size());
+        assertEquals("Persistance not enabled",0, manager.getProjectCount());
 
-        Project result = manager.getProject(null);
+        boolean result = manager.hasProject(null);
 
-        assertNull("Testing null getProject value", result);
+        assertFalse("Testing null getProject value", result);
 
-        result = manager.getProject(projectName1);
+        result = manager.hasProject(projectName1);
 
-        assertNull("Testing get missing project", result);
+        assertFalse("Testing get missing project", result);
 
         manager.addProject(p1);
         manager.addProject(p2);
 
-        result = manager.getProject(projectName1);
+        result = manager.hasProject(projectName1);
 
-        assertEquals("Obtained project 1", p1, result);
+        assertTrue("Obtained project 1", result);
 
-        result = manager.getProject(projectName2);
+        result = manager.hasProject(projectName2);
 
-        assertEquals("Obtained project 2", p2, result);
+        assertTrue("Obtained project 2",  result);
     }
 
     @Test
@@ -142,40 +142,40 @@ public class ProjectsManagerTest {
     {
         manager = new ProjectsManager();
 
-        assertEquals("Persistance not enabled",0, manager.getProjects().size());
+        assertEquals("Persistance not enabled",0, manager.getProjectCount());
 
         manager.addProject(p1);
         manager.addProject(p2);
 
-        assertEquals("Projects added",2, manager.getProjects().size());
+        assertEquals("Projects added",2, manager.getProjectCount());
 
         manager = new ProjectsManager();
 
-        assertEquals("Persistance still not enabled",0, manager.getProjects().size());
+        assertEquals("Persistance still not enabled",0, manager.getProjectCount());
 
         // now enable persistance
         manager = new ProjectsManager(fileName);
 
-        assertEquals("Persistant storage is empty",0, manager.getProjects().size());
+        assertEquals("Persistant storage is empty",0, manager.getProjectCount());
 
         manager.addProject(p1);
         manager.addProject(p2);
 
         manager = new ProjectsManager();
 
-        assertEquals("Persistance not enabled",0, manager.getProjects().size());
+        assertEquals("Persistance not enabled",0, manager.getProjectCount());
 
         manager.setFileName(fileName);
 
-        assertEquals("Persistance enabled",2, manager.getProjects().size());
+        assertEquals("Persistance enabled",2, manager.getProjectCount());
 
         manager.removeProject(p1);
 
-        assertEquals("Project removed",1, manager.getProjects().size());
+        assertEquals("Project removed",1, manager.getProjectCount());
 
         manager = new ProjectsManager(fileName);
         
-        assertEquals("Only one project remaining",1, manager.getProjects().size());
+        assertEquals("Only one project remaining",1, manager.getProjectCount());
 
 
     }
@@ -187,13 +187,13 @@ public class ProjectsManagerTest {
         manager.addProject(p1);
         manager.addProject(p2);
 
-        assertEquals("Two project added",2, manager.getProjects().size());
+        assertEquals("Two project added",2, manager.getProjectCount());
 
         String uniqueName = "project_"+new Date().getTime();
         boolean result = manager.addProject(uniqueName);
 
         assertTrue("Successfully added third project", result);
-        assertEquals("Unique third project added",3, manager.getProjects().size());
+        assertEquals("Unique third project added",3, manager.getProjectCount());
 
         result = manager.addProject(projectName1);
 
@@ -203,18 +203,18 @@ public class ProjectsManagerTest {
 
         assertFalse("Unknown project not removed", result);
 
-        assertNotNull(manager.getProject(projectName2));
+        assertTrue(manager.hasProject(projectName2));
         
         result = manager.removeProject(projectName2);
 
         assertTrue("Project 2 removed", result);
 
-        assertNull(manager.getProject(projectName2));
+        assertFalse(manager.hasProject(projectName2));
 
         result = manager.removeProject(uniqueName);
         assertTrue("Unique project name removed", result);
 
-        assertEquals("One project remaining",1, manager.getProjects().size());
-        assertNotNull(manager.getProject(projectName1));
+        assertEquals("One project remaining",1, manager.getProjectCount());
+        assertTrue(manager.hasProject(projectName1));
     }
 }

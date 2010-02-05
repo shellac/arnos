@@ -40,9 +40,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.wf.arnos.controller.model.Endpoint;
-import org.wf.arnos.controller.model.Project;
 import org.wf.arnos.controller.model.ProjectsManager;
+import org.wf.arnos.exception.ResourceNotFoundException;
 import org.wf.arnos.logger.Logger;
 
 /**
@@ -57,7 +58,7 @@ public class EndpointController
      * Logger.
      */
     @Logger
-    private transient Log logger;
+    private static transient Log logger;
 
     /**
      * The projects manager, autowired in.
@@ -74,30 +75,23 @@ public class EndpointController
     @RequestMapping(value = "/")
     public final String listEndpoints(@PathVariable final String projectName, final Model model)
     {
-        if (StringUtils.isNotEmpty(projectName))
+        ArrayList <String> endpoints = new ArrayList<String>();
+
+        checkProject(projectName);
+
+        if (logger.isDebugEnabled())
         {
-            ArrayList <String> endpoints = new ArrayList<String>();
-
-            Project p = manager.getProject(projectName);
-
-            if (p == null)
-            {
-                if (logger.isDebugEnabled()) logger.debug("Listing failed, no project named '"+projectName + "'");
-            }
-            else
-            {
-                if (logger.isDebugEnabled()) logger.debug("Listing endpoints for '"+projectName + "'");
-
-                List<Endpoint> endpointList = p.getEndpoints();
-                for (Endpoint ep : endpointList)
-                {
-                    endpoints.add(ep.getLocation());
-                }
-            }
-
-
-            model.addAttribute("endpoints", endpoints);
+            logger.debug("Listing endpoints for '" + projectName + "'");
         }
+
+        List<Endpoint> endpointList = manager.getEndpoints(projectName);
+        for (Endpoint ep : endpointList)
+        {
+            endpoints.add(ep.getLocation());
+        }
+
+        model.addAttribute("endpoints", endpoints);
+
         return "";
     }
 
@@ -109,34 +103,23 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return String representing view name
      */
-    @RequestMapping(value = "/add/{endpoint}")
+    @RequestMapping(value = "/add")
     public final String addEndpoint(@PathVariable final String projectName,
-                                                      @PathVariable final String endpoint,
+                                                      @RequestParam("url") final String endpoint,
                                                       final Model model)
     {
         String message = "";
 
-        if (StringUtils.isEmpty(projectName))
-        {
-            message = "Missing project name";
-        }
-        else if (StringUtils.isEmpty(endpoint))
+        if (StringUtils.isEmpty(endpoint))
         {
             message = "Missing endpoint";
         }
         else
         {
-            Project p = manager.getProject(projectName);
+            checkProject(projectName);
 
-            if (p == null)
-            {
-                message = "Project '" + projectName + "' not found";
-            }
-            else
-            {
-                p.addEndpoint(endpoint);
-                message = "endpoint '" + endpoint + "' added";
-            }
+            manager.addEndpoint(projectName, endpoint);
+            message = "endpoint '" + endpoint + "' added";
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);
@@ -152,39 +135,51 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return String representing view name
      */
-    @RequestMapping(value = "/remove/{endpoint}")
+    @RequestMapping(value = "/remove")
     public final String removeEndpoint(@PathVariable final String projectName,
-                                                      @PathVariable final String endpoint,
+                                                       @RequestParam("url") final String endpoint,
                                                       final Model model)
     {
         String message = "";
 
-        if (StringUtils.isEmpty(projectName))
-        {
-            message = "Missing project name";
-        }
-        else if (StringUtils.isEmpty(endpoint))
+        if (StringUtils.isEmpty(endpoint))
         {
             message = "Missing endpoint";
         }
         else
         {
-            Project p = manager.getProject(projectName);
+            checkProject(projectName);
 
-            if (p == null)
-            {
-                message = "Project '" + projectName + "' not found";
-            }
-            else
-            {
-                p.removeEndpoint(endpoint);
-                message = "endpoint '" + endpoint + "' added";
-            }
+            manager.removeEndpoint(projectName, endpoint);
+
+            message = "endpoint '" + endpoint + "' removed";
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);
 
         model.addAttribute("message", message);
         return "";
+    }
+
+    /**
+     * Checks for the existance of the project, throwing a runtime exception
+     * if not found.
+     * @param projectName Name of project, provided from request
+     */
+    private void checkProject(final String projectName)
+    {
+        if (StringUtils.isEmpty(projectName))
+        {
+            if (logger.isDebugEnabled()) logger.debug("Missing project name");
+            throw new ResourceNotFoundException();
+        }
+
+        if (manager.hasProject(projectName))
+        {
+            return;
+        }
+
+        if (logger.isDebugEnabled()) logger.debug("Listing failed, no project named '" + projectName + "'");
+        throw new ResourceNotFoundException();
     }
 }

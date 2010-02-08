@@ -71,7 +71,7 @@
             <version>${org.springframework.version}</version>
             <scope>runtime</scope>
         </dependency>
-
+        
         <!-- Jackson Java JSON-processor (for JSON views) -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -93,7 +93,7 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.15</version>
-            <scope>runtime,test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>jackson</groupId>

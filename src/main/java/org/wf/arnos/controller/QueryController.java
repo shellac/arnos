@@ -77,7 +77,7 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/projects/{projectName}/query")
+    @RequestMapping(value = "/{projectName}/query")
     public final void executeQuery(@PathVariable final String projectName,
                                                  @RequestParam("query") final String query,
                                                  final java.io.Writer writer)
@@ -96,7 +96,7 @@ public class QueryController
         }
         catch (Exception e)
         {
-            logger.error("Unable to write output",e);
+            logger.error("Unable to write output", e);
         }
     }
 

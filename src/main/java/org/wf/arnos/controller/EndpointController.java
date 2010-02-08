@@ -40,6 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.ProjectsManager;
@@ -51,7 +52,7 @@ import org.wf.arnos.logger.Logger;
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 @Controller
-@RequestMapping(value = "/projects/{projectName}/endpoints")
+@RequestMapping(value = "/{projectName}/endpoints")
 public class EndpointController
 {
     /**
@@ -72,7 +73,7 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return View name
      */
-    @RequestMapping(value = "/")
+    @RequestMapping(value = "")
     public final String listEndpoints(@PathVariable final String projectName, final Model model)
     {
         ArrayList <String> endpoints = new ArrayList<String>();
@@ -103,7 +104,7 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return String representing view name
      */
-    @RequestMapping(value = "/add")
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
     public final String addEndpoint(@PathVariable final String projectName,
                                                       @RequestParam("url") final String endpoint,
                                                       final Model model)
@@ -123,7 +124,7 @@ public class EndpointController
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);
-        
+
         model.addAttribute("message", message);
         return "";
     }
@@ -135,7 +136,7 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return String representing view name
      */
-    @RequestMapping(value = "/remove")
+    @RequestMapping(value = "/remove", method = RequestMethod.POST)
     public final String removeEndpoint(@PathVariable final String projectName,
                                                        @RequestParam("url") final String endpoint,
                                                       final Model model)

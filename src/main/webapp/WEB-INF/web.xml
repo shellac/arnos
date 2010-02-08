@@ -32,7 +32,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>SpringDispatcher</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/projects/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

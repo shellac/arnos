@@ -31,7 +31,6 @@
  */
 package org.wf.arnos.controller;
 
-import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -73,30 +72,32 @@ public class QueryController
 
     /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
-     * query over all defined endpoints for that project
-     * @param projectName
-     * @param query
-     * @param model
-     * @return
+     * query over all defined endpoints for that project.
+     * @param projectName Name of project
+     * @param query SPARQL Query
+     * @param writer Writer to send results to
      */
     @RequestMapping(value = "/projects/{projectName}/query")
     public final void executeQuery(@PathVariable final String projectName,
                                                  @RequestParam("query") final String query,
-                                                 java.io.Writer writer)
+                                                 final java.io.Writer writer)
     {
         checkProject(projectName);
 
-        logger.info("Passing to " + queryHandler.getClass() );
+        logger.info("Passing to " + queryHandler.getClass());
 
         List<Endpoint> endpoints = manager.getEndpoints(projectName);
         String s = queryHandler.handleQuery(query, endpoints);
 
         try
         {
-        writer.append(s);
-        writer.flush();
+            writer.append(s);
+            writer.flush();
         }
-        catch (Exception e){e.printStackTrace();}
+        catch (Exception e)
+        {
+            logger.error("Unable to write output",e);
+        }
     }
 
 

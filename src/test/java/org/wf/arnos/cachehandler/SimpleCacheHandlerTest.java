@@ -31,7 +31,10 @@
  */
 package org.wf.arnos.cachehandler;
 
+import java.io.File;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -57,46 +60,61 @@ public class SimpleCacheHandlerTest
     public static void tearDownClass() throws Exception {
     }
 
+    @Before
+    public void setUp()
+    {
+        try
+        {
+            cache = new SimpleCacheHandler(new File("./src/main/webapp/WEB-INF/ehcache.xml"));
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+    }
+
+    @After
+    public void tearDown()
+    {
+        try
+        {
+            cache.finalize();
+        }
+        catch (Throwable e)
+        {
+            fail(e.getMessage());
+        }
+    }
+
     @Test
     public void testPut() throws Throwable
     {
-
-        cache = new SimpleCacheHandler("./src/main/webapp/WEB-INF/ehcache.xml");
         assertNull(cache.get(key));
         cache.put(key,value);
         assertEquals(value,cache.get(key));
         cache.put(key,value+"more text");
         assertEquals(value+"more text",cache.get(key));
-        cache.finalize();
     }
 
     @Test
-    public void testGet() {
-    }
-
-    @Test
-    public void testFlush() throws Throwable
+    public void testFlush()
     {
-        cache = new SimpleCacheHandler("./src/main/webapp/WEB-INF/ehcache.xml");
         assertNull(cache.get(key));
         cache.put(key,value);
         assertEquals(value,cache.get(key));
         cache.flush(key);
         assertNull(cache.get(key));
-        cache.finalize();
     }
 
     @Test
-    public void testFlushAll()  throws Throwable
+    public void testFlushAll()
     {
-        cache = new SimpleCacheHandler("./src/main/webapp/WEB-INF/ehcache.xml");
         assertNull(cache.get(key));
         cache.put(key,value);
         cache.put(key+"22",value);
         cache.flushAll();
         assertNull(cache.get(key));
         assertNull(cache.get(key+"22"));
-        cache.finalize();
     }
 
 }

@@ -45,12 +45,12 @@
         </property>
         <property name="ignoreAcceptHeader" value="false" />
     </bean>
-<!--
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/views/"/>
-        <property name="suffix" value=".jsp"/>
+
+    <!-- Cache setup -->
+    <bean class="org.wf.arnos.cachehandler.SimpleCacheHandler">
+        <constructor-arg value="/WEB-INF/ehcache.xml"/>
     </bean>
--->
+
     <!-- JMX Beans -->
     <bean id="exporter"
           class="org.springframework.jmx.export.MBeanExporter"
@@ -73,4 +73,24 @@
     </bean>
 
     <bean class="org.wf.arnos.logger.Log4jMBean"/>
+
+    <!--
+    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <property name="locateExistingServerIfPossible" value="true" />
+    </bean>
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="/WEB-INF/ehcache.xml"/>
+        <property name="shared" value="true"/>
+    </bean>
+
+    <bean class="net.sf.ehcache.management.ManagementService" init-method="init">
+        <constructor-arg ref="cacheManager" />
+        <constructor-arg ref="mbeanServer" />
+        <constructor-arg value="true" />
+        <constructor-arg value="true" />
+        <constructor-arg value="true" />
+        <constructor-arg value="true" />
+    </bean>
+    -->
 </beans>

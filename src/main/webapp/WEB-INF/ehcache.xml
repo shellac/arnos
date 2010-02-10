@@ -1,0 +1,23 @@
+<ehcache>
+
+    <!--
+    For more information about configuring the cache, see:
+    http://ehcache.org/documentation/configuration.html
+    -->
+
+    <diskStore path="java.io.tmpdir"/>
+
+    <defaultCache
+        maxElementsInMemory="500"
+        eternal="true"
+        overflowToDisk="false"
+        memoryStoreEvictionPolicy="LFU" />
+
+    <cache name="resultsCache"
+        maxElementsInMemory="50"
+        eternal="false"
+        overflowToDisk="false"
+        diskPersistent="false"
+        memoryStoreEvictionPolicy="LFU" />
+        
+</ehcache>

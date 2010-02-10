@@ -150,19 +150,6 @@ public class SimpleQueryHandler implements QueryHandlerInterface
     {
         HttpQuery httpQuery = new HttpQuery(service) ;
         httpQuery.addParam(HttpParams.pQuery, queryString );
-
-//        for ( Iterator<String> iter = defaultGraphURIs.iterator() ; iter.hasNext() ; )
-//        {
-//            String dft = iter.next() ;
-//            httpQuery.addParam(HttpParams.pDefaultGraph, dft) ;
-//        }
-//        for ( Iterator<String> iter = namedGraphURIs.iterator() ; iter.hasNext() ; )
-//        {
-//            String name = iter.next() ;
-//            httpQuery.addParam(HttpParams.pNamedGraph, name) ;
-//        }
-
-//        httpQuery.setBasicAuthentication(user, password) ;
         return httpQuery ;
     }
 

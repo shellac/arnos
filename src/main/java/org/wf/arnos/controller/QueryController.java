@@ -31,6 +31,10 @@
  */
 package org.wf.arnos.controller;
 
+import java.lang.String;
+import java.lang.String;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,6 +43,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.ProjectsManager;
 import org.wf.arnos.exception.ResourceNotFoundException;
@@ -71,6 +76,12 @@ public class QueryController
     private transient QueryHandlerInterface queryHandler;
 
     /**
+     * The cache handler, autowired in.
+     */
+    @Autowired
+    private transient CacheHandlerInterface cacheHandler;
+    
+    /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
      * query over all defined endpoints for that project.
      * @param projectName Name of project
@@ -84,14 +95,23 @@ public class QueryController
     {
         checkProject(projectName);
 
-        logger.info("Passing to " + queryHandler.getClass());
+        // generate cache key
+        String result = cacheHandler.get(query);
+        if (result == null)
+        {
+            logger.info("Passing to " + queryHandler.getClass());
 
-        List<Endpoint> endpoints = manager.getEndpoints(projectName);
-        String s = queryHandler.handleQuery(query, endpoints);
+            List<Endpoint> endpoints = manager.getEndpoints(projectName);
+            result = queryHandler.handleQuery(query, endpoints);
 
+            logger.info("Adding result to cache");
+
+            // put this result into the cache
+            cacheHandler.put(query, result);
+        }
         try
         {
-            writer.append(s);
+            writer.append(result);
             writer.flush();
         }
         catch (Exception e)

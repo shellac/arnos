@@ -13,6 +13,11 @@
             <name>Repository hosting the jee6 artifacts</name>
             <url>http://download.java.net/maven/2</url>
         </repository>
+        <repository>
+            <id>sourceforge-releases</id>
+            <name>Sourceforge Release Repository</name>
+            <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
+        </repository>
     </repositories>
     <!-- Shared version number properties -->
     <properties>
@@ -71,7 +76,27 @@
             <version>${org.springframework.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
+
+        <!-- caching -->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>1.7.2</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sf.ehcache</groupId>
+                    <artifactId>ehcache-terracotta</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${org.springframework.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Jackson Java JSON-processor (for JSON views) -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -146,6 +171,7 @@
         <finalName>arnos</finalName>
     </build>
 </project>
+
 
 
 

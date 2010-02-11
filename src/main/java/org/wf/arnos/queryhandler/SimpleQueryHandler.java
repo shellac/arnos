@@ -31,15 +31,8 @@
  */
 package org.wf.arnos.queryhandler;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.engine.http.HttpParams;
 import com.hp.hpl.jena.sparql.engine.http.HttpQuery;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
-import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.controller.model.Endpoint;
 
 /**
- *
+ * A native implementation which uses string concatination to merge results together.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class SimpleQueryHandler implements QueryHandlerInterface 
@@ -60,6 +53,11 @@ public class SimpleQueryHandler implements QueryHandlerInterface
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(SimpleQueryHandler.class);
+    
+    /**
+     * SPARQL SELECT tag used to do string concatination.
+     */
+    private static final String TAG = "results";
 
     /**
      * This implementation, simple contatinates all query results.
@@ -70,7 +68,6 @@ public class SimpleQueryHandler implements QueryHandlerInterface
     public final String handleQuery(final String queryString, final List<Endpoint> endpoints)
     {
         LOG.debug("Querying against  " + endpoints.size() + " endpoints");
-        Model model = ModelFactory.createDefaultModel();
 
         ArrayList<String> results = new ArrayList<String>();
 
@@ -78,20 +75,7 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         {
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
-            Query query = QueryFactory.create(queryString);
-            QueryEngineHTTP qehttp = QueryExecutionFactory.createServiceRequest(url, query);
-            try
-            {
-                results.add(execSelect(queryString,url));
-            }
-            catch (QueryExceptionHTTP qhttpe)
-            {
-                LOG.error("Unable to execute query against " + url);
-            }
-            finally
-            {
-                qehttp.close();
-            }
+            results.add(execSelect(queryString, url));
         }
 
         StringBuffer finalResult = new StringBuffer("");
@@ -99,10 +83,10 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         if (results.size() > 0)
         {
 
-            int insertionPoint = results.get(0).toLowerCase().lastIndexOf("</"+TAG+">");
+            int insertionPoint = results.get(0).toLowerCase().lastIndexOf("</" + TAG + ">");
 
-            finalResult.append(results.get(0).substring(0,insertionPoint));
-            for (int i=0; i < results.size(); i++)
+            finalResult.append(results.get(0).substring(0, insertionPoint));
+            for (int i = 0; i < results.size(); i++)
             {
                 String s = extractResults(results.get(i));
                 finalResult.append(s);
@@ -113,8 +97,6 @@ public class SimpleQueryHandler implements QueryHandlerInterface
 
         return finalResult.toString();
     }
-
-    private static final String TAG = "results";
 
     public String execSelect(String querystring, String service)
     {
@@ -133,14 +115,17 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         return content;
     }
 
-    private String extractResults(String s)
+    private String extractResults(final String s)
     {
-        try {
+        try
+        {
             String newString = s;
-            newString = newString.substring(newString.toLowerCase().indexOf("<"+TAG+">")+TAG.length()+2);
-            newString = newString.substring(0, newString.toLowerCase().lastIndexOf("</"+TAG+">"));
+            newString = newString.substring(newString.toLowerCase().indexOf("<" + TAG + ">") + TAG.length() + 2);
+            newString = newString.substring(0, newString.toLowerCase().lastIndexOf("</" + TAG + ">"));
             return newString;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             LOG.error(ex);
             return s;
         }

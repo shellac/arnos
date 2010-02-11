@@ -17,7 +17,7 @@
     <context:component-scan base-package="org.wf.arnos.controller"/>
 
     <!-- autowire the query handler -->
-    <bean class="org.wf.arnos.queryhandler.SimpleQueryHandler"/>
+    <bean class="org.wf.arnos.queryhandler.ThreadedQueryHandler"/>
 
     <!-- define the persistant data model -->
     <bean class="org.wf.arnos.controller.model.ProjectsManager"
@@ -46,10 +46,11 @@
         <property name="ignoreAcceptHeader" value="false" />
     </bean>
 
-    <!-- Cache setup -->
+    <!-- Cache setup
     <bean class="org.wf.arnos.cachehandler.SimpleCacheHandler">
         <constructor-arg value="/WEB-INF/ehcache.xml"/>
     </bean>
+    -->
 
     <!-- JMX Beans -->
     <bean id="exporter"

@@ -160,7 +160,6 @@ public class SimpleCacheHandler implements CacheHandlerInterface
     @Override
     protected final void finalize() throws Throwable
     {
-        System.out.println("Closing cache manager");
         CacheManager.getInstance().shutdown();
         super.finalize();
     }

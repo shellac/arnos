@@ -31,10 +31,6 @@
  */
 package org.wf.arnos.controller;
 
-import java.lang.String;
-import java.lang.String;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -78,9 +74,9 @@ public class QueryController
     /**
      * The cache handler, autowired in.
      */
-    @Autowired
+    @Autowired(required = false)
     private transient CacheHandlerInterface cacheHandler;
-    
+
     /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
      * query over all defined endpoints for that project.
@@ -95,19 +91,26 @@ public class QueryController
     {
         checkProject(projectName);
 
+        List<Endpoint> endpoints = manager.getEndpoints(projectName);
+
+        String result = null;
+
         // generate cache key
-        String result = cacheHandler.get(query);
+        if (cacheHandler != null)
+        {
+            result = cacheHandler.get(query);
+        }
+
         if (result == null)
         {
             logger.info("Passing to " + queryHandler.getClass());
 
-            List<Endpoint> endpoints = manager.getEndpoints(projectName);
             result = queryHandler.handleQuery(query, endpoints);
 
-            logger.info("Adding result to cache");
+            logger.debug("Caching result");
 
             // put this result into the cache
-            cacheHandler.put(query, result);
+            if (cacheHandler != null) cacheHandler.put(query, result);
         }
         try
         {
@@ -118,6 +121,7 @@ public class QueryController
         {
             logger.error("Unable to write output", e);
         }
+
     }
 
 

@@ -40,9 +40,11 @@ import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
@@ -66,9 +68,9 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private static final Log LOG = LogFactory.getLog(ThreadedQueryHandler.class);
 
     /**
-     * How long the main thread should wait when checking for thread completion.
+     * How long (ms) the main thread should wait when checking for thread completion.
      */
-    private static final long MAIN_THREAD_WAIT = 50;
+    private static final long MAIN_THREAD_WAIT = 30000;
 
     /**
      * Default length for results stringbuffer constructor.
@@ -76,9 +78,20 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private static final int DEFAULT_SB_LENGTH = 133;
 
     /**
-     * Flag to indicate how many threads have completed their processing.
+     * Spring's taskexecutor for handling threads.
      */
-    private transient int theadsCompleted;
+    @Autowired
+    private transient ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * Sets the task executor.
+     * @param paramTaskExecutor A given task executor
+     */
+    public final void setTaskExecutor(final ThreadPoolTaskExecutor paramTaskExecutor)
+    {
+        this.taskExecutor = paramTaskExecutor;
+    }
+
 
     /**
      * Public accessor for cache (if present).
@@ -88,15 +101,21 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         return cacheHandler;
     }
-    
+
     /**
-     * Notifies the SimpleQueryHandler that another thread has finished processing.
+     * Tracks the number of completed threads.
+     */
+    private transient AtomicInteger threadsCompleted = new AtomicInteger();
+
+    /**
+     * Method for letting a thread inform the handler that it's finished processing.
      */
     public final void setCompleted()
     {
-        synchronized (this)
+        synchronized (threadsCompleted)
         {
-            theadsCompleted++;
+            threadsCompleted.incrementAndGet();
+            threadsCompleted.notifyAll();
         }
     }
 
@@ -133,10 +152,12 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         if (query.getQueryType() == Query.QueryTypeSelect)
         {
             // this is a simple select query. Results can be appended, and limited as required
-            LOG.debug("Is a select query");
             return handleSelect(query, endpoints);
-
-        } // if (query.getQueryType() == Query.QueryTypeSelect)
+        }
+        else if (query.getQueryType() == Query.QueryTypeConstruct)
+        {
+            return handleConstruct(query, endpoints);
+        }
         else
         {
             LOG.warn("Unable to handle this query type");
@@ -144,6 +165,13 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         return "";
     }
+
+
+    private String handleConstruct(final Query query, final List<Endpoint> endpoints)
+    {
+        return "";
+    }
+
 
     /**
      * This method handles a SELECT SPARQL query.
@@ -155,9 +183,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
         // reset conditions
-        theadsCompleted = 0;
         resultList = new LinkedList<Result>();
-        int totalThreads = endpoints.size();
+
+        threadsCompleted.set(0);
+        int threadsToWaitFor = endpoints.size();
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -165,23 +194,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            Thread t = new FetchSPARQLResponseThread(this, query, url);
-            t.start();
+            taskExecutor.execute(new FetchSelectResponseTask(this, query, url));
         }
 
-        // now wait for all thread to finish processing
-        LOG.debug("Threads started, going to sleep");
-        while (theadsCompleted != totalThreads)
-        {
-            try
-            {
-                Thread.sleep(MAIN_THREAD_WAIT);
-            }
-            catch (InterruptedException ex)
-            {
-                LOG.warn("Exception while waiting for threads to complete", ex);
-            }
-        }
+        // block until all threads have finished
+        waitForThreadsToComplete(threadsToWaitFor);
 
         // once threads have compeleted, construct results
         LOG.debug("Threads completed, constructing results");
@@ -221,31 +238,84 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         content.append("</results></sparql>");
 
+        clearUp();
+
         return content.toString();
     }
 
-
-    class FetchSPARQLResponseThread extends Thread
+    
+    /**
+     * Blocking method to wait until all threads have finished processing.
+     * @param threadsToWaitFor Number of threads currently running
+     */
+    private void waitForThreadsToComplete(final int threadsToWaitFor)
     {
-
-        ThreadedQueryHandler handler;
-        String url;
-        Query query;
-
-        FetchSPARQLResponseThread(final ThreadedQueryHandler handler, final Query query,  final String url)
+        synchronized (threadsCompleted)
         {
-            this.handler = handler;
-            this.query = query;
-            this.url = url;
+            while (threadsCompleted.get() < threadsToWaitFor)
+            {
+                try
+                {
+                    threadsCompleted.wait();
+                }
+                catch (InterruptedException ex)
+                {
+                    LOG.error("Error while waiting on threads", ex);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Clean up any used resources.
+     */
+    private void clearUp()
+    {
+        resultList.clear();
+    }
+
+
+    /**
+     * Handles obtaining select query from endpoint and parsing result set.
+     */
+    static class FetchSelectResponseTask implements Runnable
+    {
+        /**
+         * Handle to query processor for posting results back.
+         */
+        private final transient ThreadedQueryHandler handler;
+
+        /**
+         * Endpoint url.
+         */
+        private final transient String url;
+
+        /**
+         * Query to execute.
+         */
+        private final transient Query query;
+
+        /**
+         * Constructor for thread.
+         * @param paramHandler handling class
+         * @param paramQuery SPARQL query
+         * @param paramUrl Endpoint url
+         */
+        FetchSelectResponseTask(final ThreadedQueryHandler paramHandler, final Query paramQuery,  final String paramUrl)
+        {
+            super();
+            this.handler = paramHandler;
+            this.query = paramQuery;
+            this.url = paramUrl;
         }
 
+        /**
+         * Executes the query on the specified endpoint and processes the results.
+         */
+        @Override
         public void run()
         {
-//            if (handler.cacheHandler != null)
-//            {
-//                String handler.cacheHandler.get(query+url);
-//            }
-
             QueryEngineHTTP qehttp = QueryExecutionFactory.createServiceRequest(url, query);
 
             try
@@ -255,8 +325,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
                 while (resultSet.hasNext())
                 {
                     QuerySolution sol = resultSet.next();
-                    Result r = new Result(sol);
-                    handler.addResult(r);
+                    handler.addResult(new Result(sol));
                 }
             }
             catch (QueryExceptionHTTP qhttpe)
@@ -268,8 +337,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
                 qehttp.close();
                 handler.setCompleted();
             }
-
-            
         }
     }
 

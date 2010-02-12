@@ -36,8 +36,13 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -103,6 +108,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     }
 
     /**
+     * Stores the number of threads that will get executed (one per endpoint).
+     */
+    private transient int threadsToWaitFor;
+
+    /**
      * Tracks the number of completed threads.
      */
     private transient AtomicInteger threadsCompleted = new AtomicInteger();
@@ -122,7 +132,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * A container for SPARQL SELECT results gathered by the threads.
      */
-    private transient List<Result> resultList;
+    private transient List<Result> selectResultList;
 
     /**
      * Adds a result.
@@ -132,7 +142,24 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         synchronized (this)
         {
-            resultList.add(r);
+            selectResultList.add(r);
+        }
+    }
+
+    /**
+     * Holder for construct query results.
+     */
+    private transient Model constructModel;
+
+    /**
+     * Adds a construct query results model.
+     * @param m Model to add
+     */
+    public final void addResult(final Model m)
+    {
+        synchronized (this)
+        {
+            constructModel.add(m);
         }
     }
 
@@ -145,6 +172,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     public final String handleQuery(final String queryString, final List<Endpoint> endpoints)
     {
         LOG.debug("Querying against  " + endpoints.size() + " endpoints");
+
+        // reset conditions
+        threadsCompleted.set(0);
+        threadsToWaitFor = endpoints.size();
 
         // process the SPARQL query to best determin how to handle this query
         Query query = QueryFactory.create(queryString);
@@ -169,7 +200,24 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
     private String handleConstruct(final Query query, final List<Endpoint> endpoints)
     {
-        return "";
+        // start a new model
+        constructModel = ModelFactory.createDefaultModel();
+
+        // fire off a thread to handle quering each endpoint
+        for (Endpoint ep : endpoints)
+        {
+            String url = ep.getLocation();
+            LOG.debug("Querying " + url);
+
+            taskExecutor.execute(new FetchConstructResponseTask(this, query, url));
+        }
+
+        // block until all threads have finished
+        waitForThreadsToComplete();
+
+        StringWriter wr = new StringWriter();
+        constructModel.write(wr);
+        return wr.toString();
     }
 
 
@@ -182,11 +230,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     private String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
-        // reset conditions
-        resultList = new LinkedList<Result>();
-
-        threadsCompleted.set(0);
-        int threadsToWaitFor = endpoints.size();
+        selectResultList = new LinkedList<Result>();
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -198,7 +242,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         }
 
         // block until all threads have finished
-        waitForThreadsToComplete(threadsToWaitFor);
+        waitForThreadsToComplete();
 
         // once threads have compeleted, construct results
         LOG.debug("Threads completed, constructing results");
@@ -227,7 +271,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             hasLimit = true;
         }
 
-        for (Result r : resultList)
+        for (Result r : selectResultList)
         {
             if (!hasLimit || limit > 0)
             {
@@ -248,7 +292,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * Blocking method to wait until all threads have finished processing.
      * @param threadsToWaitFor Number of threads currently running
      */
-    private void waitForThreadsToComplete(final int threadsToWaitFor)
+    private void waitForThreadsToComplete()
     {
         synchronized (threadsCompleted)
         {
@@ -272,30 +316,50 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     private void clearUp()
     {
-        resultList.clear();
+        selectResultList.clear();
     }
 
 
     /**
-     * Handles obtaining select query from endpoint and parsing result set.
+     * Task to handle sparql query.
      */
-    static class FetchSelectResponseTask implements Runnable
+    static abstract class BasicResponseTask implements Runnable
     {
         /**
          * Handle to query processor for posting results back.
          */
-        private final transient ThreadedQueryHandler handler;
+        protected final transient ThreadedQueryHandler handler;
 
         /**
          * Endpoint url.
          */
-        private final transient String url;
+        protected final transient String url;
 
         /**
          * Query to execute.
          */
-        private final transient Query query;
+        protected final transient Query query;
 
+        /**
+         * Constructor for thread.
+         * @param paramHandler handling class
+         * @param paramQuery SPARQL query
+         * @param paramUrl Endpoint url
+         */
+        protected BasicResponseTask(final ThreadedQueryHandler paramHandler, final Query paramQuery,  final String paramUrl)
+        {
+            super();
+            this.handler = paramHandler;
+            this.query = paramQuery;
+            this.url = paramUrl;
+        }
+    }
+
+    /**
+     * Handles obtaining select query from endpoint and parsing result set.
+     */
+    static class FetchSelectResponseTask extends BasicResponseTask
+    {
         /**
          * Constructor for thread.
          * @param paramHandler handling class
@@ -304,10 +368,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
          */
         FetchSelectResponseTask(final ThreadedQueryHandler paramHandler, final Query paramQuery,  final String paramUrl)
         {
-            super();
-            this.handler = paramHandler;
-            this.query = paramQuery;
-            this.url = paramUrl;
+            super(paramHandler, paramQuery, paramUrl);
         }
 
         /**
@@ -327,6 +388,48 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
                     QuerySolution sol = resultSet.next();
                     handler.addResult(new Result(sol));
                 }
+            }
+            catch (QueryExceptionHTTP qhttpe)
+            {
+                LOG.error("Unable to execute query against " + url);
+            }
+            finally
+            {
+                qehttp.close();
+                handler.setCompleted();
+            }
+        }
+    }
+
+    /**
+     * Handles obtaining construct query from endpoint and parsing result set.
+     */
+    static class FetchConstructResponseTask extends BasicResponseTask
+    {
+        /**
+         * Constructor for thread.
+         * @param paramHandler handling class
+         * @param paramQuery SPARQL query
+         * @param paramUrl Endpoint url
+         */
+        FetchConstructResponseTask(final ThreadedQueryHandler paramHandler, final Query paramQuery,  final String paramUrl)
+        {
+            super(paramHandler, paramQuery, paramUrl);
+        }
+
+        /**
+         * Executes the query on the specified endpoint and processes the results.
+         */
+        @Override
+        public void run()
+        {
+            QueryEngineHTTP qehttp = QueryExecutionFactory.createServiceRequest(url, query);
+
+            try
+            {
+                Model model  = qehttp.execConstruct();
+System.out.println("Obtained:"+model.size());
+                handler.addResult(model);
             }
             catch (QueryExceptionHTTP qhttpe)
             {

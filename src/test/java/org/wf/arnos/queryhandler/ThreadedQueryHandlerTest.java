@@ -34,6 +34,8 @@ package org.wf.arnos.queryhandler;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.xml.DOMConfigurator;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.junit.Assert.*;
@@ -46,6 +48,12 @@ import org.wf.arnos.controller.model.Endpoint;
 public class ThreadedQueryHandlerTest {
 
     private static final int LIMIT = 10;
+
+    @Before
+    public void setUp()
+    {
+        DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+    }
 
     @Test
     public void testHandleQuery()

@@ -32,6 +32,7 @@
 package org.wf.arnos.cachehandler;
 
 import java.io.File;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -65,6 +66,7 @@ public class SimpleCacheHandlerTest
     {
         try
         {
+            DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
             cache = new SimpleCacheHandler(new File("./src/main/webapp/WEB-INF/ehcache.xml"));
         }
         catch (Exception e)
@@ -97,13 +99,15 @@ public class SimpleCacheHandlerTest
     }
 
     @Test
-    public void testFlush()
+    public void testContains() throws Throwable
     {
-        assertNull(cache.get(key));
+        assertFalse(cache.contains(key));
         cache.put(key,value);
-        assertEquals(value,cache.get(key));
+        assertTrue(cache.contains(key));
+        cache.put(key,value+"more text");
+        assertTrue(cache.contains(key));
         cache.flush(key);
-        assertNull(cache.get(key));
+        assertFalse(cache.contains(key));
     }
 
     @Test
@@ -115,6 +119,16 @@ public class SimpleCacheHandlerTest
         cache.flushAll();
         assertNull(cache.get(key));
         assertNull(cache.get(key+"22"));
+    }
+
+    @Test
+    public void testFlush()
+    {
+        assertNull(cache.get(key));
+        cache.put(key,value);
+        assertEquals(value,cache.get(key));
+        cache.flush(key);
+        assertNull(cache.get(key));
     }
 
 }

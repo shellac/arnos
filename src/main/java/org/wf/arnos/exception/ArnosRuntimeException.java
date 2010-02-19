@@ -31,18 +31,37 @@
  */
 package org.wf.arnos.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 /**
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException
+public class ArnosRuntimeException extends RuntimeException
 {
     /**
-     * Empty constructor.
+     * Constructs a new runtime exception with the specified detail message.
+     * @param message Error message
      */
-    public ResourceNotFoundException() {}
+    public ArnosRuntimeException(final String message)
+    {
+        super(message);
+    }
+
+    /**
+     * Constructs a new runtime exception with the specified cause.
+     * @param cause the cause
+     */
+    public ArnosRuntimeException(final Throwable cause)
+    {
+        super(cause);
+    }
+
+    /**
+     * Constructs a new runtime exception with the specified detail message and cause.
+     * @param message Error message
+     * @param cause the cause
+     */
+    public ArnosRuntimeException(final String message, final Throwable cause)
+    {
+        super(message, cause);
+    }
 }

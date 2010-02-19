@@ -33,18 +33,16 @@ package org.wf.arnos.cachehandler;
 
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.wf.arnos.exception.ArnosRuntimeException;
 
 /**
  * A nieve implementation of cache support using ehcache.
@@ -52,7 +50,11 @@ import org.springframework.core.io.Resource;
  */
 public class SimpleCacheHandler implements CacheHandlerInterface
 {
+    /**
+     * Name of ehcache.
+     */
     private static final String CACHE_NAME = "resultsCache";
+
     /**
      * MD5 digest.
      */
@@ -84,15 +86,17 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
     /**
      * Constructor-independent initlization script.
+     * @param file Cache file
+     * @throws IOException Thrown if unable to read cache file
      */
-    private void init(final File file) throws FileNotFoundException, IOException
+    private void init(final File file) throws IOException
     {
         CacheManager.create(file.getAbsolutePath());
 
         cache = CacheManager.getInstance().getCache(CACHE_NAME);
 
-        if (cache == null) throw new RuntimeException("Cache '" + CACHE_NAME + "'missing");
-        
+        if (cache == null) throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "'missing");
+
         try
         {
             digest = MessageDigest.getInstance("MD5");
@@ -105,7 +109,7 @@ public class SimpleCacheHandler implements CacheHandlerInterface
             }
             catch (NoSuchAlgorithmException anothernsae)
             {
-                throw new RuntimeException("Unable to setup digest algorithm");
+                throw new ArnosRuntimeException("Unable to setup digest algorithm", anothernsae);
             }
         }
     }
@@ -134,6 +138,20 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
         Serializable value = element.getValue();
         return value.toString();
+    }
+
+    /**
+     * Checks for the existance of a cache object.
+     * @param key Lookup key
+     * @return <code>true</code> if cache exists, <code>false</code> otherwise
+     */
+    public final boolean contains(final String key)
+    {
+        Element element = cache.get(generateKey(key));
+
+        if (element == null) return false;
+
+        return true;
     }
 
     /**

@@ -52,6 +52,13 @@ public interface CacheHandlerInterface
     String get(String key);
 
     /**
+     * Checks for the existance of a cache object.
+     * @param key Lookup key
+     * @return <code>true</code> if cache exists, <code>false</code> otherwise
+     */
+    boolean contains(String key);
+
+    /**
      * Remove a specific key from the cache.
      * @param key Cache key
      */

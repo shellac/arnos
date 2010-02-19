@@ -53,12 +53,10 @@
         <property name="queueCapacity" value="25" />
     </bean>
 
-
-    <!-- Cache setup
+    <!-- Cache setup -->
     <bean class="org.wf.arnos.cachehandler.SimpleCacheHandler">
         <constructor-arg value="/WEB-INF/ehcache.xml"/>
     </bean>
-    -->
 
     <!-- JMX Beans -->
     <bean id="exporter"

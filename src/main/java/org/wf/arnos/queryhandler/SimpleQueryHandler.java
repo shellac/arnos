@@ -75,7 +75,7 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         {
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
-            results.add(JenaQueryWrapper.execSelect(queryString, url));
+            results.add(JenaQueryWrapper.getInstance().execSelect(queryString, url));
         }
 
         StringBuffer finalResult = new StringBuffer("");

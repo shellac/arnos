@@ -35,8 +35,6 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.StringWriter;
@@ -50,6 +48,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
+import org.wf.arnos.queryhandler.task.FetchConstructResponseTask;
+import org.wf.arnos.queryhandler.task.FetchSelectResponseTask;
 
 /**
  * A query handler that uses multithreading to handle endpoint quering.
@@ -118,7 +118,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * Adds a result.
      * @param r A single SPARQL SELECT result object.
      */
-    public final void addResult(final Result r)
+    public void addResult(final Result r)
     {
         synchronized (this)
         {
@@ -129,17 +129,17 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * Holder for construct query results.
      */
-    private transient Model mergedResultsModel;
+    private transient Model mergedResults;
 
     /**
      * Adds a construct query results model.
      * @param m Model to add
      */
-    public final void addResult(final Model m)
+    public void addResult(final Model m)
     {
         synchronized (this)
         {
-            mergedResultsModel.add(m);
+            mergedResults.add(m);
         }
     }
 
@@ -182,7 +182,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private String handleConstruct(final Query query, final List<Endpoint> endpoints)
     {
         // start a new model
-        mergedResultsModel = ModelFactory.createDefaultModel();
+        mergedResults = ModelFactory.createDefaultModel();
 
         CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
 
@@ -206,7 +206,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         }
 
         // now the model has been generated, run the query on the merged results
-        QueryExecution qexec = QueryExecutionFactory.create(query, mergedResultsModel);
+        QueryExecution qexec = QueryExecutionFactory.create(query, mergedResults);
 
         Model resultModel = qexec.execConstruct();
 
@@ -218,7 +218,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         // close the models as we don't need them any more
         resultModel.close();
-        mergedResultsModel.close();
+        mergedResults.close();
 
         // return our string results
         return wr.toString();
@@ -307,180 +307,4 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         selectResultList.clear();
     }
-
-
-    /**
-     * Task to handle sparql query.
-     */
-    abstract static class AbstractResponseTask implements Runnable
-    {
-        /**
-         * Handle to query processor for posting results back.
-         */
-        protected final transient ThreadedQueryHandler handler;
-
-        /**
-         * Endpoint url.
-         */
-        protected final transient String url;
-
-        /**
-         * Query to execute.
-         */
-        protected final transient String query;
-
-        /**
-         * A latch to signal when thread completed.
-         */
-        protected final transient CountDownLatch doneSignal;
-
-        /**
-         * Cache key lookup value.
-         */
-        protected final String cacheKey;
-
-        /**
-         * Constructor for thread.
-         * @param paramHandler handling class
-         * @param paramQuery SPARQL query
-         * @param paramUrl Endpoint url
-         * @param paramDoneSignal Latch signal to use to notify parent when completed
-         */
-        protected AbstractResponseTask(final ThreadedQueryHandler paramHandler,
-                                                               final String paramQuery,
-                                                               final String paramUrl,
-                                                               final CountDownLatch paramDoneSignal)
-        {
-            super();
-            this.handler = paramHandler;
-            this.query = paramQuery;
-            this.url = paramUrl;
-            this.doneSignal = paramDoneSignal;
-
-            // calculate the key to use for cache lookup.
-            this.cacheKey = query + url;
-        }
-    }
-
-    /**
-     * Handles obtaining select query from endpoint and parsing result set.
-     */
-    static class FetchSelectResponseTask extends AbstractResponseTask
-    {
-        /**
-         * Constructor for thread.
-         * @param paramHandler handling class
-         * @param paramQuery SPARQL query
-         * @param paramUrl Endpoint url
-         * @param paramDoneSignal Latch signal to use to notify parent when completed
-         */
-        FetchSelectResponseTask(final ThreadedQueryHandler paramHandler,
-                                                    final String paramQuery,
-                                                    final String paramUrl,
-                                                    final CountDownLatch paramDoneSignal)
-        {
-            super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
-        }
-
-        /**
-         * Executes the query on the specified endpoint and processes the results.
-         * Caches results.
-         */
-        @Override
-        public void run()
-        {
-            try
-            {
-                String resultsString;
-
-                // check cache copy
-                if (handler.hasCache() && handler.getCache().contains(cacheKey))
-                {
-                    System.out.println("Lookup from cache");
-                    resultsString = handler.getCache().get(cacheKey);
-                }
-                else
-                {
-                    resultsString = JenaQueryWrapper.execSelect(query, url);
-                     if (handler.hasCache()) handler.getCache().put(cacheKey, resultsString);
-                }
-
-                ResultSet resultSet = JenaQueryWrapper.stringToResultSet(resultsString);
-
-                while (resultSet.hasNext())
-                {
-                    QuerySolution sol = resultSet.next();
-                    handler.addResult(new Result(sol));
-                }
-
-            }
-            catch (Exception ex)
-            {
-                LOG.error("Unable to execute query against " + url, ex);
-            }
-            finally
-            {
-                doneSignal.countDown();
-            }
-        }
-    }
-
-    /**
-     * Handles obtaining construct query from endpoint and parsing result set.
-     */
-    static class FetchConstructResponseTask extends AbstractResponseTask
-    {
-        /**
-         * Constructor for thread.
-         * @param paramHandler handling class
-         * @param paramQuery SPARQL query
-         * @param paramUrl Endpoint url
-         * @param paramDoneSignal Latch signal to use to notify parent when completed
-         */
-        FetchConstructResponseTask(final ThreadedQueryHandler paramHandler,
-                                                            final String paramQuery,
-                                                            final String paramUrl,
-                                                            final CountDownLatch paramDoneSignal)
-        {
-            super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
-        }
-
-        /**
-         * Executes the query on the specified endpoint and processes the results.
-         */
-        @Override
-        public void run()
-        {
-            try
-            {
-                String resultsString;
-
-                // check cache copy
-                if (handler.hasCache() && handler.getCache().contains(cacheKey))
-                {
-                    System.out.println("Lookup construct from cache");
-
-                    resultsString = handler.getCache().get(cacheKey);
-                }
-                else
-                {
-                    resultsString = JenaQueryWrapper.execConstruct(query, url);
-                     if (handler.hasCache()) handler.getCache().put(cacheKey, resultsString);
-                }
-
-                Model model  = JenaQueryWrapper.stringToModel(resultsString);
-
-                handler.addResult(model);
-            }
-            catch (Exception ex)
-            {
-                LOG.error("Unable to execute query against " + url, ex);
-            }
-            finally
-            {
-                doneSignal.countDown();
-            }
-        }
-    }
-
 }

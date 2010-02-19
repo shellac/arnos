@@ -47,7 +47,11 @@ import org.wf.arnos.controller.model.Endpoint;
  */
 public class ThreadedQueryHandlerTest {
 
-    private static final int LIMIT = 10;
+    // maximum number of results we're expecting
+    private static final int MAX_LIMIT = 10;
+
+    // minimum number of results we're expecting
+    private static final int MIN_LIMIT = 5;
 
     @Before
     public void setUp()
@@ -58,6 +62,7 @@ public class ThreadedQueryHandlerTest {
     @Test
     public void testHandleQuery()
     {
+
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
         endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
@@ -72,12 +77,12 @@ public class ThreadedQueryHandlerTest {
 "SELECT DISTINCT ?type\n"+
 "    WHERE {\n"+
 "      ?thing a ?type\n"+
-"    }    LIMIT "+LIMIT;
+"    }    LIMIT "+MAX_LIMIT;
 
         String constructQuery = "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"+
 "CONSTRUCT { $book dc:title $title }\n"+
 "WHERE\n"+
-"  { $book dc:title $title }    LIMIT "+LIMIT;
+"  { $book dc:title $title }    LIMIT "+MAX_LIMIT;
 
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
 
@@ -91,7 +96,8 @@ public class ThreadedQueryHandlerTest {
         assertTrue("Expected reasonable size results",selectQueryResults.length() > 1200);
 
         int bindings = StringUtils.countMatches(selectQueryResults, "<binding");
-        assertTrue(LIMIT >=bindings);
+        assertTrue(bindings >= MIN_LIMIT);
+        assertTrue(MAX_LIMIT >=bindings);
 
         String constructQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
 
@@ -100,7 +106,8 @@ public class ThreadedQueryHandlerTest {
         int rdfDesc = StringUtils.countMatches(constructQueryResults, "<rdf:Description");
 
         // statistics/directgov produces 7 matches
-        assertTrue(LIMIT >= rdfDesc);
+        assertTrue(rdfDesc >= MIN_LIMIT);
+        assertTrue(MAX_LIMIT >= rdfDesc);
 
         // add a new endpoint
         endpoints.add(new Endpoint("http://sparql.org/books"));
@@ -109,6 +116,8 @@ public class ThreadedQueryHandlerTest {
         constructQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
 
         rdfDesc = StringUtils.countMatches(constructQueryResults, "<rdf:Description");
-        assertTrue(LIMIT >= rdfDesc);
+        assertTrue(rdfDesc >= MIN_LIMIT);
+        assertTrue(MAX_LIMIT >= rdfDesc);
     }
+
 }

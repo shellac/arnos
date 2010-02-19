@@ -101,7 +101,7 @@ public class JenaQueryWrapper
      * @param service URL endpoint
      * @return Query result as a string
      */
-    public static String execConstruct(final String querystring, final String service)
+    public String execConstruct(final String querystring, final String service)
     {
         HttpQuery httpQuery = makeHttpQuery(querystring, service);
         httpQuery.setAccept(HttpParams.contentTypeRDFXML);
@@ -125,7 +125,7 @@ public class JenaQueryWrapper
      * @param s Raw xml result
      * @return Model representation
      */
-    public static final Model stringToModel(final String s)
+    public final Model stringToModel(final String s)
     {
         Model model = GraphUtils.makeJenaDefaultModel();
         StringReader in = new StringReader(s);
@@ -142,7 +142,7 @@ public class JenaQueryWrapper
      * @param service URL endpoint
      * @return Query result as a string
      */
-    public static String execSelect(final String querystring, final String service)
+    public String execSelect(final String querystring, final String service)
     {
 
         HttpQuery httpQuery = makeHttpQuery(querystring, service);
@@ -167,7 +167,7 @@ public class JenaQueryWrapper
      * @param s Raw xml result
      * @return ResultSet object
      */
-    public static final ResultSet stringToResultSet(final String s)
+    public final ResultSet stringToResultSet(final String s)
     {
         return ResultSetFactory.fromXML(s);
     }
@@ -178,7 +178,7 @@ public class JenaQueryWrapper
      * @param service Endpoint URL
      * @return HttpQuery object
      */
-    private static HttpQuery makeHttpQuery(final String queryString, final String service)
+    private HttpQuery makeHttpQuery(final String queryString, final String service)
     {
         HttpQuery httpQuery = new HttpQuery(service);
         httpQuery.addParam(HttpParams.pQuery, queryString);
@@ -191,7 +191,7 @@ public class JenaQueryWrapper
      * @return Contents of inputstream as a String
      * @throws IOException Throws exception
      */
-    private static String convertStreamToString(final InputStream is) throws IOException
+    private String convertStreamToString(final InputStream is) throws IOException
     {
         /*
          * To convert the InputStream to String we use the BufferedReader.readLine()

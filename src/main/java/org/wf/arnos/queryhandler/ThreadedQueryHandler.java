@@ -75,6 +75,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private static final int DEFAULT_SB_LENGTH = 133;
 
     /**
+     * Latch signal to indicate that tasks have finished.
+     */
+    public transient CountDownLatch doneSignal;
+    
+    /**
      * Spring's taskexecutor for handling threads.
      */
     @Autowired
@@ -184,7 +189,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         // start a new model
         mergedResults = ModelFactory.createDefaultModel();
 
-        CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
+        doneSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -235,7 +240,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
         selectResultList = new LinkedList<Result>();
-        CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
+        doneSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)

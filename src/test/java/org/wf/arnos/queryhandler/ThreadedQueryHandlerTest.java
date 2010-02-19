@@ -40,34 +40,13 @@ import org.junit.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
+import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;
 
 /**
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class ThreadedQueryHandlerTest {
-
-    // maximum number of results we're expecting
-    private static final int MAX_LIMIT = 10;
-
-    // minimum number of results we're expecting
-    private static final int MIN_LIMIT = 5;
-
-    @Before
-    public void setUp()
-    {
-        DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
-    }
-
-    @Test
-    public void testHandleQuery()
-    {
-
-        List<Endpoint> endpoints = new ArrayList<Endpoint>();
-        // add test endpoints - unit test relies on successful connection with following endpoints
-        endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
-        endpoints.add(new Endpoint("http://services.data.gov.uk/education/sparql"));
-
 
         String selectQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"+
@@ -84,40 +63,42 @@ public class ThreadedQueryHandlerTest {
 "WHERE\n"+
 "  { $book dc:title $title }    LIMIT "+MAX_LIMIT;
 
+    // maximum number of results we're expecting
+    private static final int MAX_LIMIT = 10;
+
+    // minimum number of results we're expecting
+    private static final int MIN_LIMIT = 5;
+
+    @Before
+    public void setUp()
+    {
+        DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+    }
+
+    @Test
+    public void testHandleQuery()
+    {
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
+        endpoints.add(new Endpoint("http://services.data.gov.uk/education/sparql"));
+        
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
 
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.initialize();
+        MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
         queryHandler.setTaskExecutor(executor);
 
         String selectQueryResults = queryHandler.handleQuery(selectQuery, endpoints);
 
-        assertTrue(StringUtils.isNotEmpty(selectQueryResults));
-        assertTrue("Expected reasonable size results",selectQueryResults.length() > 1200);
+        assertEquals(2, executor.selectTasksRunning);
+        assertEquals(0, executor.constructTasksRunning);
 
-        int bindings = StringUtils.countMatches(selectQueryResults, "<binding");
-        assertTrue(bindings >= MIN_LIMIT);
-        assertTrue(MAX_LIMIT >=bindings);
+        executor.selectTasksRunning = 0;
 
-        String constructQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
+        selectQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
 
-        assertTrue(StringUtils.isNotEmpty(constructQueryResults));
-
-        int rdfDesc = StringUtils.countMatches(constructQueryResults, "<rdf:Description");
-
-        // statistics/directgov produces 7 matches
-        assertTrue(rdfDesc >= MIN_LIMIT);
-        assertTrue(MAX_LIMIT >= rdfDesc);
-
-        // add a new endpoint
-        endpoints.add(new Endpoint("http://sparql.org/books"));
-
-        // rerun query
-        constructQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
-
-        rdfDesc = StringUtils.countMatches(constructQueryResults, "<rdf:Description");
-        assertTrue(rdfDesc >= MIN_LIMIT);
-        assertTrue(MAX_LIMIT >= rdfDesc);
+        assertEquals(0, executor.selectTasksRunning);
+        assertEquals(2, executor.constructTasksRunning);
     }
 
 }

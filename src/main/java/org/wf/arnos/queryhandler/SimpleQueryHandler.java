@@ -53,11 +53,11 @@ public class SimpleQueryHandler implements QueryHandlerInterface
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(SimpleQueryHandler.class);
-    
+
     /**
      * SPARQL SELECT tag used to do string concatination.
      */
-    private static final String TAG = "results";
+    public static final String TAG = "results";
 
     /**
      * This implementation, simple contatinates all query results.
@@ -75,7 +75,7 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         {
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
-            results.add(execSelect(queryString, url));
+            results.add(JenaQueryWrapper.execSelect(queryString, url));
         }
 
         StringBuffer finalResult = new StringBuffer("");
@@ -98,24 +98,7 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         return finalResult.toString();
     }
 
-    public String execSelect(String querystring, String service)
-    {
-        HttpQuery httpQuery = makeHttpQuery(querystring, service);
-        // TODO Allow other content types.
-        httpQuery.setAccept(HttpParams.contentTypeResultsXML) ;
-        InputStream in = httpQuery.exec();
-
-        String content = "";
-        try {
-            content = convertStreamToString(in);
-        } catch (Exception ex) {
-            LOG.error(ex);
-        }
-
-        return content;
-    }
-
-    private String extractResults(final String s)
+    private static final String extractResults(final String s)
     {
         try
         {
@@ -128,38 +111,6 @@ public class SimpleQueryHandler implements QueryHandlerInterface
         {
             LOG.error(ex);
             return s;
-        }
-    }
-
-    private HttpQuery makeHttpQuery(String queryString, String service)
-    {
-        HttpQuery httpQuery = new HttpQuery(service) ;
-        httpQuery.addParam(HttpParams.pQuery, queryString );
-        return httpQuery ;
-    }
-
-    public String convertStreamToString(InputStream is) throws IOException {
-        /*
-         * To convert the InputStream to String we use the BufferedReader.readLine()
-         * method. We iterate until the BufferedReader return null which means
-         * there's no more data to read. Each line will appended to a StringBuilder
-         * and returned as String.
-         */
-        if (is != null) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-            } finally {
-                is.close();
-            }
-            return sb.toString();
-        } else {
-            return "";
         }
     }
 }

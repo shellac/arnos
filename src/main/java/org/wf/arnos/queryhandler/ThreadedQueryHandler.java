@@ -39,8 +39,6 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.engine.http.QueryEngineHTTP;
-import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +97,15 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     public final CacheHandlerInterface getCache()
     {
         return cacheHandler;
+    }
+
+    /**
+     * Check to see if cache has been set.
+     * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
+     */
+    public final boolean hasCache()
+    {
+        return cacheHandler != null;
     }
 
 
@@ -185,7 +192,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchConstructResponseTask(this, query, url, doneSignal));
+            taskExecutor.execute(new FetchConstructResponseTask(this, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -236,7 +243,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchSelectResponseTask(this, query, url, doneSignal));
+            taskExecutor.execute(new FetchSelectResponseTask(this, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -320,12 +327,17 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         /**
          * Query to execute.
          */
-        protected final transient Query query;
+        protected final transient String query;
 
         /**
          * A latch to signal when thread completed.
          */
-        protected  final transient CountDownLatch doneSignal;
+        protected final transient CountDownLatch doneSignal;
+
+        /**
+         * Cache key lookup value.
+         */
+        protected final String cacheKey;
 
         /**
          * Constructor for thread.
@@ -335,7 +347,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
          * @param paramDoneSignal Latch signal to use to notify parent when completed
          */
         protected AbstractResponseTask(final ThreadedQueryHandler paramHandler,
-                                                               final Query paramQuery,
+                                                               final String paramQuery,
                                                                final String paramUrl,
                                                                final CountDownLatch paramDoneSignal)
         {
@@ -344,6 +356,9 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             this.query = paramQuery;
             this.url = paramUrl;
             this.doneSignal = paramDoneSignal;
+
+            // calculate the key to use for cache lookup.
+            this.cacheKey = query + url;
         }
     }
 
@@ -360,7 +375,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
          * @param paramDoneSignal Latch signal to use to notify parent when completed
          */
         FetchSelectResponseTask(final ThreadedQueryHandler paramHandler,
-                                                    final Query paramQuery,
+                                                    final String paramQuery,
                                                     final String paramUrl,
                                                     final CountDownLatch paramDoneSignal)
         {
@@ -369,29 +384,42 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         /**
          * Executes the query on the specified endpoint and processes the results.
+         * Caches results.
          */
         @Override
         public void run()
         {
-            QueryEngineHTTP qehttp = QueryExecutionFactory.createServiceRequest(url, query);
-
             try
             {
-                ResultSet resultSet = qehttp.execSelect();
+                String resultsString;
+
+                // check cache copy
+                if (handler.hasCache() && handler.getCache().contains(cacheKey))
+                {
+                    System.out.println("Lookup from cache");
+                    resultsString = handler.getCache().get(cacheKey);
+                }
+                else
+                {
+                    resultsString = JenaQueryWrapper.execSelect(query, url);
+                     if (handler.hasCache()) handler.getCache().put(cacheKey, resultsString);
+                }
+
+                ResultSet resultSet = JenaQueryWrapper.stringToResultSet(resultsString);
 
                 while (resultSet.hasNext())
                 {
                     QuerySolution sol = resultSet.next();
                     handler.addResult(new Result(sol));
                 }
+
             }
-            catch (QueryExceptionHTTP qhttpe)
+            catch (Exception ex)
             {
-                LOG.error("Unable to execute query against " + url);
+                LOG.error("Unable to execute query against " + url, ex);
             }
             finally
             {
-                qehttp.close();
                 doneSignal.countDown();
             }
         }
@@ -410,7 +438,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
          * @param paramDoneSignal Latch signal to use to notify parent when completed
          */
         FetchConstructResponseTask(final ThreadedQueryHandler paramHandler,
-                                                            final Query paramQuery,
+                                                            final String paramQuery,
                                                             final String paramUrl,
                                                             final CountDownLatch paramDoneSignal)
         {
@@ -423,21 +451,33 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         @Override
         public void run()
         {
-            QueryEngineHTTP qehttp = QueryExecutionFactory.createServiceRequest(url, query);
-
             try
             {
-                Model model  = qehttp.execConstruct();
+                String resultsString;
+
+                // check cache copy
+                if (handler.hasCache() && handler.getCache().contains(cacheKey))
+                {
+                    System.out.println("Lookup construct from cache");
+
+                    resultsString = handler.getCache().get(cacheKey);
+                }
+                else
+                {
+                    resultsString = JenaQueryWrapper.execConstruct(query, url);
+                     if (handler.hasCache()) handler.getCache().put(cacheKey, resultsString);
+                }
+
+                Model model  = JenaQueryWrapper.stringToModel(resultsString);
 
                 handler.addResult(model);
             }
-            catch (QueryExceptionHTTP qhttpe)
+            catch (Exception ex)
             {
-                LOG.error("Unable to execute query against " + url);
+                LOG.error("Unable to execute query against " + url, ex);
             }
             finally
             {
-                qehttp.close();
                 doneSignal.countDown();
             }
         }

@@ -77,8 +77,17 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * Latch signal to indicate that tasks have finished.
      */
-    public transient CountDownLatch doneSignal;
-    
+    private transient CountDownLatch doneSignal;
+
+    /**
+     * Acccessor for the countdownlatch.
+     * @return The CountDownLatch
+     */
+    public final CountDownLatch getLatch()
+    {
+        return doneSignal;
+    }
+
     /**
      * Spring's taskexecutor for handling threads.
      */

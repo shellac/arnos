@@ -171,6 +171,7 @@ public class JenaQueryWrapperTest {
     @Test
     public void testExecConstruct()
     {
+        // TODO: Find a way of mocking up a real http connection - Jersey?
         System.err.println("Warning: This test requires an internet connection and the  endpoint server needs to be live");
 
         String actualResult = JenaQueryWrapper.getInstance().execConstruct(CONSTRUCT_QUERY, ENDPOINT1);
@@ -181,6 +182,7 @@ public class JenaQueryWrapperTest {
     @Test
     public void testStringToModel()
     {
+        // TODO: Find a way of mocking up a real http connection - Jersey?
         Model model = ModelFactory.createDefaultModel();
 
         Model actualModel = JenaQueryWrapper.getInstance().stringToModel(EXPECTED_CONSTRUCT_RESULT);

@@ -74,7 +74,7 @@ public class QueryController
     /**
      * The cache handler, autowired in.
      */
-    @Autowired(required = false)
+//    @Autowired(required = false) TODO: Look into enabling cache here
     private transient CacheHandlerInterface cacheHandler;
 
     /**
@@ -95,10 +95,14 @@ public class QueryController
 
         String result = null;
 
+        // TODO: Add endpoints to cache key
+        String cachekey = query;
+
         // generate cache key
         if (cacheHandler != null)
         {
-            result = cacheHandler.get(query);
+            logger.debug("Fetching result from cache");
+            result = cacheHandler.get(cachekey);
         }
 
         if (result == null)
@@ -107,10 +111,12 @@ public class QueryController
 
             result = queryHandler.handleQuery(query, endpoints);
 
-            logger.debug("Caching result");
-
-            // put this result into the cache
-            if (cacheHandler != null) cacheHandler.put(query, result);
+            // put this result into the cache if available
+            if (cacheHandler != null)
+            {
+                logger.debug("Caching result");
+                cacheHandler.put(cachekey, result);
+            }
         }
         try
         {

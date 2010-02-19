@@ -66,6 +66,6 @@ public class MockThreadPoolTaskExecutor extends ThreadPoolTaskExecutor
             selectTasksRunning++;
         }
 
-        handler.doneSignal.countDown();
+        handler.getLatch().countDown();
     }
 }

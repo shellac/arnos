@@ -144,9 +144,9 @@ public class JenaQueryWrapper
      */
     public String execSelect(final String querystring, final String service)
     {
-
         HttpQuery httpQuery = makeHttpQuery(querystring, service);
-        // TODO Allow other content types.
+
+        // TODO Allow other content types?
         httpQuery.setAccept(HttpParams.contentTypeResultsXML);
         InputStream in = httpQuery.exec();
 

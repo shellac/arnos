@@ -125,6 +125,7 @@ abstract class AbstractResponseTask implements Runnable
      */
     public String getFromCache()
     {
+        System.out.println("handler.hasCache():"+handler.hasCache());
         // check cache copy
         if (handler.hasCache() && handler.getCache().contains(cacheKey))
         {
@@ -141,7 +142,11 @@ abstract class AbstractResponseTask implements Runnable
      */
     public void putInCache(final String s)
     {
-        if (handler.hasCache()) handler.getCache().put(cacheKey, s);
+        if (handler.hasCache()) 
+        {
+            LOG.debug("Putting result in cache");
+            handler.getCache().put(cacheKey, s);
+        }
     }
 
 }

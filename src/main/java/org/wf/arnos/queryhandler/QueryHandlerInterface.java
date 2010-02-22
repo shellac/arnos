@@ -32,6 +32,7 @@
 package org.wf.arnos.queryhandler;
 
 import java.util.List;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 
 /**
@@ -46,4 +47,22 @@ public interface QueryHandlerInterface
      * @param p Project endpoints to run this query against
      */
     String handleQuery(String query, List<Endpoint> endpoints);
+
+    /**
+     * Public accessor for cache (if present).
+     * @return CacheHandler supplied by spring, or <code>null</code> otherwise
+     */
+    public CacheHandlerInterface getCache();
+
+    /**
+     * Sets the cache handler.
+     * @param cache Cache implementing the CacheHandlerInterface
+     */
+    public void setCache(CacheHandlerInterface cache);
+
+    /**
+     * Check to see if cache has been set.
+     * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
+     */
+    public boolean hasCache();
 }

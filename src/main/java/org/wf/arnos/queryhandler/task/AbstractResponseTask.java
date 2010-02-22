@@ -35,6 +35,8 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.queryhandler.JenaQueryWrapper;
+import org.wf.arnos.queryhandler.QueryHandlerInterface;
+import org.wf.arnos.queryhandler.QueryWrapperInterface;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
@@ -52,7 +54,7 @@ abstract class AbstractResponseTask implements Runnable
     /**
      * Handle to query processor for posting results back.
      */
-    protected final transient ThreadedQueryHandler handler;
+    protected final transient QueryHandlerInterface handler;
 
     /**
      * Endpoint url.
@@ -75,9 +77,9 @@ abstract class AbstractResponseTask implements Runnable
     protected final transient String cacheKey;
 
     /**
-     * A handle to the query wrapper
+     * A handle to the query wrapper.
      */
-    protected final transient JenaQueryWrapper querywrapper;
+    protected final transient QueryWrapperInterface querywrapper;
 
     /**
      * Constructor for thread.
@@ -86,7 +88,7 @@ abstract class AbstractResponseTask implements Runnable
      * @param paramUrl Endpoint url
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
-    protected AbstractResponseTask(final ThreadedQueryHandler paramHandler,
+    protected AbstractResponseTask(final QueryHandlerInterface paramHandler,
                                                            final String paramQuery,
                                                            final String paramUrl,
                                                            final CountDownLatch paramDoneSignal)
@@ -109,7 +111,7 @@ abstract class AbstractResponseTask implements Runnable
      * We do this as an aid to unit testing.
      * @return JenaQueryWrapper
      */
-    protected JenaQueryWrapper getQueryWrapper()
+    protected QueryWrapperInterface getQueryWrapper()
     {
         return JenaQueryWrapper.getInstance();
     }
@@ -117,7 +119,7 @@ abstract class AbstractResponseTask implements Runnable
     /**
      * Worker's run method.
      */
-//    public abstract void run();
+    public abstract void run();
 
     /**
      * Lookup a string from cache.
@@ -125,7 +127,6 @@ abstract class AbstractResponseTask implements Runnable
      */
     public String getFromCache()
     {
-        System.out.println("handler.hasCache():"+handler.hasCache());
         // check cache copy
         if (handler.hasCache() && handler.getCache().contains(cacheKey))
         {

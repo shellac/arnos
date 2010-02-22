@@ -55,8 +55,6 @@ public class MockThreadPoolTaskExecutor extends ThreadPoolTaskExecutor
     
     public void execute(Runnable task)
     {
-        System.out.println("Running "+ task.toString());
-
         if (task instanceof FetchConstructResponseTask)
         {
             constructTasksRunning++;

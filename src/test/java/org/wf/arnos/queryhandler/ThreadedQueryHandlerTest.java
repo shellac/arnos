@@ -33,11 +33,9 @@ package org.wf.arnos.queryhandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;

@@ -49,6 +49,7 @@ public class SimpleCacheHandlerTest
     SimpleCacheHandler cache;
     String key = "abc";
     String value = "simple text content";
+    public static final String CACHE_SETTINGS = "./src/main/webapp/WEB-INF/ehcache.xml";
 
     public SimpleCacheHandlerTest() {
     }
@@ -67,7 +68,7 @@ public class SimpleCacheHandlerTest
         try
         {
             DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
-            cache = new SimpleCacheHandler(new File("./src/main/webapp/WEB-INF/ehcache.xml"));
+            cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
         }
         catch (Exception e)
         {

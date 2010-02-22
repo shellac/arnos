@@ -51,7 +51,7 @@ import org.wf.arnos.exception.ArnosRuntimeException;
  * We do this because it allows us to insert a layer of caching of the endpoint results.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class JenaQueryWrapper
+public class JenaQueryWrapper implements QueryWrapperInterface
 {
     /**
      * Logger.

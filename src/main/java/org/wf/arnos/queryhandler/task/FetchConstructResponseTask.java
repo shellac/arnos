@@ -35,6 +35,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
@@ -55,7 +56,7 @@ public class FetchConstructResponseTask extends AbstractResponseTask
      * @param paramUrl Endpoint url
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
-    public FetchConstructResponseTask(final ThreadedQueryHandler paramHandler,
+    public FetchConstructResponseTask(final QueryHandlerInterface paramHandler,
                                                         final String paramQuery,
                                                         final String paramUrl,
                                                         final CountDownLatch paramDoneSignal)
@@ -82,7 +83,7 @@ public class FetchConstructResponseTask extends AbstractResponseTask
 
             Model model  = getQueryWrapper().stringToModel(resultsString);
 
-            handler.addResult(model);
+            ((ThreadedQueryHandler) handler).addResult(model);
         }
         catch (Exception ex)
         {

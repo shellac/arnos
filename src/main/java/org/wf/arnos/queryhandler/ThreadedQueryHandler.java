@@ -103,7 +103,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         this.taskExecutor = paramTaskExecutor;
     }
 
-
     /**
      * Public accessor for cache (if present).
      * @return CacheHandler supplied by spring, or <code>null</code> otherwise
@@ -111,6 +110,15 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     public final CacheHandlerInterface getCache()
     {
         return cacheHandler;
+    }
+
+    /**
+     * Sets the cache handler.
+     * @param cache Cache implementing the CacheHandlerInterface
+     */
+    public final void setCache(final CacheHandlerInterface cache)
+    {
+        this.cacheHandler = cache;
     }
 
     /**

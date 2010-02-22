@@ -37,6 +37,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.controller.model.sparql.Result;
+import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
@@ -57,7 +58,7 @@ public class FetchSelectResponseTask extends AbstractResponseTask
      * @param paramUrl Endpoint url
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
-    public FetchSelectResponseTask(final ThreadedQueryHandler paramHandler,
+    public FetchSelectResponseTask(final QueryHandlerInterface paramHandler,
                                                 final String paramQuery,
                                                 final String paramUrl,
                                                 final CountDownLatch paramDoneSignal)
@@ -88,7 +89,7 @@ public class FetchSelectResponseTask extends AbstractResponseTask
             while (resultSet.hasNext())
             {
                 QuerySolution sol = resultSet.next();
-                handler.addResult(new Result(sol));
+                ((ThreadedQueryHandler) handler).addResult(new Result(sol));
             }
 
         }

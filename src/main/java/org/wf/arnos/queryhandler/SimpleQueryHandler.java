@@ -31,16 +31,12 @@
  */
 package org.wf.arnos.queryhandler;
 
-import com.hp.hpl.jena.sparql.engine.http.HttpParams;
-import com.hp.hpl.jena.sparql.engine.http.HttpQuery;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 
 /**
@@ -58,6 +54,39 @@ public class SimpleQueryHandler implements QueryHandlerInterface
      * SPARQL SELECT tag used to do string concatination.
      */
     public static final String TAG = "results";
+
+    /**
+     * The cache handler, autowired in.
+     */
+    @Autowired(required = false)
+    private transient CacheHandlerInterface cacheHandler;
+
+    /**
+     * Public accessor for cache (if present).
+     * @return CacheHandler supplied by spring, or <code>null</code> otherwise
+     */
+    public final CacheHandlerInterface getCache()
+    {
+        return cacheHandler;
+    }
+
+    /**
+     * Sets the cache handler.
+     * @param cache Cache implementing the CacheHandlerInterface
+     */
+    public final void setCache(final CacheHandlerInterface cache)
+    {
+        this.cacheHandler = cache;
+    }
+
+    /**
+     * Check to see if cache has been set.
+     * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
+     */
+    public final boolean hasCache()
+    {
+        return cacheHandler != null;
+    }
 
     /**
      * This implementation, simple contatinates all query results.

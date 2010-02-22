@@ -29,30 +29,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-package org.wf.arnos.queryhandler.task.mocks;
+package org.wf.arnos.queryhandler;
 
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
-import org.wf.arnos.controller.model.sparql.Result;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
- * Mock implementation of ThreadedQueryHandler.
- * This simply totals up the number of times the addResult method is called.
+ * This class provides an customized version of Jena's execSelect and execConstruct methods.
+ * We do this because it allows us to insert a layer of caching of the endpoint results.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class MockThreadedQueryHandler  extends ThreadedQueryHandler
+public interface QueryWrapperInterface
 {
-    public int modelsAdded = 0;
 
-    public int resultsAdded = 0;
+    /**
+     * Executes the provided CONSTRUCT query against an endpoint.
+     * This method mimics the <code>execConstruct</code> method from
+     * jena's <code>QueryExecution</code> class except it returns the
+     * raw result as a string
+     * @param querystring SPARQL CONSTRUCT query
+     * @param service URL endpoint
+     * @return Query result as a string
+     */
+    String execConstruct(final String querystring, final String service);
 
-    public void addResult(final Model m)
-    {
-        modelsAdded++;
-    }
+    /**
+     * Executes the provided SELECT query against a given endpoint.
+     * This method mimics the <code>execSelect</code> method from
+     * jena's <code>QueryExecution</code> class except it returns the
+     * raw result as a string
+     * @param querystring SPARQL SELECT query
+     * @param service URL endpoint
+     * @return Query result as a string
+     */
+    String execSelect(final String querystring, final String service);
 
-    public void addResult(final Result r)
-    {
-        resultsAdded++;
-    }
+    /**
+     * Converts a string into a model.
+     * @param s Raw xml result
+     * @return Model representation
+     */
+    Model stringToModel(final String s);
+
+    /**
+     * Converts a sparql select query result into a resultSet object.
+     * @param s Raw xml result
+     * @return ResultSet object
+     */
+    ResultSet stringToResultSet(final String s);
+
 }

@@ -68,7 +68,7 @@ public class SimpleCacheHandler implements CacheHandlerInterface
     /**
      * Creates a singleton instance of the cachemanager for spring-configured frameworks.
      */
-    SimpleCacheHandler(final Resource res) throws FileNotFoundException, IOException
+    public SimpleCacheHandler(final Resource res) throws FileNotFoundException, IOException
     {
         init(res.getFile());
     }
@@ -78,7 +78,7 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * This constructor can be used in a unit testing environment.
      * @param configFile Path to ehcache.xml
      */
-    SimpleCacheHandler(final File  file) throws FileNotFoundException, IOException
+    public SimpleCacheHandler(final File  file) throws FileNotFoundException, IOException
     {
         init(file);
     }

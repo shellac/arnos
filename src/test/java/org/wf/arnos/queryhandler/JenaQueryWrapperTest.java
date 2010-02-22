@@ -201,7 +201,6 @@ public class JenaQueryWrapperTest {
 //        while (it.hasNext())
 //        {
 //            Statement s = it.next();
-//            System.out.println(s.toString());
 //        }
         assertTrue(actualModel.contains(statement));
     }

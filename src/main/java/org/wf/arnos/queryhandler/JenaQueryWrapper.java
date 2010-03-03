@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.exception.ArnosRuntimeException;
@@ -93,60 +94,15 @@ public class JenaQueryWrapper implements QueryWrapperInterface
    }
 
     /**
-     * Executes the provided CONSTRUCT query against an endpoint.
-     * This method mimics the <code>execConstruct</code> method from
-     * jena's <code>QueryExecution</code> class except it returns the
-     * raw result as a string
-     * @param querystring SPARQL CONSTRUCT query
+     * Executes the provided query against a given endpoint.
+     * This method returns the raw result as a string
+     * @param querystring SPARQL query
      * @param service URL endpoint
      * @return Query result as a string
      */
-    public String execConstruct(final String querystring, final String service)
+    public final String execQuery(final String querystring, final String service)
     {
         HttpQuery httpQuery = makeHttpQuery(querystring, service);
-        httpQuery.setAccept(HttpParams.contentTypeRDFXML);
-        InputStream in = httpQuery.exec();
-
-        String content = "";
-        try
-        {
-            content = convertStreamToString(in);
-        }
-        catch (Exception ex)
-        {
-            LOG.error("Unable to convert input stream to string", ex);
-        }
-
-        return content;
-    }
-
-    /**
-     * Converts a string into a model.
-     * @param s Raw xml result
-     * @return Model representation
-     */
-    public final Model stringToModel(final String s)
-    {
-        Model model = GraphUtils.makeJenaDefaultModel();
-        StringReader in = new StringReader(s);
-        model.read(in, null);
-        return model;
-    }
-
-    /**
-     * Executes the provided SELECT query against a given endpoint.
-     * This method mimics the <code>execSelect</code> method from
-     * jena's <code>QueryExecution</code> class except it returns the
-     * raw result as a string
-     * @param querystring SPARQL SELECT query
-     * @param service URL endpoint
-     * @return Query result as a string
-     */
-    public String execSelect(final String querystring, final String service)
-    {
-        HttpQuery httpQuery = makeHttpQuery(querystring, service);
-
-        // TODO Allow other content types?
         httpQuery.setAccept(HttpParams.contentTypeResultsXML);
         InputStream in = httpQuery.exec();
 
@@ -170,6 +126,32 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     public final ResultSet stringToResultSet(final String s)
     {
         return ResultSetFactory.fromXML(s);
+    }
+
+    /**
+     * Converts a string into a model.
+     * @param s Raw xml result
+     * @return Model representation
+     */
+    public final Model stringToModel(final String s)
+    {
+        Model model = GraphUtils.makeJenaDefaultModel();
+        StringReader in = new StringReader(s);
+        model.read(in, null);
+        return model;
+    }
+
+    /**
+     * Interprets the response of an ASK query to a boolean value.
+     * @param s Raw xml result
+     * @return Boolean value representation
+     */
+    public final boolean stringToBoolean(final String s)
+    {
+        String check = s.toLowerCase(Locale.ENGLISH);
+        check = check.replace(" ", "");
+        if (check.indexOf("<boolean>true</boolean>") > 0) return true;
+        return false;
     }
 
     /**

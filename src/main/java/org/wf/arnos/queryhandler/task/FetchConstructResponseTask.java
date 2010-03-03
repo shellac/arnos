@@ -77,7 +77,7 @@ public class FetchConstructResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
-                resultsString = getQueryWrapper().execConstruct(query, url);
+                resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }
 

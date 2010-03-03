@@ -80,7 +80,7 @@ public class FetchSelectResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
-                resultsString = getQueryWrapper().execSelect(query, url);
+                resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }
 

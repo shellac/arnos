@@ -43,26 +43,13 @@ public interface QueryWrapperInterface
 {
 
     /**
-     * Executes the provided CONSTRUCT query against an endpoint.
-     * This method mimics the <code>execConstruct</code> method from
-     * jena's <code>QueryExecution</code> class except it returns the
-     * raw result as a string
+     * Executes the provided query against an endpoint.
+     * This method returns the raw html result as a string
      * @param querystring SPARQL CONSTRUCT query
      * @param service URL endpoint
      * @return Query result as a string
      */
-    String execConstruct(final String querystring, final String service);
-
-    /**
-     * Executes the provided SELECT query against a given endpoint.
-     * This method mimics the <code>execSelect</code> method from
-     * jena's <code>QueryExecution</code> class except it returns the
-     * raw result as a string
-     * @param querystring SPARQL SELECT query
-     * @param service URL endpoint
-     * @return Query result as a string
-     */
-    String execSelect(final String querystring, final String service);
+    String execQuery(final String querystring, final String service);
 
     /**
      * Converts a string into a model.

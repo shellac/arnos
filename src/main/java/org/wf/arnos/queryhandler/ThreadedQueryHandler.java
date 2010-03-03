@@ -262,7 +262,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         // close the models as we don't need them any more
         resultModel.close();
         
-        clearUp();
+        mergedResults.close();
 
         // return our string results
         return wr.toString();
@@ -338,7 +338,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         content.append("</results></sparql>");
 
-        clearUp();
+        selectResultList.clear();
 
         return content.toString();
     }
@@ -391,18 +391,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         content.append("<results><boolean>" + finalResult + "</boolean></results></sparql>");
 
-        clearUp();
+        askResultList.clear();
 
         return content.toString();
-    }
-
-    /**
-     * Clean up any used resources.
-     */
-    private void clearUp()
-    {
-        mergedResults.close();
-        selectResultList.clear();
-        askResultList.clear();
     }
 }

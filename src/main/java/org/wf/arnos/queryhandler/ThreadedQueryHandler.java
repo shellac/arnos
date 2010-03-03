@@ -48,6 +48,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
+import org.wf.arnos.queryhandler.task.FetchAskResponseTask;
 import org.wf.arnos.queryhandler.task.FetchConstructResponseTask;
 import org.wf.arnos.queryhandler.task.FetchSelectResponseTask;
 
@@ -140,7 +141,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * Adds a result.
      * @param r A single SPARQL SELECT result object.
      */
-    public void addResult(final Result r)
+    public final void addResult(final Result r)
     {
         synchronized (this)
         {
@@ -157,7 +158,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * Adds a construct query results model.
      * @param m Model to add
      */
-    public void addResult(final Model m)
+    public final void addResult(final Model m)
     {
         synchronized (this)
         {
@@ -165,6 +166,22 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         }
     }
 
+    /**
+     * A Container for ASK query responses.
+     */
+    private transient List<Boolean> askResultList;
+
+    /**
+     * Stores the results of an ASK query.
+     * @param b Boolean value of query
+     */
+    public final void addResult(final Boolean b)
+    {
+        synchronized (this)
+        {
+            askResultList.add(b);
+        }
+    }
     /**
      * This implementation, simple contatinates all query results.
      * @param queryString SPARQL query to execute
@@ -186,6 +203,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         else if (query.getQueryType() == Query.QueryTypeConstruct)
         {
             return handleConstruct(query, endpoints);
+        }
+        else if (query.getQueryType() == Query.QueryTypeAsk)
+        {
+            return handleAsk(query, endpoints);
         }
         else
         {
@@ -240,7 +261,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         // close the models as we don't need them any more
         resultModel.close();
-        mergedResults.close();
+        
+        clearUp();
 
         // return our string results
         return wr.toString();
@@ -321,12 +343,66 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         return content.toString();
     }
 
+    /**
+     * This method handles a SELECT SPARQL query.
+     * It uses threads to query each endpoint and then combines the responses.
+     * @param query SPARQL SELECT query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    private String handleAsk(final Query query, final List<Endpoint> endpoints)
+    {
+        askResultList = new LinkedList<Boolean>();
+        doneSignal = new CountDownLatch(endpoints.size());
+
+        // fire off a thread to handle quering each endpoint
+        for (Endpoint ep : endpoints)
+        {
+            String url = ep.getLocation();
+            LOG.debug("Querying " + url);
+
+            taskExecutor.execute(new FetchAskResponseTask(this, query.serialize(), url, doneSignal));
+        }
+
+        // block until all threads have finished
+        try
+        {
+            doneSignal.await();
+        }
+        catch (InterruptedException ex)
+        {
+            LOG.warn("Error while waiting on threads", ex);
+        }
+
+        // once threads have compeleted, construct results
+        LOG.debug("Threads completed, constructing results");
+
+        StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
+
+        content.append("<?xml version=\"1.0\"?><sparql xmlns=\"http://www.w3.org/2005/sparql-results#\"><head></head>");
+
+        // calculate the response to provide (in this case, any single yes from
+        // one of the endpoints indicates we can handle this query, so return true.
+        boolean finalResult = false;
+        for (boolean b : askResultList)
+        {
+            if (b) finalResult = true;
+        }
+
+        content.append("<results><boolean>" + finalResult + "</boolean></results></sparql>");
+
+        clearUp();
+
+        return content.toString();
+    }
 
     /**
      * Clean up any used resources.
      */
     private void clearUp()
     {
+        mergedResults.close();
         selectResultList.clear();
+        askResultList.clear();
     }
 }

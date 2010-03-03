@@ -149,6 +149,8 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     public final boolean stringToBoolean(final String s)
     {
         String check = s.toLowerCase(Locale.ENGLISH);
+        check = check.replace("\n", "");
+        check = check.replace("\r", "");
         check = check.replace(" ", "");
         if (check.indexOf("<boolean>true</boolean>") > 0) return true;
         return false;

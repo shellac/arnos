@@ -65,4 +65,10 @@ public interface QueryWrapperInterface
      */
     ResultSet stringToResultSet(final String s);
 
+    /**
+     * Converts an ASK response into a boolean value.
+     * @param s Raw xml result
+     * @return Boolean answer
+     */
+    boolean stringToBoolean(final String s);
 }

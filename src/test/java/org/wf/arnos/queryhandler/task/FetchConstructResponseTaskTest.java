@@ -46,7 +46,6 @@ import org.easymock.EasyMockSupport;
 import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
  *
@@ -89,11 +88,11 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
         
-        expect(mockQueryWrapper.execConstruct((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
 
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 
@@ -108,11 +107,11 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
         
-        expect(mockQueryWrapper.execConstruct((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
 
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 
@@ -148,11 +147,11 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
         expect(mockCache.contains((String) notNull())).andReturn(false);
         mockCache.put((String)anyObject(), (String)anyObject());
 
-        expect(mockQueryWrapper.execConstruct((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
 
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 
@@ -170,11 +169,11 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andStubReturn(true);
-        expect(mockCache.get((String)anyObject())).andStubReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
+        expect(mockCache.contains((String) notNull())).andReturn(true);
+        expect(mockCache.get((String)anyObject())).andReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
 
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 
@@ -216,11 +215,11 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
 
-        expect(mockQueryWrapper.execConstruct((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT);
 
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 
@@ -242,7 +241,7 @@ public class FetchConstructResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
         
         expect(mockQueryWrapper.stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(JenaQueryWrapperTest.EXPECTED_CONSTRUCT_RESULT));
 
         replayAll();
 

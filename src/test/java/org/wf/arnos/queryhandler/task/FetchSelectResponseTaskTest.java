@@ -88,11 +88,11 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
 
-        expect(mockQueryWrapper.execSelect((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
 
         expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
 
         replayAll();
 
@@ -129,11 +129,11 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         
         mockCache.put((String)anyObject(), (String)anyObject());
 
-        expect(mockQueryWrapper.execSelect((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
 
         expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
 
         replayAll();
 
@@ -151,11 +151,11 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andStubReturn(true);
-        expect(mockCache.get((String)anyObject())).andStubReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+        expect(mockCache.contains((String) notNull())).andReturn(true);
+        expect(mockCache.get((String)anyObject())).andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
 
         expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
 
         replayAll();
 
@@ -197,11 +197,11 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
 
-        expect(mockQueryWrapper.execSelect((String) notNull(), (String) notNull())).
-                andStubReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
 
         expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
 
         replayAll();
 
@@ -224,7 +224,7 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
         
         expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andStubReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
 
         replayAll();
 

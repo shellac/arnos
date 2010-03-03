@@ -175,7 +175,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      * @return Contents of inputstream as a String
      * @throws IOException Throws exception
      */
-    private String convertStreamToString(final InputStream is) throws IOException
+    public static String convertStreamToString(final InputStream is) throws IOException
     {
         /*
          * To convert the InputStream to String we use the BufferedReader.readLine()
@@ -197,13 +197,15 @@ public class JenaQueryWrapper implements QueryWrapperInterface
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                 while ((line = reader.readLine()) != null)
                 {
-                    sb.append(line).append("\n");
+                    if (sb.length() > 0) sb.append("\n");
+                    sb.append(line);
                 }
             }
             finally
             {
                 is.close();
             }
+
             return sb.toString();
         }
     }

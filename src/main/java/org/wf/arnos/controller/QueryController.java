@@ -160,9 +160,13 @@ public class QueryController
         {
             return queryHandler.handleAsk(query, endpoints);
         }
+        else if (query.getQueryType() == Query.QueryTypeDescribe)
+        {
+            return queryHandler.handleDescribe(query, endpoints);
+        }
         else
         {
-            logger.warn("Unable to handle this query type");
+            logger.warn("Unable to determin this query type");
         }
 
         return "";

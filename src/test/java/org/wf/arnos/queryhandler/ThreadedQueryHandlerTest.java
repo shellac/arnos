@@ -61,21 +61,21 @@ public class ThreadedQueryHandlerTest {
     }
 
     @Test
-    public void testHandleQuery()
+    public void testTaskInitalization()
     {
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
-        endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
-        endpoints.add(new Endpoint("http://services.data.gov.uk/education/sparql"));
+        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT2_URL));
         
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
 
         MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
         queryHandler.setTaskExecutor(executor);
 
-        Query selectQuery = QueryFactory.create(JenaQueryWrapperTest.SELECT_QUERY);
-        Query constructQuery = QueryFactory.create(JenaQueryWrapperTest.CONSTRUCT_QUERY);
-        Query askQuery = QueryFactory.create(JenaQueryWrapperTest.ASK_QUERY);
+        Query selectQuery = QueryFactory.create(JenaQueryWrapperTest.getSelectQuery());
+        Query constructQuery = QueryFactory.create(JenaQueryWrapperTest.getConstructQuery());
+        Query askQuery = QueryFactory.create(JenaQueryWrapperTest.getAskQuery());
 
         String results = queryHandler.handleSelect(selectQuery, endpoints);
 
@@ -95,7 +95,7 @@ public class ThreadedQueryHandlerTest {
 
         executor.reset();
 
-        endpoints.add(new Endpoint("http://services.data.gov.uk/civil/sparql"));
+        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT3_URL));
 
         results = queryHandler.handleAsk(askQuery, endpoints);
 
@@ -104,5 +104,23 @@ public class ThreadedQueryHandlerTest {
         assertEquals(3, executor.askTasksRunning);
         assertEquals(0, executor.describeTasksRunning);
     }
+
+    @Test
+    public void testHandleSelect()
+    {
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
+        endpoints.add(new Endpoint("http://services.data.gov.uk/education/sparql"));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+    }
+
+    @Test
+    public void testHandleDescribe()
+    {
+
+    }
+
 
 }

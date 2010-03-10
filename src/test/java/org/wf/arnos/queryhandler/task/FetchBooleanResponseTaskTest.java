@@ -47,7 +47,7 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class FetchAskResponseTaskTest extends EasyMockSupport 
+public class FetchBooleanResponseTaskTest extends EasyMockSupport
 {
 
     QueryHandlerInterface mockThreadedQueryHandler;
@@ -70,9 +70,12 @@ public class FetchAskResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testFetchAskResponseTask");
 
-        FetchAskResponseTask fetcher = new FetchAskResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1,
-                JenaQueryWrapperTest.ASK_QUERY,
+        String askQuery = JenaQueryWrapperTest.getAskQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String askResult = JenaQueryWrapperTest.getAskResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+
+        FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                JenaQueryWrapperTest.ENDPOINT1_URL,
+                askQuery,
                 doneSignal)
         {
             @Override
@@ -88,9 +91,9 @@ public class FetchAskResponseTaskTest extends EasyMockSupport
                 .anyTimes();
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
-                .andReturn(JenaQueryWrapperTest.EXPECTED_ASK_RESULT);
+                .andReturn(askResult);
 
-        expect(mockQueryWrapper.stringToBoolean(JenaQueryWrapperTest.EXPECTED_ASK_RESULT))
+        expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true);
 
         replayAll();
@@ -109,7 +112,7 @@ public class FetchAskResponseTaskTest extends EasyMockSupport
                 .anyTimes();
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
-                .andReturn(JenaQueryWrapperTest.EXPECTED_ASK_RESULT.replace(">", "\n "));
+                .andReturn(askResult.replace(">", "\n "));
 
         expect(mockQueryWrapper.stringToBoolean((String) notNull()))
                 .andReturn(true);

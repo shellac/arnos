@@ -40,18 +40,18 @@ import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.cachehandler.SimpleCacheHandler;
 import org.wf.arnos.cachehandler.SimpleCacheHandlerTest;
 import org.wf.arnos.queryhandler.JenaQueryWrapper;
-import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
-import org.wf.arnos.queryhandler.QueryHandlerInterface;
-import org.wf.arnos.queryhandler.QueryWrapperInterface;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import org.easymock.EasyMockSupport;
+import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
+import org.wf.arnos.queryhandler.QueryHandlerInterface;
+import org.wf.arnos.queryhandler.QueryWrapperInterface;
 
 /**
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class FetchSelectResponseTaskTest extends EasyMockSupport
+public class FetchModelResponseTaskTest extends EasyMockSupport
 {
 
     QueryHandlerInterface mockThreadedQueryHandler;
@@ -74,9 +74,12 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
-        FetchSelectResponseTask fetcher = new FetchSelectResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1,
-                JenaQueryWrapperTest.SELECT_QUERY,
+        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+
+        FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                JenaQueryWrapperTest.ENDPOINT1_URL,
+                constructQuery,
                 doneSignal)
         {
             @Override
@@ -87,12 +90,12 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         };
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
-
+        
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
-                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+                andReturn(constructResult);
 
-        expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
         replayAll();
 
@@ -102,7 +105,25 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
+
+        resetAll();
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
+        
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(constructResult);
+
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
     }
+
     @Test
     public void testMockUseOfCache()
     {
@@ -110,9 +131,12 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
-        FetchSelectResponseTask fetcher = new FetchSelectResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1,
-                JenaQueryWrapperTest.SELECT_QUERY,
+        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+
+        FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                JenaQueryWrapperTest.ENDPOINT1_URL,
+                constructQuery,
                 doneSignal)
         {
             @Override
@@ -125,15 +149,15 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
+
         expect(mockCache.contains((String) notNull())).andReturn(false);
-        
         mockCache.put((String)anyObject(), (String)anyObject());
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
-                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+                andReturn(constructResult);
 
-        expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
         replayAll();
 
@@ -145,17 +169,17 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // run the query again, check the query wrapper is not called
-
-        resetAll();
         
+        resetAll();
+
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
         expect(mockCache.contains((String) notNull())).andReturn(true);
-        expect(mockCache.get((String)anyObject())).andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+        expect(mockCache.get((String)anyObject())).andReturn(constructResult);
 
-        expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
         replayAll();
 
@@ -179,9 +203,12 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
 
-        FetchSelectResponseTask fetcher = new FetchSelectResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1,
-                JenaQueryWrapperTest.SELECT_QUERY,
+        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+
+        FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                JenaQueryWrapperTest.ENDPOINT1_URL,
+                constructQuery,
                 doneSignal)
         {
             @Override
@@ -191,24 +218,22 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
             }
         };
 
-
         assertFalse(cache.contains(fetcher.cacheKey));
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
-                andReturn(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT);
+                andReturn(constructResult);
 
-        expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
         replayAll();
 
         fetcher.run();
 
         verifyAll();
-
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
@@ -223,8 +248,8 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
         
-        expect(mockQueryWrapper.stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT))
-                .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(JenaQueryWrapperTest.EXPECTED_SELECT_RESULT));
+        expect(mockQueryWrapper.stringToModel(constructResult))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
         replayAll();
 
@@ -239,11 +264,16 @@ public class FetchSelectResponseTaskTest extends EasyMockSupport
     public void testInstantiation()
     {
         System.out.println("testInstantiation");
-        // for complete coverage, test creating the original object
 
-        FetchConstructResponseTask fetcher = new FetchConstructResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1,
-                JenaQueryWrapperTest.SELECT_QUERY,
+        // for complete coverage, test creating the original object
+        
+        CountDownLatch doneSignal = new CountDownLatch(1);
+
+        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+
+        FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                JenaQueryWrapperTest.ENDPOINT1_URL,
+                constructQuery,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();

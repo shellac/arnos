@@ -40,7 +40,7 @@ import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.cachehandler.SimpleCacheHandler;
 import org.wf.arnos.cachehandler.SimpleCacheHandlerTest;
 import org.wf.arnos.queryhandler.JenaQueryWrapper;
-import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
+import org.wf.arnos.utils.Sparql;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
 import static org.junit.Assert.*;
@@ -74,11 +74,11 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
-        String selectQuery = JenaQueryWrapperTest.getSelectQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String selectResult = JenaQueryWrapperTest.getSelectResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
+        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
         {
@@ -113,11 +113,11 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
-        String selectQuery = JenaQueryWrapperTest.getSelectQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String selectResult = JenaQueryWrapperTest.getSelectResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
+        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
         {
@@ -185,11 +185,11 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
         
-        String selectQuery = JenaQueryWrapperTest.getSelectQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String selectResult = JenaQueryWrapperTest.getSelectResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
+        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
         {
@@ -250,11 +250,11 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         System.out.println("testInstantiation");
         // for complete coverage, test creating the original object
         
-        String selectQuery = JenaQueryWrapperTest.getSelectQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String selectResult = JenaQueryWrapperTest.getSelectResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
+        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal);
 

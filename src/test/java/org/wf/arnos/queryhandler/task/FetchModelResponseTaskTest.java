@@ -43,7 +43,7 @@ import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import org.easymock.EasyMockSupport;
-import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
+import org.wf.arnos.utils.Sparql;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
 
@@ -74,11 +74,11 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
-        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
+        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
         {
@@ -131,11 +131,11 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
-        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
+        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
         {
@@ -203,11 +203,11 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
 
-        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String constructResult = JenaQueryWrapperTest.getConstructResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
+        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
         {
@@ -269,10 +269,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         
         CountDownLatch doneSignal = new CountDownLatch(1);
 
-        String constructQuery = JenaQueryWrapperTest.getConstructQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal);
 

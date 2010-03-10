@@ -36,10 +36,9 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
-import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
-import org.wf.arnos.queryhandler.JenaQueryWrapperTest;
+import org.wf.arnos.utils.Sparql;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
 
@@ -70,11 +69,11 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testFetchAskResponseTask");
 
-        String askQuery = JenaQueryWrapperTest.getAskQuery(JenaQueryWrapperTest.ENDPOINT1_URL);
-        String askResult = JenaQueryWrapperTest.getAskResult(JenaQueryWrapperTest.ENDPOINT1_URL);
+        String askQuery = Sparql.getAskQuery(Sparql.ENDPOINT1_URL);
+        String askResult = Sparql.getAskResult(Sparql.ENDPOINT1_URL);
 
         FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
-                JenaQueryWrapperTest.ENDPOINT1_URL,
+                Sparql.ENDPOINT1_URL,
                 askQuery,
                 doneSignal)
         {

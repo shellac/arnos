@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.queryhandler;
 
+import org.wf.arnos.utils.Sparql;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import java.util.ArrayList;
@@ -65,17 +66,17 @@ public class ThreadedQueryHandlerTest {
     {
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
-        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT1_URL));
-        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT2_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
         
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
 
         MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
         queryHandler.setTaskExecutor(executor);
 
-        Query selectQuery = QueryFactory.create(JenaQueryWrapperTest.getSelectQuery());
-        Query constructQuery = QueryFactory.create(JenaQueryWrapperTest.getConstructQuery());
-        Query askQuery = QueryFactory.create(JenaQueryWrapperTest.getAskQuery());
+        Query selectQuery = QueryFactory.create(Sparql.getSelectQuery());
+        Query constructQuery = QueryFactory.create(Sparql.getConstructQuery());
+        Query askQuery = QueryFactory.create(Sparql.getAskQuery());
 
         String results = queryHandler.handleSelect(selectQuery, endpoints);
 
@@ -95,7 +96,7 @@ public class ThreadedQueryHandlerTest {
 
         executor.reset();
 
-        endpoints.add(new Endpoint(JenaQueryWrapperTest.ENDPOINT3_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
 
         results = queryHandler.handleAsk(askQuery, endpoints);
 
@@ -110,10 +111,11 @@ public class ThreadedQueryHandlerTest {
     {
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
-        endpoints.add(new Endpoint("http://services.data.gov.uk/analytics/sparql"));
-        endpoints.add(new Endpoint("http://services.data.gov.uk/education/sparql"));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
 
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+
     }
 
     @Test

@@ -47,9 +47,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
-import org.wf.arnos.queryhandler.task.FetchAskResponseTask;
-import org.wf.arnos.queryhandler.task.FetchConstructResponseTask;
-import org.wf.arnos.queryhandler.task.FetchSelectResponseTask;
+import org.wf.arnos.queryhandler.task.FetchBooleanResponseTask;
+import org.wf.arnos.queryhandler.task.FetchModelResponseTask;
+import org.wf.arnos.queryhandler.task.FetchResultSetResponseTask;
 
 /**
  * A query handler that uses multithreading to handle endpoint quering.
@@ -170,7 +170,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     private transient List<Boolean> askResultList;
 
-    
+
     /**
      * Stores the results of an ASK query.
      * @param b Boolean value of query
@@ -182,7 +182,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             askResultList.add(b);
         }
     }
-    
+
 
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
@@ -190,50 +190,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to conduct query accross
      * @return Result as an xml string
      */
-    public String handleConstruct(final Query query, final List<Endpoint> endpoints)
+    public final String handleConstruct(final Query query, final List<Endpoint> endpoints)
     {
-        // start a new model
-        mergedResults = ModelFactory.createDefaultModel();
-
-        doneSignal = new CountDownLatch(endpoints.size());
-
-        // fire off a thread to handle quering each endpoint
-        for (Endpoint ep : endpoints)
-        {
-            String url = ep.getLocation();
-            LOG.debug("Querying " + url);
-
-            taskExecutor.execute(new FetchConstructResponseTask(this, query.serialize(), url, doneSignal));
-        }
-
-        // block until all threads have finished
-        try
-        {
-            doneSignal.await();
-        }
-        catch (InterruptedException ex)
-        {
-            LOG.warn("Error while waiting on threads", ex);
-        }
-
-        // now the model has been generated, run the query on the merged results
-        QueryExecution qexec = QueryExecutionFactory.create(query, mergedResults);
-
-        Model resultModel = qexec.execConstruct();
-
-        // create a string writer to print the model to
-        StringWriter wr = new StringWriter();
-
-        // write out the model
-        resultModel.write(wr);
-
-        // close the models as we don't need them any more
-        resultModel.close();
-        
-        mergedResults.close();
-
-        // return our string results
-        return wr.toString();
+        fetchModelsAndWait(query, endpoints);
+        return mergeModelResults(query);
     }
 
     /**
@@ -243,7 +203,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public String handleSelect(final Query query, final List<Endpoint> endpoints)
+    public final String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
         selectResultList = new LinkedList<Result>();
         doneSignal = new CountDownLatch(endpoints.size());
@@ -254,7 +214,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchSelectResponseTask(this, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchResultSetResponseTask(this, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -317,7 +277,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public String handleAsk(final Query query, final List<Endpoint> endpoints)
+    public final String handleAsk(final Query query, final List<Endpoint> endpoints)
     {
         askResultList = new LinkedList<Boolean>();
         doneSignal = new CountDownLatch(endpoints.size());
@@ -328,7 +288,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchAskResponseTask(this, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchBooleanResponseTask(this, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -370,8 +330,71 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public String handleDescribe(final Query query, final List<Endpoint> endpoints)
+    public final String handleDescribe(final Query query, final List<Endpoint> endpoints)
     {
-        return "";
+        fetchModelsAndWait(query, endpoints);
+        return mergeModelResults(query);
+    }
+
+    /**
+     * Merge all result models together and re-issue the request over the merged model.
+     * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
+     * @return Model serialised as a string
+     */
+    private String mergeModelResults(final Query query)
+    {
+
+        // now the model has been generated, run the query on the merged results
+        QueryExecution qexec = QueryExecutionFactory.create(query, mergedResults);
+
+        Model resultModel = qexec.execConstruct();
+
+        // create a string writer to print the model to
+        StringWriter wr = new StringWriter();
+
+        // write out the model
+        resultModel.write(wr);
+
+        // close the models as we don't need them any more
+        resultModel.close();
+
+        mergedResults.close();
+
+        // return our string results
+        return wr.toString();
+    }
+
+    /**
+     * Issues the query across all given endpoints.
+     * This method blocks until all results are returned
+     * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
+     * @param endpoints Set of endpoints
+     */
+    private void fetchModelsAndWait(final Query query, final List<Endpoint> endpoints)
+    {
+        // start a new model
+        mergedResults = ModelFactory.createDefaultModel();
+
+        doneSignal = new CountDownLatch(endpoints.size());
+
+        // fire off a thread to handle quering each endpoint
+        for (Endpoint ep : endpoints)
+        {
+            String url = ep.getLocation();
+            LOG.debug("Querying " + url);
+
+            taskExecutor.execute(new FetchModelResponseTask(this, query.serialize(), url, doneSignal));
+        }
+
+        // block until all threads have finished
+        try
+        {
+            doneSignal.await();
+        }
+        catch (InterruptedException ex)
+        {
+            LOG.warn("Error while waiting on threads", ex);
+        }
+
     }
 }

@@ -31,25 +31,23 @@
  */
 package org.wf.arnos.queryhandler.task;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wf.arnos.controller.model.sparql.Result;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
- * Handles obtaining select query from endpoint and parsing result set.
+ * Handles obtaining construct query from endpoint and parsing result set.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class FetchSelectResponseTask extends AbstractResponseTask
+public class FetchModelResponseTask extends AbstractResponseTask
 {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(FetchSelectResponseTask.class);
+    private static final Log LOG = LogFactory.getLog(FetchModelResponseTask.class);
 
     /**
      * Constructor for thread.
@@ -58,17 +56,16 @@ public class FetchSelectResponseTask extends AbstractResponseTask
      * @param paramUrl Endpoint url
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
-    public FetchSelectResponseTask(final QueryHandlerInterface paramHandler,
-                                                final String paramQuery,
-                                                final String paramUrl,
-                                                final CountDownLatch paramDoneSignal)
+    public FetchModelResponseTask(final QueryHandlerInterface paramHandler,
+                                                        final String paramQuery,
+                                                        final String paramUrl,
+                                                        final CountDownLatch paramDoneSignal)
     {
         super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
     }
 
     /**
      * Executes the query on the specified endpoint and processes the results.
-     * Caches results.
      */
     @Override
     public final void run()
@@ -84,14 +81,9 @@ public class FetchSelectResponseTask extends AbstractResponseTask
                 putInCache(resultsString);
             }
 
-            ResultSet resultSet = querywrapper.stringToResultSet(resultsString);
+            Model model  = getQueryWrapper().stringToModel(resultsString);
 
-            while (resultSet.hasNext())
-            {
-                QuerySolution sol = resultSet.next();
-                ((ThreadedQueryHandler) handler).addResult(new Result(sol));
-            }
-
+            ((ThreadedQueryHandler) handler).addResult(model);
         }
         catch (Exception ex)
         {

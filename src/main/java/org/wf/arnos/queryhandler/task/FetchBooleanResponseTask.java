@@ -41,12 +41,12 @@ import org.wf.arnos.queryhandler.ThreadedQueryHandler;
  * Handles obtaining the results of an ASK query from a given endpoint.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class FetchAskResponseTask extends AbstractResponseTask
+public class FetchBooleanResponseTask extends AbstractResponseTask
 {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(FetchAskResponseTask.class);
+    private static final Log LOG = LogFactory.getLog(FetchBooleanResponseTask.class);
 
     /**
      * Constructor for thread.
@@ -55,7 +55,7 @@ public class FetchAskResponseTask extends AbstractResponseTask
      * @param paramUrl Endpoint url
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
-    public FetchAskResponseTask(final QueryHandlerInterface paramHandler,
+    public FetchBooleanResponseTask(final QueryHandlerInterface paramHandler,
                                                 final String paramQuery,
                                                 final String paramUrl,
                                                 final CountDownLatch paramDoneSignal)

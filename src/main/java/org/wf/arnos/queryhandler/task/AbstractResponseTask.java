@@ -37,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
  * Task to handle sparql query.
@@ -49,7 +48,7 @@ abstract class AbstractResponseTask implements Runnable
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(FetchConstructResponseTask.class);
+    private static final Log LOG = LogFactory.getLog(FetchModelResponseTask.class);
 
     /**
      * Handle to query processor for posting results back.
@@ -143,7 +142,7 @@ abstract class AbstractResponseTask implements Runnable
      */
     public void putInCache(final String s)
     {
-        if (handler.hasCache()) 
+        if (handler.hasCache())
         {
             LOG.debug("Putting result in cache");
             handler.getCache().put(cacheKey, s);

@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.queryhandler;
 
+import com.hp.hpl.jena.query.Query;
 import java.util.List;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
@@ -42,27 +43,55 @@ import org.wf.arnos.controller.model.Endpoint;
 public interface QueryHandlerInterface
 {
     /**
-     * Handles the federated SPARQL query.
-     * @param query Regular SPARQL
-     * @param p Project endpoints to run this query against
+     * Handles the federated CONSTRUCT sparql query across endpoints.
+     * @param query SPARQL CONSTRUCT query
+     * @param endpoints List of endpoints to conduct query accross
+     * @return Result as an xml string
      */
-    String handleQuery(String query, List<Endpoint> endpoints);
+    String handleConstruct(Query query, List<Endpoint> endpoints);
+
+    /**
+     * This method handles a SELECT SPARQL query.
+     * It uses threads to query each endpoint and then combines the responses.
+     * @param query SPARQL SELECT query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    String handleSelect(Query query, List<Endpoint> endpoints);
+
+    /**
+     * This method handles a ASK SPARQL query.
+     * It uses threads to query each endpoint and then combines the responses.
+     * @param query SPARQL ASK query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    String handleAsk(Query query, List<Endpoint> endpoints);
+
+    /**
+     * This method handles a DESCRIBE SPARQL query.
+     * It uses threads to query each endpoint and then combines the responses.
+     * @param query SPARQL DESCRIBE query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    String handleDescribe(Query query, List<Endpoint> endpoints);
 
     /**
      * Public accessor for cache (if present).
      * @return CacheHandler supplied by spring, or <code>null</code> otherwise
      */
-    public CacheHandlerInterface getCache();
+    CacheHandlerInterface getCache();
 
     /**
      * Sets the cache handler.
      * @param cache Cache implementing the CacheHandlerInterface
      */
-    public void setCache(CacheHandlerInterface cache);
+    void setCache(CacheHandlerInterface cache);
 
     /**
      * Check to see if cache has been set.
      * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
      */
-    public boolean hasCache();
+    boolean hasCache();
 }

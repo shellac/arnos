@@ -33,6 +33,7 @@ package org.wf.arnos.queryhandler.mocks;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
+import org.wf.arnos.queryhandler.task.FetchAskResponseTask;
 import org.wf.arnos.queryhandler.task.FetchConstructResponseTask;
 import org.wf.arnos.queryhandler.task.FetchSelectResponseTask;
 
@@ -52,7 +53,19 @@ public class MockThreadPoolTaskExecutor extends ThreadPoolTaskExecutor
     public int selectTasksRunning = 0;
 
     public int constructTasksRunning = 0;
-    
+
+    public int askTasksRunning = 0;
+
+    public int describeTasksRunning = 0;
+
+    public void reset()
+    {
+        selectTasksRunning = 0;
+        constructTasksRunning = 0;
+        askTasksRunning = 0;
+        describeTasksRunning = 0;
+    }
+
     public void execute(Runnable task)
     {
         if (task instanceof FetchConstructResponseTask)
@@ -62,6 +75,10 @@ public class MockThreadPoolTaskExecutor extends ThreadPoolTaskExecutor
         if (task instanceof FetchSelectResponseTask)
         {
             selectTasksRunning++;
+        }
+        if (task instanceof FetchAskResponseTask)
+        {
+            askTasksRunning++;
         }
 
         handler.getLatch().countDown();

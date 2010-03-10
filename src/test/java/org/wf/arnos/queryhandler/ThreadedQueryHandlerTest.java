@@ -31,6 +31,8 @@
  */
 package org.wf.arnos.queryhandler;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -45,21 +47,6 @@ import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class ThreadedQueryHandlerTest {
-
-        String selectQuery = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
-"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"+
-"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n"+
-"PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"+
-"PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n"+
-"SELECT DISTINCT ?type\n"+
-"    WHERE {\n"+
-"      ?thing a ?type\n"+
-"    }    LIMIT "+MAX_LIMIT;
-
-        String constructQuery = "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"+
-"CONSTRUCT { $book dc:title $title }\n"+
-"WHERE\n"+
-"  { $book dc:title $title }    LIMIT "+MAX_LIMIT;
 
     // maximum number of results we're expecting
     private static final int MAX_LIMIT = 10;
@@ -86,17 +73,36 @@ public class ThreadedQueryHandlerTest {
         MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
         queryHandler.setTaskExecutor(executor);
 
-        String selectQueryResults = queryHandler.handleQuery(selectQuery, endpoints);
+        Query selectQuery = QueryFactory.create(JenaQueryWrapperTest.SELECT_QUERY);
+        Query constructQuery = QueryFactory.create(JenaQueryWrapperTest.CONSTRUCT_QUERY);
+        Query askQuery = QueryFactory.create(JenaQueryWrapperTest.ASK_QUERY);
+
+        String results = queryHandler.handleSelect(selectQuery, endpoints);
 
         assertEquals(2, executor.selectTasksRunning);
         assertEquals(0, executor.constructTasksRunning);
+        assertEquals(0, executor.askTasksRunning);
+        assertEquals(0, executor.describeTasksRunning);
 
-        executor.selectTasksRunning = 0;
+        executor.reset();
 
-        selectQueryResults = queryHandler.handleQuery(constructQuery, endpoints);
+        results = queryHandler.handleConstruct(constructQuery, endpoints);
 
         assertEquals(0, executor.selectTasksRunning);
         assertEquals(2, executor.constructTasksRunning);
+        assertEquals(0, executor.askTasksRunning);
+        assertEquals(0, executor.describeTasksRunning);
+
+        executor.reset();
+
+        endpoints.add(new Endpoint("http://services.data.gov.uk/civil/sparql"));
+
+        results = queryHandler.handleAsk(askQuery, endpoints);
+
+        assertEquals(0, executor.selectTasksRunning);
+        assertEquals(0, executor.constructTasksRunning);
+        assertEquals(3, executor.askTasksRunning);
+        assertEquals(0, executor.describeTasksRunning);
     }
 
 }

@@ -34,7 +34,6 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.StringWriter;
@@ -171,6 +170,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     private transient List<Boolean> askResultList;
 
+    
     /**
      * Stores the results of an ASK query.
      * @param b Boolean value of query
@@ -182,39 +182,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             askResultList.add(b);
         }
     }
-    /**
-     * This implementation, simple contatinates all query results.
-     * @param queryString SPARQL query to execute
-     * @param endpoints List of endpoint urls to run the query against
-     * @return An RDF model
-     */
-    public final String handleQuery(final String queryString, final List<Endpoint> endpoints)
-    {
-        LOG.debug("Querying against  " + endpoints.size() + " endpoints");
-
-        // process the SPARQL query to best determin how to handle this query
-        Query query = QueryFactory.create(queryString);
-
-        if (query.getQueryType() == Query.QueryTypeSelect)
-        {
-            // this is a simple select query. Results can be appended, and limited as required
-            return handleSelect(query, endpoints);
-        }
-        else if (query.getQueryType() == Query.QueryTypeConstruct)
-        {
-            return handleConstruct(query, endpoints);
-        }
-        else if (query.getQueryType() == Query.QueryTypeAsk)
-        {
-            return handleAsk(query, endpoints);
-        }
-        else
-        {
-            LOG.warn("Unable to handle this query type");
-        }
-
-        return "";
-    }
+    
 
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
@@ -222,7 +190,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to conduct query accross
      * @return Result as an xml string
      */
-    private String handleConstruct(final Query query, final List<Endpoint> endpoints)
+    public String handleConstruct(final Query query, final List<Endpoint> endpoints)
     {
         // start a new model
         mergedResults = ModelFactory.createDefaultModel();
@@ -268,7 +236,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         return wr.toString();
     }
 
-
     /**
      * This method handles a SELECT SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
@@ -276,7 +243,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    private String handleSelect(final Query query, final List<Endpoint> endpoints)
+    public String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
         selectResultList = new LinkedList<Result>();
         doneSignal = new CountDownLatch(endpoints.size());
@@ -344,13 +311,13 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     }
 
     /**
-     * This method handles a SELECT SPARQL query.
+     * This method handles a ASK SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
-     * @param query SPARQL SELECT query
+     * @param query SPARQL ASK query
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    private String handleAsk(final Query query, final List<Endpoint> endpoints)
+    public String handleAsk(final Query query, final List<Endpoint> endpoints)
     {
         askResultList = new LinkedList<Boolean>();
         doneSignal = new CountDownLatch(endpoints.size());
@@ -394,5 +361,17 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         askResultList.clear();
 
         return content.toString();
+    }
+
+    /**
+     * This method handles a DESCRIBE SPARQL query.
+     * It uses threads to query each endpoint and then combines the responses.
+     * @param query SPARQL DESCRIBE query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    public String handleDescribe(final Query query, final List<Endpoint> endpoints)
+    {
+        return "";
     }
 }

@@ -32,6 +32,8 @@
 package org.wf.arnos.controller;
 
 import java.util.List;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +111,8 @@ public class QueryController
         {
             logger.info("Passing to " + queryHandler.getClass());
 
-            result = queryHandler.handleQuery(query, endpoints);
+
+            result = handleQuery(query, endpoints);
 
             // put this result into the cache if available
             if (cacheHandler != null)
@@ -128,6 +131,41 @@ public class QueryController
             logger.error("Unable to write output", e);
         }
 
+    }
+
+
+    /**
+     * This implementation, simple contatinates all query results.
+     * @param queryString SPARQL query to execute
+     * @param endpoints List of endpoint urls to run the query against
+     * @return An RDF model
+     */
+    public final String handleQuery(final String queryString, final List<Endpoint> endpoints)
+    {
+        logger.debug("Querying against  " + endpoints.size() + " endpoints");
+
+        // process the SPARQL query to best determin how to handle this query
+        Query query = QueryFactory.create(queryString);
+
+        if (query.getQueryType() == Query.QueryTypeSelect)
+        {
+            // this is a simple select query. Results can be appended, and limited as required
+            return queryHandler.handleSelect(query, endpoints);
+        }
+        else if (query.getQueryType() == Query.QueryTypeConstruct)
+        {
+            return queryHandler.handleConstruct(query, endpoints);
+        }
+        else if (query.getQueryType() == Query.QueryTypeAsk)
+        {
+            return queryHandler.handleAsk(query, endpoints);
+        }
+        else
+        {
+            logger.warn("Unable to handle this query type");
+        }
+
+        return "";
     }
 
 

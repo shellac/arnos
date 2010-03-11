@@ -34,20 +34,27 @@ package org.wf.arnos.queryhandler;
 import org.wf.arnos.utils.Sparql;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.xml.DOMConfigurator;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;
+import org.wf.arnos.utils.LocalServer;
 
 /**
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class ThreadedQueryHandlerTest {
+    Query selectQuery = QueryFactory.create(Sparql.getSelectQuery());
+    Query constructQuery = QueryFactory.create(Sparql.getConstructQuery());
+    Query askQuery = QueryFactory.create(Sparql.getAskQuery());
 
     // maximum number of results we're expecting
     private static final int MAX_LIMIT = 10;
@@ -55,15 +62,24 @@ public class ThreadedQueryHandlerTest {
     // minimum number of results we're expecting
     private static final int MIN_LIMIT = 5;
 
-    @Before
-    public void setUp()
+    @BeforeClass
+    public static void setUp() throws Exception
     {
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+        LocalServer.start();
     }
+
+    @AfterClass
+    public static void tearDown() {
+        LocalServer.stop();
+    }
+
 
     @Test
     public void testTaskInitalization()
     {
+        System.out.println("testTaskInitalization");
+
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
         endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
@@ -73,10 +89,6 @@ public class ThreadedQueryHandlerTest {
 
         MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
         queryHandler.setTaskExecutor(executor);
-
-        Query selectQuery = QueryFactory.create(Sparql.getSelectQuery());
-        Query constructQuery = QueryFactory.create(Sparql.getConstructQuery());
-        Query askQuery = QueryFactory.create(Sparql.getAskQuery());
 
         String results = queryHandler.handleSelect(selectQuery, endpoints);
 
@@ -109,19 +121,48 @@ public class ThreadedQueryHandlerTest {
     @Test
     public void testHandleSelect()
     {
+        System.out.println("testHandleSelect");
+
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints
         endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
         endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
 
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
 
+        String result = queryHandler.handleSelect(selectQuery, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        int numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with endpoints 1 & 2",7,numResults);
+
+        // now add another result set
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+        result = queryHandler.handleSelect(selectQuery, endpoints);
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with all endpoints",Sparql.MAX_LIMIT,numResults);
     }
 
     @Test
     public void testHandleDescribe()
     {
-
+        System.out.println("testHandleDescribe");
     }
 
 

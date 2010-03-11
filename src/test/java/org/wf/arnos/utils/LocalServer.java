@@ -65,34 +65,12 @@ public class LocalServer {
             String query = request.getParameter("query");
 
             String thisEndpoint = "http://localhost:"+PORT_NUMBER+target;
-            String result = "";
-            String queryType = "Unknown";
 
-            if (query.indexOf("CONSTRUCT ") > 0)
-            {
-                queryType = "CONSTRUCT";
-                result = Sparql.getConstructResult(thisEndpoint);
-            }
-            else if (query.indexOf("DESCRIBE ") > 0)
-            {
-                queryType = "DESCRIBE";
-                result = Sparql.getDescribeResult(thisEndpoint);
-            }
-            else if (query.indexOf("SELECT ") > 0)
-            {
-                queryType = "SELECT";
-                result = Sparql.getSelectResult(thisEndpoint);
-            }
-            else
-            {
-                queryType = "ASK";
-                result = Sparql.getAskResult(thisEndpoint);
-            }
+            String result = Sparql.getResult(thisEndpoint,query);
 
-            System.out.println(queryType + " request");
             if (result == null)
             {
-                throw new RuntimeException("No response found for " + queryType + " query type send to "+target);
+                throw new RuntimeException("No response found for " + query + " query type send to "+thisEndpoint);
             }
 
             response.getWriter().print(result);

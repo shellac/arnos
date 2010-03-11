@@ -68,8 +68,8 @@ public class JenaQueryWrapperTest {
     {
         System.out.println("testExecConstruct");
 
-        String query = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
-        String result = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
+        String query = Sparql.CONSTRUCT_QUERY_BOOKS;
+        String result = Sparql.getResult(Sparql.ENDPOINT1_URL,query);
 
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
@@ -81,8 +81,8 @@ public class JenaQueryWrapperTest {
     {
         System.out.println("testExecSelect");
 
-        String query = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
-        String result = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
+        String query = Sparql.SELECT_QUERY_BOOKS;
+        String result = Sparql.getResult(Sparql.ENDPOINT1_URL,query);
 
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
@@ -94,8 +94,8 @@ public class JenaQueryWrapperTest {
     {
         System.out.println("testExecAsk");
 
-        String query = Sparql.getAskQuery(Sparql.ENDPOINT1_URL);
-        String result = Sparql.getAskResult(Sparql.ENDPOINT1_URL);
+        String query = Sparql.ASK_QUERY_ALICE;
+        String result = Sparql.getResult(Sparql.ENDPOINT1_URL,query);
 
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
@@ -107,16 +107,16 @@ public class JenaQueryWrapperTest {
     {
         System.out.println("testExecAsk");
 
-        String describeQuery1 = Sparql.getDescribeQuery(Sparql.ENDPOINT1_URL);
-        String describeResult1 = Sparql.getDescribeResult(Sparql.ENDPOINT1_URL);
-        String describeQuery2 = Sparql.getDescribeQuery(Sparql.ENDPOINT2_URL);
-        String describeResult2 = Sparql.getDescribeResult(Sparql.ENDPOINT2_URL);
+        String describeQuery1 = Sparql.DESCRIBE_QUERY_BOOK_2;
+        String describeResult1 = Sparql.getResult(Sparql.ENDPOINT1_URL,describeQuery1);
+        String describeQuery2 = Sparql.DESCRIBE_QUERY_BOOK_3;
+        String describeResult2 = Sparql.getResult(Sparql.ENDPOINT1_URL,describeQuery2);
 
         String actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery1, Sparql.ENDPOINT1_URL);
 
         assertEquals(describeResult1, actualResult);
 
-        actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery2, Sparql.ENDPOINT2_URL);
+        actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery2, Sparql.ENDPOINT1_URL);
 
         assertEquals(describeResult2, actualResult);
     }
@@ -126,7 +126,7 @@ public class JenaQueryWrapperTest {
     {
         Model model = ModelFactory.createDefaultModel();
 
-        String result = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
+        String result = Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.CONSTRUCT_QUERY_BOOKS);
 
         Model actualModel = JenaQueryWrapper.getInstance().stringToModel(result);
 
@@ -142,7 +142,7 @@ public class JenaQueryWrapperTest {
     @Test
     public void testStringToBoolean()
     {
-        String askResult = Sparql.getAskResult(Sparql.ENDPOINT1_URL);
+        String askResult = Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.ASK_QUERY_ALICE);
 
         boolean b = JenaQueryWrapper.getInstance().stringToBoolean(askResult);
         assertTrue(b);
@@ -161,7 +161,7 @@ public class JenaQueryWrapperTest {
     @Test
     public void testStringToResultSet()
     {
-        String result = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
+        String result = Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS);
 
         ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 

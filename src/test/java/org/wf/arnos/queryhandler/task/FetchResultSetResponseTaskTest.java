@@ -53,6 +53,8 @@ import org.easymock.EasyMockSupport;
  */
 public class FetchResultSetResponseTaskTest extends EasyMockSupport
 {
+    String selectQuery = Sparql.SELECT_QUERY_BOOKS;
+    String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL,selectQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 
@@ -74,8 +76,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
-        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
-        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
+        String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL, selectQuery);
 
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
@@ -106,15 +107,13 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
     }
+
     @Test
     public void testMockUseOfCache()
     {
         System.out.println("testMockUseOfCache");
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
-
-        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
-        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
@@ -185,9 +184,6 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
         
-        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
-        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
-
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
@@ -249,9 +245,6 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testInstantiation");
         // for complete coverage, test creating the original object
-        
-        String selectQuery = Sparql.getSelectQuery(Sparql.ENDPOINT1_URL);
-        String selectResult = Sparql.getSelectResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,

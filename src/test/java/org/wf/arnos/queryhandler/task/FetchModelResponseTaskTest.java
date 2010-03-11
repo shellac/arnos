@@ -53,6 +53,8 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
  */
 public class FetchModelResponseTaskTest extends EasyMockSupport
 {
+    String constructQuery = Sparql.CONSTRUCT_QUERY_BOOKS;
+    String constructResult = Sparql.getResult(Sparql.ENDPOINT1_URL,constructQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 
@@ -73,9 +75,6 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     public void testRun()
     {
         System.out.println("testRun");
-
-        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
-        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
@@ -131,9 +130,6 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
-        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
-        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
-
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
@@ -148,7 +144,6 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
-
 
         expect(mockCache.contains((String) notNull())).andReturn(false);
         mockCache.put((String)anyObject(), (String)anyObject());
@@ -202,9 +197,6 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         {
             fail("Unable to create cache");
         }
-
-        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
-        String constructResult = Sparql.getConstructResult(Sparql.ENDPOINT1_URL);
 
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
@@ -269,11 +261,9 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         
         CountDownLatch doneSignal = new CountDownLatch(1);
 
-        String constructQuery = Sparql.getConstructQuery(Sparql.ENDPOINT1_URL);
-
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
-                constructQuery,
+                Sparql.CONSTRUCT_QUERY_BOOKS,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();

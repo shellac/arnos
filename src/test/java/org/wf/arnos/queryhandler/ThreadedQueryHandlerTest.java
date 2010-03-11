@@ -52,9 +52,10 @@ import org.wf.arnos.utils.LocalServer;
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class ThreadedQueryHandlerTest {
-    Query selectQuery = QueryFactory.create(Sparql.getSelectQuery());
-    Query constructQuery = QueryFactory.create(Sparql.getConstructQuery());
-    Query askQuery = QueryFactory.create(Sparql.getAskQuery());
+    Query selectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS);
+    Query constructQuery = QueryFactory.create(Sparql.CONSTRUCT_QUERY_BOOKS);
+    Query askQuery = QueryFactory.create(Sparql.ASK_QUERY_ALICE);
+    Query describeQuery = QueryFactory.create(Sparql.DESCRIBE_QUERY_BOOK_2);
 
     // maximum number of results we're expecting
     private static final int MAX_LIMIT = 10;

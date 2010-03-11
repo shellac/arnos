@@ -31,11 +31,16 @@
  */
 package org.wf.arnos.queryhandler.task;
 
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
+import org.wf.arnos.cachehandler.SimpleCacheHandler;
+import org.wf.arnos.cachehandler.SimpleCacheHandlerTest;
+import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import org.wf.arnos.utils.Sparql;
@@ -48,6 +53,8 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
  */
 public class FetchBooleanResponseTaskTest extends EasyMockSupport
 {
+    String askQuery = Sparql.ASK_QUERY_ALICE;
+    String askResult = Sparql.getResult(Sparql.ENDPOINT1_URL, askQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 
@@ -68,9 +75,6 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
     public void testFetchAskResponseTask()
     {
         System.out.println("testFetchAskResponseTask");
-
-        String askQuery = Sparql.getAskQuery(Sparql.ENDPOINT1_URL);
-        String askResult = Sparql.getAskResult(Sparql.ENDPOINT1_URL);
 
         FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
                 Sparql.ENDPOINT1_URL,
@@ -122,4 +126,73 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         verifyAll();
     }
 
+
+    @Test
+    public void testRealUseOfCache()
+    {
+        System.out.println("testRealUseOfCache");
+
+        CacheHandlerInterface cache = null;
+        try
+        {
+            cache = new SimpleCacheHandler(new File(SimpleCacheHandlerTest.CACHE_SETTINGS));
+        }
+        catch (Exception ex)
+        {
+            fail("Unable to create cache");
+        }
+
+        FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                Sparql.ENDPOINT1_URL,
+                askQuery,
+                doneSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+
+        assertFalse(cache.contains(fetcher.cacheKey));
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
+        expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
+                .andReturn(askResult);
+
+        expect(mockQueryWrapper.stringToBoolean(askResult))
+                .andReturn(true);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        // now check we've got the expected number of results
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+
+        // check the results has been put into the cache
+        assertTrue(cache.contains(fetcher.cacheKey));
+
+        resetAll();
+
+        // run the query again, check the cache was used (no call to execQuery)
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
+        expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
+
+        expect(mockQueryWrapper.stringToBoolean(askResult))
+                .andReturn(true).anyTimes();
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertTrue(cache.contains(fetcher.cacheKey));
+    }
 }

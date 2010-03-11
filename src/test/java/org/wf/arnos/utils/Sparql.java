@@ -320,10 +320,20 @@ public class Sparql {
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
+    private static final String CONSTRUCT_RESULT_EMPTY_RESULTS = "<?xml version=\"1.0\"?>\n"
+        + "<rdf:RDF\n"
+        + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+        + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
+        + "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
+        + "    xmlns:ns=\"http://example.org/ns#\"\n"
+        + "    xmlns=\"http://example.org/book/\">\n"
+        + "</rdf:RDF>";
 
     static
     {
         endpoint1Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
+        endpoint2Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
+        endpoint3Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
     }
 
 

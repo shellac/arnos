@@ -19,6 +19,7 @@
             <url>http://oss.sonatype.org/content/repositories/sourceforge-releases</url>
         </repository>
     </repositories>
+
     <!-- Shared version number properties -->
     <properties>
         <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
@@ -126,6 +127,8 @@
             <version>0.9.3</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Jena -->
         <dependency>
             <groupId>com.hp.hpl.jena</groupId>
             <artifactId>arq</artifactId>

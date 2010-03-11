@@ -57,20 +57,21 @@ public class LocalServer {
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
         {
-            System.out.println("Target is " +target);
+            String query = request.getParameter("query");
+
+//            System.out.println("Target is " +target);
 
             response.setContentType("text/xml");
             response.setStatus(HttpServletResponse.SC_OK);
 
-            String query = request.getParameter("query");
-
-            String thisEndpoint = "http://localhost:"+PORT_NUMBER+target;
+            String thisEndpoint = SERVER_URL+target;
 
             String result = Sparql.getResult(thisEndpoint,query);
+            result = Sparql.getResult(thisEndpoint,query);
 
             if (result == null)
             {
-                throw new RuntimeException("No response found for " + query + " query type send to "+thisEndpoint);
+                throw new Error("No response found for " + query + " query type send to "+thisEndpoint);
             }
 
             response.getWriter().print(result);

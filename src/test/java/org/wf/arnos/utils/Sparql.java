@@ -33,7 +33,8 @@ package org.wf.arnos.utils;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Notes:
@@ -43,13 +44,9 @@ import java.util.Map;
 public class Sparql {
 
     // point the endpoints to our dummy Jetty server
-    private static final String ENDPOINT1 = "/books/1";
-    private static final String ENDPOINT2 = "/books/2";
-    private static final String ENDPOINT3 = "/books/3";
-
-    public static final String ENDPOINT1_URL = LocalServer.SERVER_URL+ENDPOINT1;
-    public static final String ENDPOINT2_URL = LocalServer.SERVER_URL+ENDPOINT2;
-    public static final String ENDPOINT3_URL = LocalServer.SERVER_URL+ENDPOINT3;
+    public static final String ENDPOINT1_URL = LocalServer.SERVER_URL+"/books/1";
+    public static final String ENDPOINT2_URL = LocalServer.SERVER_URL+"/books/2";
+    public static final String ENDPOINT3_URL = LocalServer.SERVER_URL+"/books/3";
 
     // maximum number of results we're expecting
     public static final int MAX_LIMIT = 10;
@@ -70,9 +67,21 @@ public class Sparql {
 
     public static final String SELECT_QUERY_PEOPLE = "PREFIX people:   <http://example.org/people/>\n"
         + "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
-        + "SELECT ?name ?title\n"
+        + "SELECT ?name\n"
         + "WHERE \n"
         + "  { ?name dc:title ?title }    LIMIT "+MAX_LIMIT;
+
+    public static final String SELECT_QUERY_PEOPLE_DISTINCT = "PREFIX people:   <http://example.org/people/>\n"
+        + "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
+        + "SELECT DISTINCT ?name\n"
+        + "WHERE \n"
+        + "  { ?name dc:title ?title }    LIMIT "+MAX_LIMIT;
+
+    public static final String SELECT_QUERY_PEOPLE_ORDERED = "PREFIX people:   <http://example.org/people/>\n"
+        + "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
+        + "SELECT DISTINCT ?name\n"
+        + "WHERE \n"
+        + "  { ?name dc:title ?title } ORDER BY ?name ?title   LIMIT "+MAX_LIMIT;
 
     private static final String SELECT_RESULT_7_ITEMS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
@@ -153,10 +162,57 @@ public class Sparql {
     private static final String SELECT_RESULT_EMPTY_PEOPLE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
-        + "    <variable name=\"book\"/>\n"
-        + "    <variable name=\"title\"/>\n"
+        + "    <variable name=\"name\"/>\n"
         + "  </head>\n"
         + "  <results>\n"
+        + "  </results>\n"
+        + "</sparql>";
+
+    private static final String SELECT_RESULT_2_PEOPLE = "<?xml version=\"1.0\"?>\n"
+        + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
+        + "  <head>\n"
+        + "    <variable name=\"name\"/>\n"
+        + "  </head>\n"
+        + "  <results>\n"
+        + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Beth</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Chris</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "  </results>\n"
+        + "</sparql>";
+
+    private static final String SELECT_RESULT_4_PEOPLE = "<?xml version=\"1.0\"?>\n"
+        + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
+        + "  <head>\n"
+        + "    <variable name=\"name\"/>\n"
+        + "  </head>\n"
+        + "  <results>\n"
+        + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Adam</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Beth</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Chris</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+         + "    <result>\n"
+        + "      <binding name=\"name\">\n"
+        + "        <literal>Daisy</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
         + "  </results>\n"
         + "</sparql>";
 
@@ -202,25 +258,31 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static Map<String,Map <String,String>> selectResults = new HashMap<String,Map <String,String>>();
+    private static Map<String,QueryMap> selectResults = new HashMap<String,QueryMap>();
 
     static
     {
         // associate endpoints, queries and results
-        Map temp = new HashMap<String,String>();
+        QueryMap temp = new QueryMap();
         temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_ITEMS);
-        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
         selectResults.put(ENDPOINT1_URL,temp);
 
-        temp = new HashMap<String,String>();
+        temp = new QueryMap();
         temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
-        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
-        selectResults.put(ENDPOINT2_URL, temp );
+        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
+        selectResults.put(ENDPOINT2_URL, temp);
 
-        temp = new HashMap<String,String>();
+        temp = new QueryMap();
         temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_ITEMS);
         temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
-        selectResults.put(ENDPOINT2_URL, temp );
+        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
+        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
+        selectResults.put(ENDPOINT3_URL, temp);
     }
 
 
@@ -262,11 +324,11 @@ public class Sparql {
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
-    private static Map<String,Map<String,String>> constructResults = new HashMap<String,Map<String,String>>();
+    private static Map<String,QueryMap> constructResults = new HashMap<String,QueryMap>();
 
     static
     {
-        Map temp = new HashMap<String,String>();
+        QueryMap temp = new QueryMap();
         temp.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
         constructResults.put(ENDPOINT1_URL,temp);
     }
@@ -299,21 +361,21 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static Map<String,Map<String,String>> askResults = new HashMap<String,Map<String,String>>();
+    private static Map<String,QueryMap> askResults = new HashMap<String,QueryMap>();
 
     static
     {
-        Map temp = new HashMap<String,String>();
+        QueryMap temp = new QueryMap();
         temp.put(ASK_QUERY_ALICE,ASK_RESULT_TRUE);
         temp.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
         askResults.put(ENDPOINT1_URL, temp );
 
-        temp = new HashMap<String,String>();
+        temp = new QueryMap();
         temp.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
         temp.put(ASK_QUERY_BOB,ASK_RESULT_TRUE);
         askResults.put(ENDPOINT2_URL, temp );
 
-        temp = new HashMap<String,String>();
+        temp = new QueryMap();
         temp.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
         temp.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
         askResults.put(ENDPOINT3_URL, temp );
@@ -325,10 +387,10 @@ public class Sparql {
     /*==================*/
 
     public static final String DESCRIBE_QUERY_BOOK_2 = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
-        + "DESCRIBE <http://example.org/book/book2>";
+        + "DESCRIBE <http://example.org/book/book2> WHERE {}";
 
     public static final String DESCRIBE_QUERY_BOOK_3 = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
-        + "DESCRIBE <http://example.org/book/book3>";
+        + "DESCRIBE <http://example.org/book/book3> WHERE {}";
 
     private static final String DESCRIBE_RESULT_BOOK_2 = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
@@ -383,24 +445,24 @@ public class Sparql {
         + "</rdf:RDF>";
 
 
-    private static Map<String,Map<String,String>> describeResults = new HashMap<String,Map<String,String>>();
+    private static Map<String,QueryMap> describeResults = new HashMap<String,QueryMap>();
 
     static
     {
-        Map temp = new HashMap<String,String>();
-        temp.put(DESCRIBE_QUERY_BOOK_2,DESCRIBE_RESULT_BOOK_2);
-        temp.put(DESCRIBE_QUERY_BOOK_3,DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT1_URL,temp);
+        QueryMap temp = new QueryMap();
+        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2);
+        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
+        describeResults.put(ENDPOINT1_URL, temp);
 
-        temp = new HashMap<String,String>();
-        temp.put(DESCRIBE_QUERY_BOOK_2,DESCRIBE_RESULT_EMPTY_BOOK);
-        temp.put(DESCRIBE_QUERY_BOOK_3,DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT2_URL,temp);
+        temp = new QueryMap();
+        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_EMPTY_BOOK);
+        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
+        describeResults.put(ENDPOINT2_URL, temp);
 
-        temp = new HashMap<String,String>();
-        temp.put(DESCRIBE_QUERY_BOOK_2,DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
-        temp.put(DESCRIBE_QUERY_BOOK_3,DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT3_URL,temp);
+        temp = new QueryMap();
+        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
+        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
+        describeResults.put(ENDPOINT3_URL, temp);
     }
 
     public static String getResult(String endpoint, String query)
@@ -416,7 +478,14 @@ public class Sparql {
         if (result != null) return result;
 
         if (describeResults.containsKey(endpoint)) result = describeResults.get(endpoint).get(query);
-
         return result;
+    }
+
+    @Test
+    public void test()
+    {
+        assertEquals(Sparql.SELECT_RESULT_7_ITEMS,Sparql.getResult(Sparql.ENDPOINT1_URL,Sparql.SELECT_QUERY_BOOKS));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL,Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql.DESCRIBE_QUERY_BOOK_2));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL,Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql.DESCRIBE_QUERY_BOOK_2));
     }
 }

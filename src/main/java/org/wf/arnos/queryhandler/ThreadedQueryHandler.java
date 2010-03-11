@@ -360,7 +360,15 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         // now the model has been generated, run the query on the merged results
         QueryExecution qexec = QueryExecutionFactory.create(query, mergedResults);
 
-        Model resultModel = qexec.execConstruct();
+        Model resultModel;
+        if (query.isConstructType())
+        {
+            resultModel = qexec.execConstruct();
+        }
+        else
+        {
+            resultModel = qexec.execDescribe();
+        }
 
         // create a string writer to print the model to
         StringWriter wr = new StringWriter();

@@ -34,6 +34,7 @@ package org.wf.arnos.queryhandler;
 import org.wf.arnos.utils.Sparql;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.junit.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
+import org.wf.arnos.controller.model.sparql.Result;
 import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;
 import org.wf.arnos.utils.LocalServer;
 
@@ -131,6 +133,7 @@ public class ThreadedQueryHandlerTest {
 
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
         executor.initialize();
         queryHandler.setTaskExecutor(executor);
 
@@ -161,10 +164,130 @@ public class ThreadedQueryHandlerTest {
     }
 
     @Test
+    public void testHandleDistinctSelect()
+    {
+        System.out.println("testHandleDistinctSelect");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE);
+        String result = queryHandler.handleSelect(query, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        int numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results non-distinct people",6,numResults);
+
+        // now use the distinct query to filter results
+        query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_DISTINCT);
+        result = queryHandler.handleSelect(query, endpoints);
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with all endpoints",4,numResults);
+    }
+
+    @Test
+    public void testHandleOrderedSelect()
+    {
+        System.out.println("testHandleOrderedSelect");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_ORDERED);
+        String result = queryHandler.handleSelect(query, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        String previous = "";
+        int numResults = 0;
+        while (results.hasNext())
+        {
+            numResults++;
+            QuerySolution sol = results.next();
+            Result r = new Result(sol);
+
+            String next = r.getValues().get(0);
+            assertTrue(next +" > " + previous, next.compareTo(previous) > 0);
+            previous = next;
+        }
+
+        assertEquals("Expeced number of ordered results",4,numResults);
+    }
+
+    @Test
     public void testHandleDescribe()
     {
         System.out.println("testHandleDescribe");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        String queryBefore = describeQuery.toString();
+        String result = queryHandler.handleDescribe(describeQuery, endpoints);
+
+        assertEquals(queryBefore,describeQuery.toString());
+
+        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("J.K. Rowling"));
+        assertFalse(result.contains("dc:description"));
+        assertFalse(result.contains("Scholastic Paperbacks"));
+
+        // run the same query again to make sure we get the same results
+        result = queryHandler.handleDescribe(describeQuery, endpoints);
+
+        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("J.K. Rowling"));
+        assertFalse(result.contains("dc:description"));
+        assertFalse(result.contains("Scholastic Paperbacks"));
+
+        // add our slightly more knowledgeable endpoint
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+
+        result = queryHandler.handleDescribe(describeQuery, endpoints);
+
+        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("J.K. Rowling"));
+        assertTrue(result.contains("dc:description"));
+        assertTrue(result.contains("Scholastic Paperbacks"));
+
     }
-
-
 }

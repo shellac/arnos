@@ -35,7 +35,11 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.sparql.core.ResultBinding;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A single SPARQL SELECT query result.
@@ -44,9 +48,37 @@ import java.util.Iterator;
 public class Result
 {
     /**
-     * Internal representation of this object.
+     * Binding representation used for sorting.
      */
-    private final transient String s;
+    private transient Binding binding = null;
+
+    /**
+     * Returns the binding for this Result.
+     * @return Binding object
+     */
+    public final Binding getBinding()
+    {
+        return binding;
+    }
+    
+    /**
+     * Bindings array.
+     */
+    protected final transient List<String> bindings;
+
+    /**
+     * Value of each binding.
+     */
+    protected final transient List<String> values;
+
+    /**
+     * Returns the list of values for this result.
+     * @return List of values
+     */
+    public final List<String> getValues()
+    {
+        return values;
+    }
 
     /**
      * Default length for results stringbuffer constructor.
@@ -59,47 +91,76 @@ public class Result
      */
     public Result(final QuerySolution sol)
     {
-        StringBuffer representation = new StringBuffer(DEFAULT_SB_LENGTH);
+        binding = ((ResultBinding) sol).getBinding();
 
-        representation.append("<result>");
-
+        bindings = new ArrayList();
+        values = new ArrayList();
         Iterator vars = sol.varNames();
         while (vars.hasNext())
         {
             String var = vars.next().toString();
-            RDFNode n = sol.get(var);
 
-            representation.append("<binding name=\"");
-            representation.append(var);
-            representation.append("\">");
+            bindings.add(var);
+
+            RDFNode n = sol.get(var);
 
             if (n.isLiteral())
             {
-                representation.append("<literal>");
-                representation.append(((Literal) n).getLexicalForm());
-                representation.append("</literal>");
+                values.add("<literal>" + ((Literal) n).getLexicalForm() + "</literal>");
             }
             else
             {
-                representation.append("<uri>");
-                representation.append(((Resource) n).getURI());
-                representation.append("</uri>");
+                values.add("<uri>" + ((Resource) n).getURI() + "</uri>");
             }
-
-             representation.append("</binding>");
         }
-
-        representation.append("</result>");
-
-        s = representation.toString();
     }
 
     /**
-     * Converts internal representation to an xml string.
+     * Converts the internal representation to an xml string.
      * @return XML string
      */
     public final String toXML()
     {
-        return s;
+        StringBuffer representation = new StringBuffer(DEFAULT_SB_LENGTH);
+
+        representation.append("<result>");
+
+        for (int i = 0; i < bindings.size(); i++)
+        {
+            String bind = bindings.get(i).toString();
+            String value = values.get(i).toString();
+
+            representation.append("<binding name=\"");
+            representation.append(bind);
+            representation.append("\">");
+            representation.append(value);
+            representation.append("</binding>");
+        }
+
+        representation.append("</result>");
+
+        return representation.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return false;
+
+        if (!(obj instanceof Result)) return false;
+
+        Result other = (Result) obj;
+
+        if (this.values.equals(other.getValues())) return true;
+        return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 5;
+        hash = 61 * hash + (this.bindings != null ? this.bindings.hashCode() : 0);
+        hash = 61 * hash + (this.values != null ? this.values.hashCode() : 0);
+        return hash;
     }
 }

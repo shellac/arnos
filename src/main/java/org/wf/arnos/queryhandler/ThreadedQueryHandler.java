@@ -34,11 +34,17 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.engine.binding.Binding;
+import com.hp.hpl.jena.sparql.engine.binding.BindingComparator;
 import java.io.StringWriter;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -205,31 +211,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     public final String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
-        selectResultList = new LinkedList<Result>();
-        doneSignal = new CountDownLatch(endpoints.size());
-
-        // fire off a thread to handle quering each endpoint
-        for (Endpoint ep : endpoints)
-        {
-            String url = ep.getLocation();
-            LOG.debug("Querying " + url);
-
-            taskExecutor.execute(new FetchResultSetResponseTask(this, query.serialize(), url, doneSignal));
-        }
-
-        // block until all threads have finished
-        try
-        {
-            doneSignal.await();
-        }
-        catch (InterruptedException ex)
-        {
-            LOG.warn("Error while waiting on threads", ex);
-        }
-
-        // once threads have compeleted, construct results
-        LOG.debug("Threads completed, constructing results");
-
+        fetchResultSetAndWait(query, endpoints);
+        
         StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
 
         content.append("<?xml version=\"1.0\"?><sparql xmlns=\"http://www.w3.org/2005/sparql-results#\"><head>");
@@ -238,7 +221,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         List<String> vars = query.getResultVars();
         for (String var : vars)
         {
-            content.append("<varaible name=\"");
+            content.append("<variable name=\"");
             content.append(var);
             content.append("\"/>");
         }
@@ -246,6 +229,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         // collate all responses
         boolean hasLimit = false;
+        boolean distinct = false;
         long limit = -1;
 
         if (query.hasLimit())
@@ -254,13 +238,42 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             hasLimit = true;
         }
 
-        for (Result r : selectResultList)
+        if (query.isDistinct())
         {
+            distinct = true;
+        }
+
+        if (query.hasOrderBy())
+        {
+            sortResults(query.getOrderBy());
+        }
+
+        for (int i = 0; i < selectResultList.size(); i++)
+        {
+            Result r = selectResultList.get(i);
+            boolean add = true;
+
             if (!hasLimit || limit > 0)
             {
                 if (hasLimit) limit--;
-                content.append(r.toXML());
             }
+            else
+            {
+                add = false;
+            }
+
+            if (distinct)
+            {
+                // check a duplicate result hasn't already been added
+                boolean match = false;
+                for (int j = 0; j < i; j++)
+                {
+                    if (r.equals(selectResultList.get(j))) match = true;
+                }
+                if (match) add = false;
+            }
+
+            if (add) content.append(r.toXML());
         }
 
         content.append("</results></sparql>");
@@ -395,6 +408,72 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         {
             LOG.warn("Error while waiting on threads", ex);
         }
+    }
 
+    /**
+     * Issues the query across all given endpoints.
+     * This method blocks until all results are returned
+     * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
+     * @param endpoints Set of endpoints
+     */
+    private void fetchResultSetAndWait(final Query query, final List<Endpoint> endpoints)
+    {
+        selectResultList = new LinkedList<Result>();
+        doneSignal = new CountDownLatch(endpoints.size());
+
+        // fire off a thread to handle quering each endpoint
+        for (Endpoint ep : endpoints)
+        {
+            String url = ep.getLocation();
+            LOG.debug("Querying " + url);
+
+            taskExecutor.execute(new FetchResultSetResponseTask(this, query.serialize(), url, doneSignal));
+        }
+
+        // block until all threads have finished
+        try
+        {
+            doneSignal.await();
+        }
+        catch (InterruptedException ex)
+        {
+            LOG.warn("Error while waiting on threads", ex);
+        }
+
+        // once threads have compeleted, construct results
+        LOG.debug("Threads completed, constructing results");
+    }
+
+    /**
+     * Uses Jena's SortedResultSet to sort the results.
+     * @param conditions The sort conditions from the query
+     */
+    private void sortResults(final List<SortCondition> conditions)
+    {
+        Comparator<Binding> comparator = new BindingComparator(conditions);
+        SortedSet<Binding> sorted = new TreeSet<Binding>(comparator);
+
+        List<Result> sortedResultList = new LinkedList<Result>();
+
+        for (Result r : selectResultList)
+        {
+            Binding b = r.getBinding();
+            sorted.add(b);
+        }
+
+        for (Binding b : sorted)
+        {
+            for (Result r : selectResultList)
+            {
+                if (r.getBinding().equals(b))
+                {
+                    sortedResultList.add(r);
+                    selectResultList.remove(r);
+                    break;
+                }
+            }
+        }
+
+        selectResultList = sortedResultList;
     }
 }

@@ -55,7 +55,11 @@ public class Sparql {
     public static final int MIN_LIMIT = 5;
 
 
-    
+    private static Map<String,QueryMap> endpointQueryResultMapping = new HashMap<String,QueryMap>();
+    private static  QueryMap endpoint1Mapping = new QueryMap();
+    private static  QueryMap endpoint2Mapping = new QueryMap();
+    private static QueryMap endpoint3Mapping = new QueryMap();
+
     /*** SELECT QUERIES ***/
     /*=================*/
 
@@ -258,31 +262,23 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static Map<String,QueryMap> selectResults = new HashMap<String,QueryMap>();
-
     static
     {
         // associate endpoints, queries and results
-        QueryMap temp = new QueryMap();
-        temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_ITEMS);
-        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
-        selectResults.put(ENDPOINT1_URL,temp);
+        endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_ITEMS);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
 
-        temp = new QueryMap();
-        temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
-        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
-        selectResults.put(ENDPOINT2_URL, temp);
+        endpoint2Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
 
-        temp = new QueryMap();
-        temp.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_ITEMS);
-        temp.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
-        temp.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
-        selectResults.put(ENDPOINT3_URL, temp);
+        endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_ITEMS);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
     }
 
 
@@ -324,15 +320,11 @@ public class Sparql {
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
-    private static Map<String,QueryMap> constructResults = new HashMap<String,QueryMap>();
 
     static
     {
-        QueryMap temp = new QueryMap();
-        temp.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
-        constructResults.put(ENDPOINT1_URL,temp);
+        endpoint1Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
     }
-
 
 
 
@@ -361,24 +353,16 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static Map<String,QueryMap> askResults = new HashMap<String,QueryMap>();
-
     static
     {
-        QueryMap temp = new QueryMap();
-        temp.put(ASK_QUERY_ALICE,ASK_RESULT_TRUE);
-        temp.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
-        askResults.put(ENDPOINT1_URL, temp );
+        endpoint1Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_TRUE);
+        endpoint1Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
 
-        temp = new QueryMap();
-        temp.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
-        temp.put(ASK_QUERY_BOB,ASK_RESULT_TRUE);
-        askResults.put(ENDPOINT2_URL, temp );
+        endpoint2Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
+        endpoint2Mapping.put(ASK_QUERY_BOB,ASK_RESULT_TRUE);
 
-        temp = new QueryMap();
-        temp.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
-        temp.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
-        askResults.put(ENDPOINT3_URL, temp );
+        endpoint3Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
+        endpoint3Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
     }
 
 
@@ -444,48 +428,37 @@ public class Sparql {
         + "    xmlns=\"http://example.org/book/\">\n"
         + "</rdf:RDF>";
 
+    static
+    {
+        endpoint1Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2);
+        endpoint1Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
 
-    private static Map<String,QueryMap> describeResults = new HashMap<String,QueryMap>();
+        endpoint2Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_EMPTY_BOOK);
+        endpoint2Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
+
+        endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
+        endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
+    }
 
     static
     {
-        QueryMap temp = new QueryMap();
-        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2);
-        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT1_URL, temp);
-
-        temp = new QueryMap();
-        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_EMPTY_BOOK);
-        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT2_URL, temp);
-
-        temp = new QueryMap();
-        temp.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
-        temp.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
-        describeResults.put(ENDPOINT3_URL, temp);
+        endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);
+        endpointQueryResultMapping.put(ENDPOINT2_URL, endpoint2Mapping);
+        endpointQueryResultMapping.put(ENDPOINT3_URL, endpoint3Mapping);
     }
 
     public static String getResult(String endpoint, String query)
     {
         String result = null;
-        if (selectResults.containsKey(endpoint)) result = selectResults.get(endpoint).get(query);
-        if (result != null) return result;
-
-        if (constructResults.containsKey(endpoint)) result = constructResults.get(endpoint).get(query);
-        if (result != null) return result;
-
-        if (askResults.containsKey(endpoint)) result = askResults.get(endpoint).get(query);
-        if (result != null) return result;
-
-        if (describeResults.containsKey(endpoint)) result = describeResults.get(endpoint).get(query);
+        if (endpointQueryResultMapping.containsKey(endpoint)) result = endpointQueryResultMapping.get(endpoint).get(query);
         return result;
     }
 
     @Test
     public void test()
     {
-        assertEquals(Sparql.SELECT_RESULT_7_ITEMS,Sparql.getResult(Sparql.ENDPOINT1_URL,Sparql.SELECT_QUERY_BOOKS));
-        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL,Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql.DESCRIBE_QUERY_BOOK_2));
-        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL,Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql.DESCRIBE_QUERY_BOOK_2));
+        assertEquals(Sparql.SELECT_RESULT_7_ITEMS, Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
     }
 }

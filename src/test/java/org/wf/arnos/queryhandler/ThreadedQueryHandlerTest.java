@@ -38,6 +38,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -288,6 +289,44 @@ public class ThreadedQueryHandlerTest {
         assertTrue(result.contains("J.K. Rowling"));
         assertTrue(result.contains("dc:description"));
         assertTrue(result.contains("Scholastic Paperbacks"));
+    }
 
+    @Test
+    public void testHandleConstruct()
+    {
+        System.out.println("testHandleConstruct");
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        String result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+
+        assertEquals(7,StringUtils.countMatches(result,"rdf:about"));
+
+        endpoints.remove(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+
+        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+
+        assertEquals(3,StringUtils.countMatches(result,"rdf:about"));
+
+        // test distinct construct
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+
+        constructQuery.setLimit(10);
+        constructQuery.setDistinct(false);
+        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
+        
+        constructQuery.setDistinct(true);
+        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
     }
 }

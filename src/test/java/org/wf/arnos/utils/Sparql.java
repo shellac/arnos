@@ -229,7 +229,7 @@ public class Sparql {
         + "  <results>\n"
         + "    <result>\n"
         + "      <binding name=\"book\">\n"
-        + "        <uri>http://example.org/book/book8</uri>\n"
+        + "        <uri>http://example.org/book/book0</uri>\n"
         + "      </binding>\n"
         + "      <binding name=\"title\">\n"
         + "        <literal>Semantic Web Programming</literal>\n"
@@ -289,7 +289,7 @@ public class Sparql {
     public static final String CONSTRUCT_QUERY_BOOKS = "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
         + "CONSTRUCT { $book dc:title $title }\n"
         + "WHERE\n"
-        + "  { $book dc:title $title }    LIMIT "+MAX_LIMIT;
+        + "  { $book dc:title $title } ORDER BY ?title LIMIT "+MAX_LIMIT;
     private static final String CONSTRUCT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
@@ -319,7 +319,23 @@ public class Sparql {
         + "    <dc:title>Harry Potter and the Philosopher's Stone</dc:title>\n"
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
-
+    private static final String CONSTRUCT_RESULT_3_BOOKS = "<?xml version=\"1.0\"?>\n"
+        + "<rdf:RDF\n"
+        + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+        + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
+        + "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
+        + "    xmlns:ns=\"http://example.org/ns#\"\n"
+        + "    xmlns=\"http://example.org/book/\">\n"
+        + "  <rdf:Description rdf:about=\"http://example.org/book/book3\">\n"
+        + "    <dc:title>Harry Potter and the Prisoner Of Azkaban</dc:title>\n"
+        + "  </rdf:Description>\n"
+        + "  <rdf:Description rdf:about=\"http://example.org/book/book7\">\n"
+        + "    <dc:title>Harry Potter and the Deathly Hallows</dc:title>\n"
+        + "  </rdf:Description>\n"
+        + "  <rdf:Description rdf:about=\"http://example.org/book/book0\">\n"
+        + "    <dc:title>Semantic Web Programming</dc:title>\n"
+        + "  </rdf:Description>\n"
+        + "</rdf:RDF>";
     private static final String CONSTRUCT_RESULT_EMPTY_RESULTS = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
@@ -333,7 +349,7 @@ public class Sparql {
     {
         endpoint1Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
         endpoint2Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
-        endpoint3Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
+        endpoint3Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_3_BOOKS);
     }
 
 

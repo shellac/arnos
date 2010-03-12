@@ -69,7 +69,6 @@ public class FetchModelResponseTask extends AbstractResponseTask
     @Override
     public final void run()
     {
-        System.out.println("run");
         try
         {
             String resultsString = getFromCache();
@@ -77,7 +76,6 @@ public class FetchModelResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
-                System.out.println("cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }

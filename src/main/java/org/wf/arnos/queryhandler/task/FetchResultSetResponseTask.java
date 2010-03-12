@@ -38,7 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.controller.model.sparql.Result;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
  * Handles obtaining select query from endpoint and parsing result set.
@@ -89,7 +88,7 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
             while (resultSet.hasNext())
             {
                 QuerySolution sol = resultSet.next();
-                ((ThreadedQueryHandler) handler).addResult(new Result(sol));
+                handler.addResult(new Result(sol));
             }
 
         }

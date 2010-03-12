@@ -36,7 +36,6 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
  * Handles obtaining construct query from endpoint and parsing result set.
@@ -70,6 +69,7 @@ public class FetchModelResponseTask extends AbstractResponseTask
     @Override
     public final void run()
     {
+        System.out.println("run");
         try
         {
             String resultsString = getFromCache();
@@ -77,13 +77,14 @@ public class FetchModelResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
+                System.out.println("cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }
 
             Model model  = getQueryWrapper().stringToModel(resultsString);
 
-            ((ThreadedQueryHandler) handler).addResult(model);
+            handler.addResult(model);
         }
         catch (Exception ex)
         {

@@ -46,6 +46,7 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import org.easymock.EasyMockSupport;
+import org.wf.arnos.controller.model.sparql.Result;
 
 /**
  *
@@ -98,6 +99,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
+        mockThreadedQueryHandler.addResult(isA(Result.class));
+        expectLastCall().times(7);
+
         replayAll();
 
         fetcher.run();
@@ -140,6 +144,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
+        mockThreadedQueryHandler.addResult(isA(Result.class));
+        expectLastCall().times(7);
+        
         replayAll();
 
         fetcher.run();
@@ -161,6 +168,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
+
+        mockThreadedQueryHandler.addResult(isA(Result.class));
+        expectLastCall().times(7);
 
         replayAll();
 
@@ -208,6 +218,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
+        mockThreadedQueryHandler.addResult(isA(Result.class));
+        expectLastCall().times(7);
+
         replayAll();
 
         fetcher.run();
@@ -231,6 +244,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
+        mockThreadedQueryHandler.addResult(isA(Result.class));
+        expectLastCall().times(7);
+        
         replayAll();
 
         fetcher.run();

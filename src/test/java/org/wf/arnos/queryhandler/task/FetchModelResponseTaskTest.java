@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.queryhandler.task;
 
+import com.hp.hpl.jena.rdf.model.Model;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -96,6 +97,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
+        mockThreadedQueryHandler.addResult(isA(Model.class));
+
         replayAll();
 
         fetcher.run();
@@ -114,6 +117,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
+
+        mockThreadedQueryHandler.addResult(isA(Model.class));
 
         replayAll();
 
@@ -154,6 +159,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
+        mockThreadedQueryHandler.addResult(isA(Model.class));
+
         replayAll();
 
         fetcher.run();
@@ -175,6 +182,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
+
+        mockThreadedQueryHandler.addResult(isA(Model.class));
 
         replayAll();
 
@@ -221,6 +230,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
+        mockThreadedQueryHandler.addResult((Model)anyObject());
+
         replayAll();
 
         fetcher.run();
@@ -242,6 +253,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
+
+        mockThreadedQueryHandler.addResult(isA(Model.class));
 
         replayAll();
 

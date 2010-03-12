@@ -35,7 +35,6 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
-import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 
 /**
  * Handles obtaining the results of an ASK query from a given endpoint.
@@ -87,7 +86,7 @@ public class FetchBooleanResponseTask extends AbstractResponseTask
                 ans = Boolean.valueOf(resultsString);
             }
 
-            ((ThreadedQueryHandler) handler).addResult(ans);
+            handler.addResult(ans);
         }
         catch (Exception ex)
         {

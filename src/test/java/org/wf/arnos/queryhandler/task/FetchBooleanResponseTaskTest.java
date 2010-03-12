@@ -98,6 +98,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true);
+        
+        mockThreadedQueryHandler.addResult(true);
 
         replayAll();
 
@@ -119,6 +121,9 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToBoolean((String) notNull()))
                 .andReturn(true);
+
+        mockThreadedQueryHandler.addResult(true);
+        
         replayAll();
 
         fetcher.run();
@@ -139,6 +144,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         }
         catch (Exception ex)
         {
+            System.out.println("Throwing error");
+            ex.printStackTrace();
             fail("Unable to create cache");
         }
 
@@ -165,6 +172,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true);
 
+        mockThreadedQueryHandler.addResult(true);
+        
         replayAll();
 
         fetcher.run();
@@ -186,6 +195,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true).anyTimes();
+
+        mockThreadedQueryHandler.addResult(true);
 
         replayAll();
 

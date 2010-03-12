@@ -32,9 +32,11 @@
 package org.wf.arnos.queryhandler;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
+import org.wf.arnos.controller.model.sparql.Result;
 
 /**
  *
@@ -94,4 +96,22 @@ public interface QueryHandlerInterface
      * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
      */
     boolean hasCache();
+
+    /**
+     * Adds a construct query results model.
+     * @param m Model to add
+     */
+    void addResult(Model m);
+
+    /**
+     * Adds a result.
+     * @param r A single SPARQL SELECT result object.
+     */
+    void addResult(Result r);
+
+    /**
+     * Stores the results of an ASK query.
+     * @param b Boolean value of query
+     */
+    void addResult(Boolean b);
 }

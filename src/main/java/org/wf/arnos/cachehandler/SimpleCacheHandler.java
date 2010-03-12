@@ -41,6 +41,7 @@ import java.security.NoSuchAlgorithmException;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.Status;
 import org.springframework.core.io.Resource;
 import org.wf.arnos.exception.ArnosRuntimeException;
 
@@ -96,6 +97,8 @@ public class SimpleCacheHandler implements CacheHandlerInterface
         cache = CacheManager.getInstance().getCache(CACHE_NAME);
 
         if (cache == null) throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "'missing");
+
+        if (cache.getStatus() == Status.STATUS_UNINITIALISED) cache.initialise();
 
         try
         {

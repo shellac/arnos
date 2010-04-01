@@ -66,9 +66,14 @@ public class ThreadedQueryHandlerTest {
     // minimum number of results we're expecting
     private static final int MIN_LIMIT = 5;
 
+    private static final int maxtimeout = 1000;
+
     @BeforeClass
     public static void setUp() throws Exception
     {
+        System.setProperty("arnos.connection.timeout",""+maxtimeout);
+        System.setProperty("arnos.request.timeout",""+maxtimeout);
+
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
         LocalServer.start();
     }
@@ -328,5 +333,92 @@ public class ThreadedQueryHandlerTest {
         constructQuery.setDistinct(true);
         result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
         assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
+    }
+
+    @Test
+    public void testTimeouts()
+    {
+        System.out.println("testTimeouts");
+        System.out.println("Testing timeout with construct");
+
+        int maxMultipleOfTimeoutToExpect = maxtimeout * 3;
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT4_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        long start = System.currentTimeMillis();
+        String result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        long end = System.currentTimeMillis();
+
+        // check we've got the result we expected
+        assertEquals(7,StringUtils.countMatches(result,"rdf:about"));
+
+        // check this didn't take longer then the timeout
+        assertTrue("Min timeout reached ("+(end-start)+")", end-start >= maxtimeout);
+        assertTrue("Max timeout within limits ("+(end-start)+")", end-start < maxMultipleOfTimeoutToExpect);
+
+        System.out.println("Testing timeout with describe");
+
+        start = System.currentTimeMillis();
+        result = queryHandler.handleDescribe(describeQuery, endpoints);
+        end = System.currentTimeMillis();
+
+        assertTrue("Min timeout reached ("+(end-start)+")", end-start >= maxtimeout);
+        assertTrue("Max timeout within limits ("+(end-start)+")", end-start < maxMultipleOfTimeoutToExpect);
+
+
+        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("J.K. Rowling"));
+        assertFalse(result.contains("dc:description"));
+        assertFalse(result.contains("Scholastic Paperbacks"));
+
+        Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_ORDERED);
+
+        start = System.currentTimeMillis();
+        result = queryHandler.handleSelect(query, endpoints);
+        end = System.currentTimeMillis();
+        
+        assertTrue("Min timeout reached ("+(end-start)+")", end-start >= maxtimeout);
+        assertTrue("Max timeout within limits ("+(end-start)+")", end-start < maxMultipleOfTimeoutToExpect);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        String previous = "";
+        int numResults = 0;
+        while (results.hasNext())
+        {
+            numResults++;
+            QuerySolution sol = results.next();
+            Result r = new Result(sol);
+
+            String next = r.getValues().get(0);
+            assertTrue(next +" > " + previous, next.compareTo(previous) > 0);
+            previous = next;
+        }
+
+        assertEquals("Expeced number of ordered results",4,numResults);
+
+        System.out.println("Testing timeout with select");
+
+        result = queryHandler.handleSelect(selectQuery, endpoints);
+
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with endpoints 1 & 2",7,numResults);
     }
 }

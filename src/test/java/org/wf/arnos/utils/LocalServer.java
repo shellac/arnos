@@ -79,10 +79,7 @@ public class LocalServer {
                         // this endpoint hangs for 1 minute
                         this.wait(60 * 1000);
                     }
-                } catch (InterruptedException ex)
-                {
-                    Logger.getLogger(LocalServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } catch (InterruptedException ex) { }
             }
             else
             {

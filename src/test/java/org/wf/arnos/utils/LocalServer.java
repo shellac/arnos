@@ -32,6 +32,8 @@
 package org.wf.arnos.utils;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,12 +68,30 @@ public class LocalServer {
 
             String thisEndpoint = SERVER_URL+target;
 
-            String result = Sparql.getResult(thisEndpoint,query);
-            result = Sparql.getResult(thisEndpoint,query);
+            String result = "";
 
-            if (result == null)
+            if (thisEndpoint.equals(Sparql.ENDPOINT4_URL))
             {
-                throw new Error("No response found for " + query + " query type send to "+thisEndpoint);
+                try
+                {
+                    synchronized (this)
+                    {
+                        // this endpoint hangs for 1 minute
+                        this.wait(60 * 1000);
+                    }
+                } catch (InterruptedException ex)
+                {
+                    Logger.getLogger(LocalServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            else
+            {
+                result = Sparql.getResult(thisEndpoint,query);
+
+                if (result == null)
+                {
+                    throw new Error("No response found for " + query + " query type send to "+thisEndpoint);
+                }
             }
 
             response.getWriter().print(result);

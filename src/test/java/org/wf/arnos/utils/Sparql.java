@@ -47,6 +47,7 @@ public class Sparql {
     public static final String ENDPOINT1_URL = LocalServer.SERVER_URL+"/books/1";
     public static final String ENDPOINT2_URL = LocalServer.SERVER_URL+"/books/2";
     public static final String ENDPOINT3_URL = LocalServer.SERVER_URL+"/books/3";
+    public static final String ENDPOINT4_URL = LocalServer.SERVER_URL+"/books/4";
 
     // maximum number of results we're expecting
     public static final int MAX_LIMIT = 10;

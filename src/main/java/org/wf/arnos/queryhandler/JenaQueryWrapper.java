@@ -119,19 +119,20 @@ public class JenaQueryWrapper implements QueryWrapperInterface
            if (s != null && s.length() > 0)
            {
                CONNECTION_TIMEOUT = Integer.parseInt(s);
-               LOG.info("Timeout set to " + CONNECTION_TIMEOUT + "ms");
            }
            s = System.getProperty("arnos.request.timeout");
            if (s != null && s.length() > 0)
            {
                REQUEST_TIMEOUT = Integer.parseInt(s);
-               LOG.info("Request timeout set to " + REQUEST_TIMEOUT + "ms");
            }
        }
        catch (Exception e)
        {
            // fall back to defaults
        }
+
+       LOG.info("Timeout set to " + CONNECTION_TIMEOUT + "ms");
+       LOG.info("Request timeout set to " + REQUEST_TIMEOUT + "ms");
    }
 
     /**

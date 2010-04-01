@@ -54,17 +54,10 @@ public class SimpleCacheHandlerTest
     public SimpleCacheHandlerTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
     @Before
     public void setUp()
     {
+        System.setProperty("net.sf.ehcache.enableShutdownHook","true");
         try
         {
             DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
@@ -81,7 +74,7 @@ public class SimpleCacheHandlerTest
     {
         try
         {
-            cache.finalize();
+            cache.close();
         }
         catch (Throwable e)
         {
@@ -132,4 +125,43 @@ public class SimpleCacheHandlerTest
         assertNull(cache.get(key));
     }
 
+        @Test
+        public void testRepeatedlySetupCache()
+        {
+            DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+
+            try
+            {
+                cache.close();
+            }
+            catch (Throwable e)
+            {
+                fail(e.getMessage());
+            }
+
+            int i = 0;
+            for (i=0; i < 1000; i++)
+            {
+                try
+                {
+                    cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
+
+                    cache.put("test", "value");
+
+                    assertEquals("value",cache.get("test"));
+                    
+                    cache.close();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    fail(i + " "+ e.getMessage());
+                }
+                catch (Throwable e)
+                {
+                    e.printStackTrace();
+                    fail(i + " "+ e.getMessage());
+                }
+            }
+        }
 }

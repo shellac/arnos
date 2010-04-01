@@ -33,7 +33,6 @@ package org.wf.arnos.cachehandler;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.MessageDigest;
@@ -41,7 +40,6 @@ import java.security.NoSuchAlgorithmException;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.Status;
 import org.springframework.core.io.Resource;
 import org.wf.arnos.exception.ArnosRuntimeException;
 
@@ -68,8 +66,10 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
     /**
      * Creates a singleton instance of the cachemanager for spring-configured frameworks.
+     * @param res Spring resource object point to the cache config file
+     * @throws IOException thrown if unable to read cache file
      */
-    public SimpleCacheHandler(final Resource res) throws FileNotFoundException, IOException
+    public SimpleCacheHandler(final Resource res) throws IOException
     {
         init(res.getFile());
     }
@@ -77,9 +77,10 @@ public class SimpleCacheHandler implements CacheHandlerInterface
     /**
      * Creates a singleton instance of the cachemanager using supplied file descriptor as config.
      * This constructor can be used in a unit testing environment.
-     * @param configFile Path to ehcache.xml
+     * @param file File object referencing the ehcache.xml file
+     * @throws IOException thrown if unable to read cache file
      */
-    public SimpleCacheHandler(final File  file) throws FileNotFoundException, IOException
+    public SimpleCacheHandler(final File  file) throws IOException
     {
         init(file);
     }
@@ -97,8 +98,6 @@ public class SimpleCacheHandler implements CacheHandlerInterface
         cache = CacheManager.getInstance().getCache(CACHE_NAME);
 
         if (cache == null) throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "'missing");
-
-        if (cache.getStatus() == Status.STATUS_UNINITIALISED) cache.initialise();
 
         try
         {
@@ -178,11 +177,9 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * Cleanly shuts down the cache mangager.
      * @throws Throwable
      */
-    @Override
-    protected final void finalize() throws Throwable
+    protected final void close()
     {
         CacheManager.getInstance().shutdown();
-        super.finalize();
     }
 
     /**

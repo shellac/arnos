@@ -50,12 +50,17 @@
 
     <!-- configure Tomcat -->
     <logger name="log4j.logger.org.apache.catalina">
-        <level value="warn"/>
+        <level value="WARN"/>
     </logger >
 
     <!-- configure Spring framework -->
     <logger name="org.springframework">
-        <level value="info" />
+        <level value="INFO" />
+    </logger>
+
+    <!-- configure Ehcache logging -->
+    <logger name="net.sf.ehcache">
+        <level value="INFO" />
     </logger>
 
 
@@ -63,7 +68,7 @@
 	Setup log4j's root logger
     -->
     <root>
-        <priority value="debug"/>
+        <priority value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
         <!--<appender-ref ref="EMAIL" />-->

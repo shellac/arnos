@@ -74,8 +74,8 @@ public class JenaQueryWrapper implements QueryWrapperInterface
 
     private static final String CONTENT_TYPE_RESULT = HttpParams.contentTypeResultsXML;
 
-    private static final int CONNECTION_TIMEOUT = 2 * 1000;
-    private static final int REQUEST_TIMEOUT = 10 * 1000;
+    private static int CONNECTION_TIMEOUT = 2 * 1000;
+    private static int REQUEST_TIMEOUT = 10 * 1000;
 
     private static transient HttpURLConnection httpConnection = null;
 
@@ -113,7 +113,25 @@ public class JenaQueryWrapper implements QueryWrapperInterface
    protected JenaQueryWrapper()
    {
        // made private to prevent others from instantiating this class.
-       System.setProperty("sun.net.client.defaultConnectTimeout", "1000");
+       try
+       {
+           String s = System.getProperty("arnos.connection.timeout");
+           if (s != null && s.length() > 0)
+           {
+               CONNECTION_TIMEOUT = Integer.parseInt(s);
+               LOG.info("Timeout set to " + CONNECTION_TIMEOUT + "ms");
+           }
+           s = System.getProperty("arnos.request.timeout");
+           if (s != null && s.length() > 0)
+           {
+               REQUEST_TIMEOUT = Integer.parseInt(s);
+               LOG.info("Request timeout set to " + REQUEST_TIMEOUT + "ms");
+           }
+       }
+       catch (Exception e)
+       {
+           // fall back to defaults
+       }
    }
 
     /**

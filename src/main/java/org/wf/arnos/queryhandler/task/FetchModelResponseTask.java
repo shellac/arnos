@@ -80,9 +80,12 @@ public class FetchModelResponseTask extends AbstractResponseTask
                 putInCache(resultsString);
             }
 
-            Model model  = getQueryWrapper().stringToModel(resultsString);
+            if (resultsString != null && resultsString.length() > 0)
+            {
+                Model model  = getQueryWrapper().stringToModel(resultsString);
 
-            handler.addResult(model);
+                handler.addResult(model);
+            }
         }
         catch (Exception ex)
         {

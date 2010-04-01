@@ -83,14 +83,16 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
                 putInCache(resultsString);
             }
 
-            ResultSet resultSet = querywrapper.stringToResultSet(resultsString);
-
-            while (resultSet.hasNext())
+            if (resultsString != null && resultsString.length() > 0)
             {
-                QuerySolution sol = resultSet.next();
-                handler.addResult(new Result(sol));
-            }
+                ResultSet resultSet = querywrapper.stringToResultSet(resultsString);
 
+                while (resultSet.hasNext())
+                {
+                    QuerySolution sol = resultSet.next();
+                    handler.addResult(new Result(sol));
+                }
+            }
         }
         catch (Exception ex)
         {

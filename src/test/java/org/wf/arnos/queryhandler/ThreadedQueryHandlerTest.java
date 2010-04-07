@@ -66,13 +66,27 @@ public class ThreadedQueryHandlerTest {
     // minimum number of results we're expecting
     private static final int MIN_LIMIT = 5;
 
-    private static final int maxtimeout = 1000;
+    // restrict timeout to save us waiting for default timeouts to complete when running tests.
+    // If arnos.connection.timeout is added as a command line argument,
+    // that value is used instead.
+    private static int maxtimeout = 500;
 
     @BeforeClass
     public static void setUp() throws Exception
     {
-        System.setProperty("arnos.connection.timeout",""+maxtimeout);
-        System.setProperty("arnos.request.timeout",""+maxtimeout);
+        // check to see if a connection timeout has been specified
+        String prop = System.getProperty("arnos.connection.timeout");
+        if (prop == null)
+        {
+            System.out.println("ThreadedQueryHandlerTest WARN: Unable to find system property, using default timeout of "+maxtimeout+" instead");
+            System.setProperty("arnos.connection.timeout",""+maxtimeout);
+            System.setProperty("arnos.request.timeout",""+maxtimeout);
+        }
+        else
+        {
+            maxtimeout = Integer.parseInt(prop);
+        }
+        System.out.println("ThreadedQueryHandlerTest INFO: Timeout set to "+maxtimeout);
 
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
         LocalServer.start();
@@ -341,7 +355,7 @@ public class ThreadedQueryHandlerTest {
         System.out.println("testTimeouts");
         System.out.println("Testing timeout with construct");
 
-        int maxMultipleOfTimeoutToExpect = maxtimeout * 3;
+        int maxMultipleOfTimeoutToExpect = maxtimeout + (maxtimeout/2);
 
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         // add test endpoints - unit test relies on successful connection with following endpoints

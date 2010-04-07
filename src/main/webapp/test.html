@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+        <title>Test Federated SPARQL</title>
+        <style type="text/css">
+body
+{
+    width:100%;
+    padding:0px;
+    margin:0px;
+    font-size:100%;
+    font-family: Gill, Helvetica, sans-serif;
+    background-color:#fcfdf7;
+}
+
+h1
+{
+    text-align:center;
+    color:#566109;
+}
+
+h2
+{
+    color:#8a4b00;
+}
+
+h1 a
+{
+    font-weight:bold;
+    color:#566109;
+    text-decoration:none;
+    border-bottom:dashed #566109 0.1em;
+}
+
+.parentdiv
+{
+    border:1px solid #bbb;
+    background-color:#eff5d5;
+    height:100%;
+    overflow:auto;
+    width:800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+p
+{
+    margin-bottom:0px;
+}
+
+.parentdiv
+{
+    background-color:#eff5d5;
+}
+
+.leftpane
+{
+    float:left;
+    height:100%;
+    width:500px;
+    background-color:#fcfdf7;
+    margin:5px;
+    padding:5px;
+}
+
+.rightpane
+{
+    padding:0.5em;
+    width:260px;
+    float:right;
+    background-color:#fcfdf7;
+    height:100%;
+    margin:5px;
+    padding:5px;
+}
+
+textarea
+{
+    width:495px;
+    font-size:90%;
+    font-family: Arial, sans-serif;
+}
+
+input[type=submit]
+{
+    border:1px solid #5d641f;
+    background-color:#e7eacc;
+}
+
+input[type=submit]:hover
+{
+    background-color:#f4fda8;
+    cursor:pointer;
+}
+
+
+        </style>
+    </head>
+    <body>
+        <h1><a href="http://arnos.googlecode.com">arnos</a> test page</h1>
+        <div class="parentdiv">
+            <div class="leftpane">
+                <h2>Query</h2>
+                <form action="/projects/testproject/query" method="get" enctype="application/x-www-form-urlencoded">
+                    <p>
+                        <textarea name="query" rows="10">
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt;
+PREFIX owl: &lt;http://www.w3.org/2002/07/owl#&gt;
+PREFIX skos: &lt;http://www.w3.org/2004/02/skos/core#&gt;
+SELECT DISTINCT ?type
+    WHERE {
+      ?thing a ?type
+    }    LIMIT 10
+                        </textarea>
+                        <br/>
+
+                    </p>
+                    <p><input type="submit" value="Get SELECT Results" /></p>
+                </form>
+                <form action="/projects/testproject/query" method="get" enctype="application/x-www-form-urlencoded">
+                    <p>
+                        <textarea name="query" rows="10">
+PREFIX dc:      <http://purl.org/dc/elements/1.1/>
+CONSTRUCT { $book dc:title $title }
+WHERE
+  { $book dc:title $title }    LIMIT 10
+                        </textarea>
+                        <br/>
+
+                    </p>
+                    <p><input type="submit" value="Get CONSTRUCT Results" /></p>
+                </form>
+            </div>
+
+            <div class="rightpane">
+                <h2>Endpoint management</h2>
+                <p><a href="/projects/testproject/endpoints">List endpoints</a></p>
+
+                <p>Add endpoint:</p>
+                <form action="/projects/testproject/endpoints/add" method="post" enctype="application/x-www-form-urlencoded">
+                    <input type="text" name="url" value="endpoint url"/>
+                    <input type="submit" value="Submit" />
+                </form>
+
+                <br/>
+
+                <p>Remove endpoint:</p>
+                <form action="/projects/testproject/endpoints/remove" method="post" enctype="application/x-www-form-urlencoded">
+                    <input type="text" name="url" value="endpoint url"/>
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

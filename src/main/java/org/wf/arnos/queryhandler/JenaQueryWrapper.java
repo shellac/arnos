@@ -51,10 +51,7 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.exception.ArnosRuntimeException;
@@ -72,13 +69,29 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      */
     private static final Log LOG = LogFactory.getLog(JenaQueryWrapper.class);
 
+    /**
+     * Default content type requested from endpoints.
+     */
     private static final String CONTENT_TYPE_RESULT = HttpParams.contentTypeResultsXML;
 
+    /**
+     * Default connection timeout.
+     */
     private static int CONNECTION_TIMEOUT = 2 * 1000;
+
+    /**
+     * Default response timeout.
+     */
     private static int REQUEST_TIMEOUT = 10 * 1000;
 
-    private static transient HttpURLConnection httpConnection = null;
+    /**
+     * URL connecction object.
+     */
+    private transient HttpURLConnection httpConnection = null;
 
+    /**
+     * Max length a GET request can be before being converted into a POST request.
+     */
     private static final int URL_LIMIT = 2 * 1024;
 
    /**
@@ -129,6 +142,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
        catch (Exception e)
        {
            // fall back to defaults
+           LOG.warn(e.getMessage());
        }
 
        LOG.info("Timeout set to " + CONNECTION_TIMEOUT + "ms");
@@ -151,7 +165,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
         }
         catch (Exception ex)
         {
-            LOG.error("Error querying "+service+". " + ex.getMessage());
+            LOG.error("Error querying " + service + ". " + ex.getMessage());
             return "";
         }
     }
@@ -196,7 +210,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     public final boolean stringToBoolean(final String s)
     {
         if (s == null || s.length() < 1) return false;
-        
+
         String check = s.toLowerCase(Locale.ENGLISH);
         check = check.replace("\n", "");
         check = check.replace("\r", "");
@@ -264,7 +278,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     }
 
 
-    /** Execute the operation
+    /** Execute the operation.
      * @return Model    The resulting model
      * @throws QueryExceptionHTTP
      */
@@ -348,7 +362,6 @@ public class JenaQueryWrapper implements QueryWrapperInterface
             httpConnection.setReadTimeout(REQUEST_TIMEOUT);
             httpConnection.setDoOutput(true) ;
 
-            boolean first = true ;
             OutputStream out = httpConnection.getOutputStream();
             String s = p.httpString();
             out.write(s.getBytes());
@@ -389,31 +402,18 @@ public class JenaQueryWrapper implements QueryWrapperInterface
             // Request suceeded
             InputStream in = httpConnection.getInputStream() ;
 
-            if ( false )
+            // Dump response body
+            StringBuffer b = new StringBuffer(1000) ;
+            byte[] chars = new byte[1000] ;
+            while(true)
             {
-                // Dump the reply
-                Map<String,List<String>> map = httpConnection.getHeaderFields() ;
-                for ( Iterator<String> iter = map.keySet().iterator() ; iter.hasNext() ; )
-                {
-                    String k = iter.next();
-                    List<String> v = map.get(k) ;
-                    System.out.println(k+" = "+v) ;
-                }
-
-                // Dump response body
-                StringBuffer b = new StringBuffer(1000) ;
-                byte[] chars = new byte[1000] ;
-                while(true)
-                {
-                    int x = in.read(chars) ;
-                    if ( x < 0 ) break ;
-                    b.append(new String(chars, 0, x, FileUtils.encodingUTF8)) ;
-                }
-                System.out.println(b.toString()) ;
-                System.out.flush() ;
-                // Reset
-                in = new ByteArrayInputStream(b.toString().getBytes(FileUtils.encodingUTF8)) ;
+                int x = in.read(chars) ;
+                if ( x < 0 ) break ;
+                b.append(new String(chars, 0, x, FileUtils.encodingUTF8)) ;
             }
+            // Reset
+            in = new ByteArrayInputStream(b.toString().getBytes(FileUtils.encodingUTF8)) ;
+
             return in ;
         }
         catch (IOException ioEx)

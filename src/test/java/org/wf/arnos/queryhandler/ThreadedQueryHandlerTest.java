@@ -78,7 +78,10 @@ public class ThreadedQueryHandlerTest {
         String prop = System.getProperty("arnos.connection.timeout");
         if (prop == null)
         {
-            System.out.println("ThreadedQueryHandlerTest WARN: Unable to find system property, using default timeout of "+maxtimeout+" instead");
+            System.out.println("ThreadedQueryHandlerTest WARN: Unable to find system property, using default timeout of "+maxtimeout+" instead.");
+            System.out.println("If running tests repeatedly, you probably want to make sure you set the following system properties: arnos.connection.timeout and arnos.request.timeout");
+
+            // note that if this test is being run together with others, the jenaquerywrapper may have already been initialized
             System.setProperty("arnos.connection.timeout",""+maxtimeout);
             System.setProperty("arnos.request.timeout",""+maxtimeout);
         }

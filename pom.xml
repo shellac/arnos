@@ -30,7 +30,7 @@
     <properties>
         <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
 
@@ -146,13 +146,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>jackson</groupId>
-            <artifactId>jackson-lgpl</artifactId>
-            <version>1.4.1</version>
-            <scope>runtime</scope>
-        </dependency>
-
+        
         <!-- Jena -->
         <dependency>
             <groupId>com.hp.hpl.jena</groupId>

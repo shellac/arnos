@@ -128,7 +128,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- Jena -->
         <dependency>
             <groupId>com.hp.hpl.jena</groupId>

@@ -31,16 +31,28 @@
  */
 package org.wf.arnos.controller.model;
 
+import java.security.MessageDigest;
+
 /**
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class Endpoint
+public class Endpoint implements Comparable<Endpoint>
 {
     /**
      * A SPARQL endpoint URI.
      */
-    private String location = "";
+    private transient String location = "";
+
+    /**
+     * A unique, rest-safe representation of this endpoint.
+     */
+    private transient String id = "";
+
+    /**
+     * The digest algorithm used to generate the id.
+     */
+    public static final String DIGEST_ALGORITHM = "SHA-1";
 
     /**
      * @return the URI
@@ -65,6 +77,28 @@ public class Endpoint
     public Endpoint(final String uri)
     {
         this.location = uri;
+    }
+
+    /**
+     * Returns the rest-safe identifier for this endpoint.
+     * @return a string digest representing this location
+     */
+    public final String getIdentifier()
+    {
+        if (!"".equals(id)) return id;
+
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance(DIGEST_ALGORITHM);
+
+            byte[] hash = md.digest(location.getBytes());
+
+            id = toHexString(hash);
+        }
+        catch (Exception e) { }
+
+        System.out.println("ID FOR " +  location + " is "+id);
+        return id;
     }
 
     @Override
@@ -92,5 +126,33 @@ public class Endpoint
     public final String toString()
     {
         return "Endpoint:" + this.location;
+    }
+
+    /**
+     * Implementing compareTo to allow sorting of endpoint lists.
+     * @param that Endpoint to compare to
+     * @return -1 if that is before this, 0 if they are equal, 1 if this should come after that
+     */
+    public final int compareTo(final Endpoint that)
+    {
+        if (that == null) return -1;
+        return location.compareTo(that.getLocation());
+    }
+
+    public static String toHexString(byte[] v)
+    {
+        StringBuffer sb = new StringBuffer();
+        byte n1, n2;
+
+        for (int c = 0; c < v.length; c++)
+        {
+            n1 = (byte) ((v[c] & 0xF0) >>> 4); // This line was changed
+            n2 = (byte) ((v[c] & 0x0F)); // So was this line
+
+            sb.append(n1 >= 0xA ? (char) (n1 - 0xA + 'a') : (char) (n1 + '0'));
+            sb.append(n2 >= 0xA ? (char) (n2 - 0xA + 'a') : (char) (n2 + '0'));
+        }
+
+        return sb.toString();
     }
 }

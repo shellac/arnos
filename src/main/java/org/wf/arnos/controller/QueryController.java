@@ -34,6 +34,8 @@ package org.wf.arnos.controller;
 import java.util.List;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import java.util.ArrayList;
+import java.util.Collections;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,25 +61,24 @@ public class QueryController
      * Logger.
      */
     @Logger
-    private static transient Log logger;
+    public static transient Log logger;
 
     /**
      * The projects manager, autowired in.
      */
     @Autowired
-    private transient ProjectsManager manager;
+    public transient ProjectsManager manager;
 
     /**
      * The query handler.
      */
     @Autowired
-    private transient QueryHandlerInterface queryHandler;
+    public transient QueryHandlerInterface queryHandler;
 
     /**
      * The cache handler, autowired in.
      */
-//    @Autowired(required = false) TODO: Look into enabling cache here
-    private transient CacheHandlerInterface cacheHandler;
+    public transient CacheHandlerInterface cacheHandler;
 
     /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
@@ -95,32 +96,8 @@ public class QueryController
 
         List<Endpoint> endpoints = manager.getEndpoints(projectName);
 
-        String result = null;
+        String result = handleQuery(query, endpoints);
 
-        // TODO: Add endpoints to cache key
-        String cachekey = query;
-
-        // generate cache key
-        if (cacheHandler != null)
-        {
-            logger.debug("Fetching result from cache");
-            result = cacheHandler.get(cachekey);
-        }
-
-        if (result == null)
-        {
-            logger.info("Passing to " + queryHandler.getClass());
-
-
-            result = handleQuery(query, endpoints);
-
-            // put this result into the cache if available
-            if (cacheHandler != null)
-            {
-                logger.debug("Caching result");
-                cacheHandler.put(cachekey, result);
-            }
-        }
         try
         {
             writer.append(result);
@@ -130,9 +107,54 @@ public class QueryController
         {
             logger.error("Unable to write output", e);
         }
-
     }
 
+    /**
+     * Runs the provided query over endpoints listed in the endpoints variable.
+     * @param projectName Name of project
+     * @param endpointList set of endpoint ids seperated by plus symbol. E.g. id1+id2+id3
+     * @param query SPARQL Query
+     * @param writer Writer to send results to
+     */
+    @RequestMapping(value = "/{projectName}/{endpoints}/query")
+    public final void executeQuery(@PathVariable final String projectName,
+                                                @PathVariable final String endpointList,
+                                                 @RequestParam("query") final String query,
+                                                 final java.io.Writer writer)
+    {
+        System.out.println("endpointList:" + endpointList);
+        checkProject(projectName);
+
+        List<Endpoint> endpoints = manager.getEndpoints(projectName);
+
+        List<Endpoint> endpointSubset = new ArrayList();
+
+        String [] endpointIDs = endpointList.split("\\+");
+
+        for(String id : endpointIDs)
+        {
+            for (Endpoint ep : endpoints)
+            {
+                if (ep.getIdentifier().equals(id))
+                {
+                    System.out.println("Adding id");
+                    endpointSubset.add(ep);
+                }
+            }
+        }
+
+        String result = handleQuery(query, endpointSubset);
+
+        try
+        {
+            writer.append(result);
+            writer.flush();
+        }
+        catch (Exception e)
+        {
+            logger.error("Unable to write output", e);
+        }
+    }
 
     /**
      * This implementation, simple contatinates all query results.
@@ -140,36 +162,63 @@ public class QueryController
      * @param endpoints List of endpoint urls to run the query against
      * @return An RDF model
      */
-    public final String handleQuery(final String queryString, final List<Endpoint> endpoints)
+    private final String handleQuery(final String queryString, List<Endpoint> endpoints)
     {
-        logger.debug("Querying against  " + endpoints.size() + " endpoints");
+        String result = null;
 
-        // process the SPARQL query to best determin how to handle this query
-        Query query = QueryFactory.create(queryString);
+        // generate the cache key for this query
+        String cacheString = queryString;
 
-        if (query.getQueryType() == Query.QueryTypeSelect)
-        {
-            // this is a simple select query. Results can be appended, and limited as required
-            return queryHandler.handleSelect(query, endpoints);
-        }
-        else if (query.getQueryType() == Query.QueryTypeConstruct)
-        {
-            return queryHandler.handleConstruct(query, endpoints);
-        }
-        else if (query.getQueryType() == Query.QueryTypeAsk)
-        {
-            return queryHandler.handleAsk(query, endpoints);
-        }
-        else if (query.getQueryType() == Query.QueryTypeDescribe)
-        {
-            return queryHandler.handleDescribe(query, endpoints);
-        }
-        else
-        {
-            logger.warn("Unable to determin this query type");
-        }
+        // sort the list so that caching is order-independent
+        Collections.sort(endpoints);
 
-        return "";
+        for (Endpoint e : endpoints) { cacheString += e.getIdentifier(); }
+
+        if (queryString == null) return "";
+
+        logger.debug("Fetching result from cache");
+        result = cacheHandler.get(cacheString);
+
+        if (result == null)
+        {
+            logger.info("Passing to " + queryHandler.getClass());
+
+            logger.debug("Querying against  " + endpoints.size() + " endpoints");
+
+            // process the SPARQL query to best determin how to handle this query
+            Query query = QueryFactory.create(queryString);
+
+            if (query.getQueryType() == Query.QueryTypeSelect)
+            {
+                // this is a simple select query. Results can be appended, and limited as required
+                result = queryHandler.handleSelect(query, endpoints);
+            }
+            else if (query.getQueryType() == Query.QueryTypeConstruct)
+            {
+                result = queryHandler.handleConstruct(query, endpoints);
+            }
+            else if (query.getQueryType() == Query.QueryTypeAsk)
+            {
+                result = queryHandler.handleAsk(query, endpoints);
+            }
+            else if (query.getQueryType() == Query.QueryTypeDescribe)
+            {
+                result = queryHandler.handleDescribe(query, endpoints);
+            }
+            else
+            {
+                logger.warn("Unable to determin this query type");
+            }
+
+            // put this result into the cache if available
+            if (cacheHandler != null)
+            {
+                logger.debug("Caching result");
+                cacheHandler.put(cacheString, result);
+            }
+        } // END if (result == null)
+
+        return result;
     }
 
 

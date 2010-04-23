@@ -107,7 +107,7 @@ public class ProjectsManager
     /**
      * Simple constructor.
      */
-    ProjectsManager()
+    public ProjectsManager()
     {
         projects = new ArrayList<Project>();
     }
@@ -116,7 +116,7 @@ public class ProjectsManager
      * Simple constructor with persistant storage.
      * @param storageLocation File name of persistant storage to use
      */
-    ProjectsManager(final String storageLocation)
+    public ProjectsManager(final String storageLocation)
     {
         projects = new ArrayList<Project>();
         setFileName(storageLocation);

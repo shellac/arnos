@@ -88,7 +88,7 @@ public class Sparql {
         + "WHERE \n"
         + "  { ?name dc:title ?title } ORDER BY ?name ?title   LIMIT "+MAX_LIMIT;
 
-    private static final String SELECT_RESULT_7_ITEMS = "<?xml version=\"1.0\"?>\n"
+    private static final String SELECT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"book\"/>\n"
@@ -221,7 +221,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_4_ADDITIONAL_ITEMS = "<?xml version=\"1.0\"?>\n"
+    private static final String SELECT_RESULT_4_ADDITIONAL_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"book\"/>\n"
@@ -266,7 +266,7 @@ public class Sparql {
     static
     {
         // associate endpoints, queries and results
-        endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_ITEMS);
+        endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_BOOKS);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
@@ -276,7 +276,7 @@ public class Sparql {
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
 
-        endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_ITEMS);
+        endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_BOOKS);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
@@ -484,7 +484,7 @@ public class Sparql {
     @Test
     public void test()
     {
-        assertEquals(Sparql.SELECT_RESULT_7_ITEMS, Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
+        assertEquals(Sparql.SELECT_RESULT_7_BOOKS, Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
         assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
         assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
     }

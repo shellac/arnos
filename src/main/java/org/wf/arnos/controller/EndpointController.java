@@ -59,13 +59,13 @@ public class EndpointController
      * Logger.
      */
     @Logger
-    private static transient Log logger;
+    public static transient Log logger;
 
     /**
      * The projects manager, autowired in.
      */
     @Autowired
-    private transient ProjectsManager manager;
+    public transient ProjectsManager manager;
 
     /**
      * List all the endpoints associated with a project.
@@ -109,6 +109,7 @@ public class EndpointController
                                                       @RequestParam("url") final String endpoint,
                                                       final Model model)
     {
+        String result = "";
         String message = "";
 
         if (StringUtils.isEmpty(endpoint))
@@ -121,6 +122,9 @@ public class EndpointController
 
             manager.addEndpoint(projectName, endpoint);
             message = "endpoint '" + endpoint + "' added";
+
+            Endpoint ep = new Endpoint(endpoint);
+            result = ep.getIdentifier();
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);

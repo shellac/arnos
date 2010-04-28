@@ -31,13 +31,21 @@
  */
 package org.wf.arnos.cachehandler;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import net.sf.ehcache.CacheException;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.wf.arnos.exception.ArnosRuntimeException;
 import static org.junit.Assert.*;
 
 /**
@@ -54,17 +62,23 @@ public class SimpleCacheHandlerTest
     public SimpleCacheHandlerTest() {
     }
 
+    @BeforeClass
+    public static void setUpClass()
+    {
+        System.setProperty("net.sf.ehcache.enableShutdownHook","true");
+        DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+    }
+
     @Before
     public void setUp()
     {
-        System.setProperty("net.sf.ehcache.enableShutdownHook","true");
         try
         {
-            DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
             cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             fail(e.getMessage());
         }
     }
@@ -78,9 +92,159 @@ public class SimpleCacheHandlerTest
         }
         catch (Throwable e)
         {
-            fail(e.getMessage());
+
         }
     }
+
+    @Test
+    public void testInitWrongCacheFile()
+    {
+        try
+        {
+            cache.close();
+        }
+        catch (Throwable e)
+        {
+            fail(e.getMessage());
+        }
+        
+        String filename = CACHE_SETTINGS+"wrong";
+        try
+        {
+            cache = new SimpleCacheHandler(new File(filename));
+            fail("Should have produced a CacheException accessing file "+filename);
+        }
+        catch (CacheException e)
+        {
+            // this is the expected result
+        }
+
+        filename = CACHE_SETTINGS;
+        filename = filename.replace("ehcache", "log4j");
+        Resource res = new FileSystemResource(new File(filename));
+
+        try
+        {
+            cache = new SimpleCacheHandler(res);
+            fail("Should have produced a CacheException accessing file "+filename);
+        }
+        catch (CacheException e)
+        {
+            // this is the expected result
+        }
+        catch (IOException ioe)
+        {
+            fail("CacheHandler should not throw IOException accessing "+filename);
+        }
+    }
+
+    @Test
+    public void testMissingCacheInCacheFile()
+    {
+        try
+        {
+            cache.close();
+        }
+        catch (Throwable e)
+        {
+            fail(e.getMessage());
+        }
+        
+        // create a copy of the file without the specific cache handler
+
+        String contents = readFileAsString(CACHE_SETTINGS);
+        File f = null;
+        try
+        {
+            f = File.createTempFile("junit_cache", "test");
+            f.deleteOnExit();
+
+            // write to file
+            Writer writer = new FileWriter(f);
+            writer.append(contents);
+            writer.close();
+
+        }
+        catch (IOException ioe)
+        {
+            fail("Unable to create/write to temp file");
+        }
+
+        // check we can init this cache
+
+        try
+        {
+            cache = new SimpleCacheHandler(f);
+            cache.close();
+        }
+        catch (ArnosRuntimeException e)
+        {
+            fail("Should now have produced a ArnosRuntimeException accessing file "+f.getAbsolutePath());
+        }
+        catch (CacheException ce)
+        {
+            fail("CacheHandler should not throw CacheException accessing "+f.getAbsolutePath());
+        }
+
+        // now remove the resultCache entry
+        try
+        {
+            int tagStart = contents.indexOf("<cache name=\"resultsCache\"");
+            // write to file
+            Writer writer = new FileWriter(f);
+            writer.append(contents.substring(0,tagStart));
+            writer.append(contents.substring(contents.indexOf("/>", tagStart)+2));
+            writer.close();
+        }
+        catch (IOException ioe)
+        {
+            fail("Unable to write to temp file");
+        }
+
+
+        // now check the cache is null
+
+        try
+        {
+            cache = new SimpleCacheHandler(f);
+            fail("Should now have produced a ArnosRuntimeException accessing file "+f.getAbsolutePath());
+        }
+        catch (ArnosRuntimeException e)
+        {
+            // expected
+            cache.close();
+        }
+        catch (CacheException ce)
+        {
+            ce.printStackTrace();
+            fail("CacheHandler should not throw CacheException accessing "+f.getAbsolutePath());
+        }
+
+    }
+    
+    /** @param filePath the name of the file to open. Not sure if it can accept URLs or just filenames. Path handling could be better, and buffer sizes are hardcoded
+    */
+    private static String readFileAsString(String filePath) {
+        StringBuffer fileData = new StringBuffer(1000);
+        try
+        {
+            FileReader fr = new FileReader(filePath);
+            BufferedReader reader = new BufferedReader(fr);
+            char[] buf = new char[1024];
+            int numRead=0;
+            while((numRead=reader.read(buf)) != -1){
+                fileData.append(buf, 0, numRead);
+            }
+            reader.close();
+            fr.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return fileData.toString();
+    }
+
 
     @Test
     public void testPut() throws Throwable
@@ -125,43 +289,43 @@ public class SimpleCacheHandlerTest
         assertNull(cache.get(key));
     }
 
-        @Test
-        public void testRepeatedlySetupCache()
-        {
-            DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+    @Test
+    public void testRepeatedlySetupCache()
+    {
+        DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
 
+        try
+        {
+            cache.close();
+        }
+        catch (Throwable e)
+        {
+            fail(e.getMessage());
+        }
+
+        int i = 0;
+        for (i=0; i < 1000; i++)
+        {
             try
             {
+                cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
+
+                cache.put("test", "value");
+
+                assertEquals("value",cache.get("test"));
+
                 cache.close();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                fail(i + " "+ e.getMessage());
             }
             catch (Throwable e)
             {
-                fail(e.getMessage());
-            }
-
-            int i = 0;
-            for (i=0; i < 1000; i++)
-            {
-                try
-                {
-                    cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
-
-                    cache.put("test", "value");
-
-                    assertEquals("value",cache.get("test"));
-                    
-                    cache.close();
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                    fail(i + " "+ e.getMessage());
-                }
-                catch (Throwable e)
-                {
-                    e.printStackTrace();
-                    fail(i + " "+ e.getMessage());
-                }
+                e.printStackTrace();
+                fail(i + " "+ e.getMessage());
             }
         }
+    }
 }

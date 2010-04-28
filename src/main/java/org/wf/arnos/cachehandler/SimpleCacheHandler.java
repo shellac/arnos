@@ -38,6 +38,7 @@ import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.springframework.core.io.Resource;
@@ -65,11 +66,16 @@ public class SimpleCacheHandler implements CacheHandlerInterface
     private transient Cache cache;
 
     /**
+     * The Cache Manager.
+     */
+    private transient CacheManager manager;
+
+    /**
      * Creates a singleton instance of the cachemanager for spring-configured frameworks.
      * @param res Spring resource object point to the cache config file
      * @throws IOException thrown if unable to read cache file
      */
-    public SimpleCacheHandler(final Resource res) throws IOException
+    public SimpleCacheHandler(final Resource res) throws IOException, ArnosRuntimeException
     {
         init(res.getFile());
     }
@@ -80,7 +86,7 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * @param file File object referencing the ehcache.xml file
      * @throws IOException thrown if unable to read cache file
      */
-    public SimpleCacheHandler(final File  file) throws IOException
+    public SimpleCacheHandler(final File  file) throws CacheException, ArnosRuntimeException
     {
         init(file);
     }
@@ -91,11 +97,11 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * @param file Cache file
      * @throws IOException Thrown if unable to read cache file
      */
-    private void init(final File file) throws IOException
+    private void init(final File file) throws CacheException, ArnosRuntimeException
     {
-        CacheManager.create(file.getAbsolutePath());
+        manager = CacheManager.create(file.getAbsolutePath());
 
-        cache = CacheManager.getInstance().getCache(CACHE_NAME);
+        cache = manager.getCache(CACHE_NAME);
 
         if (cache == null) throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "'missing");
 
@@ -179,7 +185,7 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      */
     protected final void close()
     {
-        CacheManager.getInstance().shutdown();
+        manager.shutdown();
     }
 
     /**

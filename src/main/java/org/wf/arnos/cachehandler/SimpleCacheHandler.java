@@ -103,7 +103,11 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
         cache = manager.getCache(CACHE_NAME);
 
-        if (cache == null) throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "'missing");
+        if (cache == null)
+        {
+            manager.shutdown();
+            throw new ArnosRuntimeException("Cache '" + CACHE_NAME + "' missing");
+        }
 
         try
         {

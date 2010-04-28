@@ -88,7 +88,7 @@ public class Sparql {
         + "WHERE \n"
         + "  { ?name dc:title ?title } ORDER BY ?name ?title   LIMIT "+MAX_LIMIT;
 
-    private static final String SELECT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"book\"/>\n"

@@ -55,7 +55,7 @@
 
     <!-- Cache setup -->
     <bean class="org.wf.arnos.cachehandler.SimpleCacheHandler">
-        <constructor-arg value="/WEB-INF/ehcache.xml"/>
+        <constructor-arg value="./WEB-INF/ehcache.xml"/>
     </bean>
 
     <!-- JMX Beans -->

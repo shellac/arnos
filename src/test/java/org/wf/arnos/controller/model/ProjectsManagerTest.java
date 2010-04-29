@@ -106,6 +106,16 @@ public class ProjectsManagerTest {
 
         assertEquals("Second project added",2, manager.getProjectCount());
 
+        assertEquals(false,manager.addProject((String)null));
+        assertEquals(false,manager.addProject(""));
+
+        assertEquals(2,manager.getEndpoints(projectName1).size());
+        manager.removeEndpoint(projectName1+"other", endpoint1);
+        assertEquals(2,manager.getEndpoints(projectName1).size());
+        manager.removeEndpoint(projectName1, endpoint1);
+        assertEquals(1,manager.getEndpoints(projectName1).size());
+        assertEquals(null,manager.getEndpoints(projectName1+"other"));
+
         manager.removeProject(p1);
 
         assertEquals("First project removed",1, manager.getProjectCount());

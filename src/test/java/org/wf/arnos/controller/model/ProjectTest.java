@@ -75,4 +75,15 @@ public class ProjectTest {
         assertEquals(true,p2.toString().contains(projectName2));
     }
 
+    @Test
+    public void testRemoveEndpoints()
+    {
+        assertEquals(2,p2.getEndpoints().size());
+        p1.removeEndpoint("blablabla");
+        assertEquals(2,p2.getEndpoints().size());
+        p1.removeEndpoint(endpoint1);
+        assertEquals(1,p2.getEndpoints().size());
+
+        assertEquals(false,p1.equals("hello"));
+    }
 }

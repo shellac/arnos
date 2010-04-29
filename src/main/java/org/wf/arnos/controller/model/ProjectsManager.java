@@ -299,6 +299,8 @@ public class ProjectsManager
      */
     private boolean save()
     {
+        if (fileName == null) return false;
+        
         XStream xstream = new XStream();
         String xmlString = xstream.toXML(projects);
 
@@ -314,6 +316,7 @@ public class ProjectsManager
                     + fileName + ")", ioe);
             return false;
         }
+
         return true;
     }
 

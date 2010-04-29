@@ -34,8 +34,10 @@ package org.wf.arnos.controller;
 import java.util.List;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QueryParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import jena.query;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,35 +188,42 @@ public class QueryController
             logger.debug("Querying against  " + endpoints.size() + " endpoints");
 
             // process the SPARQL query to best determin how to handle this query
-            Query query = QueryFactory.create(queryString);
+            try
+            {
+                Query query = QueryFactory.create(queryString);
 
-            if (query.getQueryType() == Query.QueryTypeSelect)
-            {
-                // this is a simple select query. Results can be appended, and limited as required
-                result = queryHandler.handleSelect(query, endpoints);
-            }
-            else if (query.getQueryType() == Query.QueryTypeConstruct)
-            {
-                result = queryHandler.handleConstruct(query, endpoints);
-            }
-            else if (query.getQueryType() == Query.QueryTypeAsk)
-            {
-                result = queryHandler.handleAsk(query, endpoints);
-            }
-            else if (query.getQueryType() == Query.QueryTypeDescribe)
-            {
-                result = queryHandler.handleDescribe(query, endpoints);
-            }
-            else
-            {
-                logger.warn("Unable to determin this query type");
-            }
+                if (query.getQueryType() == Query.QueryTypeSelect)
+                {
+                    // this is a simple select query. Results can be appended, and limited as required
+                    result = queryHandler.handleSelect(query, endpoints);
+                }
+                else if (query.getQueryType() == Query.QueryTypeConstruct)
+                {
+                    result = queryHandler.handleConstruct(query, endpoints);
+                }
+                else if (query.getQueryType() == Query.QueryTypeAsk)
+                {
+                    result = queryHandler.handleAsk(query, endpoints);
+                }
+                else if (query.getQueryType() == Query.QueryTypeDescribe)
+                {
+                    result = queryHandler.handleDescribe(query, endpoints);
+                }
+                else
+                {
+                    logger.warn("Unable to determin this query type");
+                }
 
-            // put this result into the cache if available
-            if (cacheHandler != null)
+                // put this result into the cache if available
+                if (cacheHandler != null)
+                {
+                    logger.debug("Caching result");
+                    cacheHandler.put(cacheString, result);
+                }
+            }
+            catch (QueryParseException qpe)
             {
-                logger.debug("Caching result");
-                cacheHandler.put(cacheString, result);
+                return "";
             }
         } // END if (result == null)
 

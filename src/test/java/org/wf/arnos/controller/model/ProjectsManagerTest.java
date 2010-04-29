@@ -32,7 +32,10 @@
 package org.wf.arnos.controller.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -72,6 +75,16 @@ public class ProjectsManagerTest {
         // remove persistant storage class if needed
         File f = new File(fileName);
         f.delete();
+    }
+
+
+    @Test
+    public void testMisc()
+    {
+        manager = new ProjectsManager();
+        assertEquals(null,manager.getFileName());
+        manager.setFileName(fileName);
+        assertEquals(fileName,manager.getFileName());
     }
 
     @Test
@@ -216,5 +229,17 @@ public class ProjectsManagerTest {
 
         assertEquals("One project remaining",1, manager.getProjectCount());
         assertTrue(manager.hasProject(projectName1));
+    }
+
+    @Test
+    public void testListAllProjects()
+    {
+        manager = new ProjectsManager();
+        assertEquals(0,manager.listAllProjects().size());
+
+        manager.addProject(p1);
+        manager.addProject(p2);
+
+        assertEquals(2,manager.listAllProjects().size());
     }
 }

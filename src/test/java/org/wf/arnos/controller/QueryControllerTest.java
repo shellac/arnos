@@ -33,6 +33,8 @@ package org.wf.arnos.controller;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -48,6 +50,7 @@ import org.wf.arnos.cachehandler.SimpleCacheHandlerTest;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.Project;
 import org.wf.arnos.controller.model.ProjectsManager;
+import org.wf.arnos.exception.ResourceNotFoundException;
 import org.wf.arnos.queryhandler.ThreadedQueryHandler;
 import org.wf.arnos.utils.LocalServer;
 import org.wf.arnos.utils.Sparql;
@@ -71,7 +74,8 @@ public class QueryControllerTest
     public void setUp()
     {
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
-        
+        Logger.getLogger("org.wf.arnos.controller.QueryController").setLevel(Level.ALL);
+
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setMaxPoolSize(10);
@@ -189,5 +193,79 @@ public class QueryControllerTest
         controller.executeQuery(PROJECT_NAME, duplicateEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_duplicateEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
+    }
+
+    @Test
+    public void testEdgeCases()
+    {
+        StringWriter writer = new StringWriter();
+        try
+        {
+            controller.executeQuery(null, QueryString, writer);
+            fail("ResourceNotFoundException not thrown");
+        }
+        catch (ResourceNotFoundException e)
+        {
+            // expected result
+        }
+
+        try
+        {
+            controller.executeQuery(PROJECT_NAME, QueryString, null);
+        }
+        catch (Exception e)
+        {
+            fail("Exception is thrown");
+        }
+
+        try
+        {
+            controller.executeQuery(PROJECT_NAME+"other", QueryString, writer);
+            fail("ResourceNotFoundException not thrown");
+        }
+        catch (ResourceNotFoundException e)
+        {
+            // expected result
+        }
+
+        writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, null, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertEquals("",buffer.toString());
+        
+        writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, "", writer);
+        buffer = writer.getBuffer();
+        assertEquals("",buffer.toString());
+    }
+
+    @Test
+    public void testAskQuery()
+    {
+        String query = Sparql.ASK_QUERY_ALICE;
+        StringWriter writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, query, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("true"));
+    }
+
+    @Test
+    public void testDescribeQuery()
+    {
+        String query = Sparql.DESCRIBE_QUERY_BOOK_2;
+        StringWriter writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, query, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("j.k. rowling"));
+    }
+
+    @Test
+    public void testConstructQuery()
+    {
+        String query = Sparql.CONSTRUCT_QUERY_BOOKS;
+        StringWriter writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, query, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("semantic web programming"));
     }
 }

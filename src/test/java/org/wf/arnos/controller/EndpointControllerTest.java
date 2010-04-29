@@ -34,6 +34,8 @@ package org.wf.arnos.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.Before;
@@ -44,6 +46,7 @@ import org.springframework.ui.Model;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.Project;
 import org.wf.arnos.controller.model.ProjectsManager;
+import org.wf.arnos.exception.ResourceNotFoundException;
 import org.wf.arnos.utils.Sparql;
 
 /**
@@ -74,7 +77,8 @@ public class EndpointControllerTest {
 
         controller = new EndpointController();
         controller.manager = manager;
-        EndpointController.logger = LogFactory.getLog(QueryController.class);
+        EndpointController.logger = LogFactory.getLog(EndpointController.class);
+        Logger.getLogger("org.wf.arnos.controller.EndpointController").setLevel(Level.ALL);
     }
 
     @Test
@@ -117,5 +121,56 @@ public class EndpointControllerTest {
         List<Endpoint> endpointList = (List<Endpoint>) model.asMap().get("endpoints");
 
         return endpointList.size();
+    }
+
+    @Test
+    public void testEdgeCases()
+    {
+        Model model = new ExtendedModelMap();
+        try
+        {
+            controller.listEndpoints(null, (Model)model);
+            fail("ResourceNotFoundException not thrown");
+        }
+        catch (ResourceNotFoundException e)
+        {
+            // expected result
+        }
+
+        try
+        {
+            controller.listEndpoints(PROJECT_NAME+"missing", (Model)model);
+            fail("ResourceNotFoundException not thrown");
+        }
+        catch (ResourceNotFoundException e)
+        {
+            // expected result
+        }
+
+        try
+        {
+            controller.listEndpoints(null, (Model)model);
+            fail("ResourceNotFoundException not thrown");
+        }
+        catch (ResourceNotFoundException e)
+        {
+            // expected result
+        }
+
+        model = new ExtendedModelMap();
+        assertEquals("",controller.addEndpoint(PROJECT_NAME, null, (Model)model));
+        assertEquals("Missing endpoint",model.asMap().get("message"));
+
+        model = new ExtendedModelMap();
+        assertEquals("",controller.addEndpoint(PROJECT_NAME, "", (Model)model));
+        assertEquals("Missing endpoint",model.asMap().get("message"));
+
+        model = new ExtendedModelMap();
+        assertEquals("",controller.removeEndpoint(PROJECT_NAME, "", (Model)model));
+        assertEquals("Missing endpoint",model.asMap().get("message"));
+
+        model = new ExtendedModelMap();
+        assertEquals("",controller.removeEndpoint(PROJECT_NAME, "", (Model)model));
+        assertEquals("Missing endpoint",model.asMap().get("message"));
     }
 }

@@ -73,17 +73,17 @@ public class ProjectTest {
         assertEquals("Hash code generated unique project nae",2,projects.size());
 
         assertEquals(true,p2.toString().contains(projectName2));
+
+        assertEquals(false,p1.equals("hello"));
     }
 
     @Test
     public void testRemoveEndpoints()
     {
-        assertEquals(2,p2.getEndpoints().size());
-        p1.removeEndpoint("blablabla");
-        assertEquals(2,p2.getEndpoints().size());
-        p1.removeEndpoint(endpoint1);
         assertEquals(1,p2.getEndpoints().size());
-
-        assertEquals(false,p1.equals("hello"));
+        p2.removeEndpoint("blablabla");
+        assertEquals(1,p2.getEndpoints().size());
+        p2.removeEndpoint(endpoint1);
+        assertEquals(0,p2.getEndpoints().size());
     }
 }

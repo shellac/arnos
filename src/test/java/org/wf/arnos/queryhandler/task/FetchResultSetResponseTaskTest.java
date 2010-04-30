@@ -270,4 +270,92 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
         assertTrue(wrapper instanceof JenaQueryWrapper);
     }
+
+
+    @Test
+    public void testExceptionThrowing()
+    {
+        System.out.println("testExceptionThrowing");
+
+        FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                Sparql.ENDPOINT1_URL,
+                selectQuery,
+                doneSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+
+        expect(mockThreadedQueryHandler.hasCache())
+                .andReturn(false)
+                .anyTimes();
+
+        Exception expectedException = new RuntimeException();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
+                .andThrow(expectedException);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+    }
+
+    @Test
+    public void testExceptionHandling()
+    {
+        System.out.println("testExceptionHandling");
+
+        FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                Sparql.ENDPOINT1_URL,
+                selectQuery,
+                doneSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+        
+        expect(mockThreadedQueryHandler.hasCache())
+                .andReturn(false)
+                .anyTimes();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
+                .andReturn("");
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        // now check we've got the expected number of results
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+
+        resetAll();
+
+        expect(mockThreadedQueryHandler.hasCache())
+                .andReturn(false)
+                .anyTimes();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
+                .andReturn(null);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        // now check we've got the expected number of results
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+    }
 }

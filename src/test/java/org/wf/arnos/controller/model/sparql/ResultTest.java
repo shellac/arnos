@@ -76,6 +76,14 @@ public class ResultTest {
 
             boolean compare = r.equals(previous);
             assertTrue(compare == previous.equals(r));
+
+            int hash1 = r.hashCode();
+            r.bindings.clear();
+            int hash2 = r.hashCode();
+            r.values.clear();
+            int hash3 = r.hashCode();
+
+            assertEquals(true,hash1 != hash2 && hash1 != hash3 && hash2 != hash3);
         }
     }
 

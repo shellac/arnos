@@ -134,6 +134,58 @@ public class ProjectsManagerTest {
     }
 
     @Test
+    public void testAddEndpoint()
+    {
+        manager = new ProjectsManager();
+
+        manager.addEndpoint(projectName2, endpoint2);
+
+        assertEquals(null,manager.getEndpoints(projectName2));
+
+        manager.addProject(p2);
+
+        assertEquals(1,manager.getEndpoints(projectName2).size());
+
+        manager.addEndpoint(projectName1, endpoint2);
+
+        assertEquals(1,manager.getEndpoints(projectName2).size());
+
+        manager.addEndpoint(projectName2, endpoint2);
+
+        assertEquals(2,manager.getEndpoints(projectName2).size());
+
+    }
+
+    @Test
+    public void testRemoveProject()
+    {
+        manager = new ProjectsManager();
+
+        manager.addProject(p1);
+        manager.addProject(p2);
+
+        assertEquals(2,manager.getProjectCount());
+
+        assertEquals(false,manager.removeProject(projectName1+"other"));
+
+        assertEquals(2,manager.getProjectCount());
+
+        assertEquals(true,manager.removeProject(projectName2));
+        assertEquals(1,manager.getProjectCount());
+        assertEquals(true,manager.hasProject(projectName1));
+        assertEquals(false,manager.hasProject(projectName2));
+
+        manager.addProject(p2);
+        assertEquals(true,manager.removeProject(p2));
+        assertEquals(1,manager.getProjectCount());
+        assertEquals(true,manager.hasProject(projectName1));
+        assertEquals(false,manager.hasProject(projectName2));
+
+        assertEquals(false,manager.removeProject((String)null));
+        assertEquals(false,manager.removeProject(""));
+    }
+
+    @Test
     public void testGetProject()
     {
         manager = new ProjectsManager();

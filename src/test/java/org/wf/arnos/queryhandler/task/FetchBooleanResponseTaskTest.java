@@ -206,4 +206,37 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         assertTrue(cache.contains(fetcher.cacheKey));
     }
+
+    @Test
+    public void testExceptionThrowing()
+    {
+        System.out.println("testExceptionThrowing");
+
+        FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                "err"+Sparql.ENDPOINT1_URL,
+                askQuery,
+                doneSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+
+        expect(mockThreadedQueryHandler.hasCache())
+                .andReturn(false)
+                .anyTimes();
+
+        Exception expectedException = new RuntimeException();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
+                .andThrow(expectedException);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+    }
 }

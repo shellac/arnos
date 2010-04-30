@@ -80,6 +80,15 @@ public interface QueryHandlerInterface
     String handleDescribe(Query query, List<Endpoint> endpoints);
 
     /**
+     * This method handles a SPARQL UPDATE query.
+     * It forward the query onto the provided endpoint and returns any response.
+     * @param query SPARQL UPDATE query (not a Query object as it can't parse UPDATE statements)
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    String handleUpdate(String query, Endpoint endpoint);
+
+    /**
      * Public accessor for cache (if present).
      * @return CacheHandler supplied by spring, or <code>null</code> otherwise
      */
@@ -111,7 +120,13 @@ public interface QueryHandlerInterface
 
     /**
      * Stores the results of an ASK query.
-     * @param b Boolean value of query
+     * @param b Boolean value of query result
      */
     void addResult(Boolean b);
+
+    /**
+     * Stores the results of an UPDATE query.
+     * @param s String value of result
+     */
+    void addResult(String s);
 }

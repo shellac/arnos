@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.cachehandler.SimpleCacheHandler;
 import org.wf.arnos.cachehandler.SimpleCacheHandlerTest;
-import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 import org.wf.arnos.utils.Sparql;

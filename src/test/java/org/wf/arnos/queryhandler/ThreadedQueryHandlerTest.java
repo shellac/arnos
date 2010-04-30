@@ -369,6 +369,31 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
     }
 
     @Test
+    public void testHandleUpdateSelect()
+    {
+        System.out.println("testHandleUpdateSelect");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        String query = Sparql.UPDATE_QUERY;
+        String expectedResult = Sparql.UPDATE_QUERY_RESULT;
+
+        String result = queryHandler.handleUpdate(query, new Endpoint(Sparql.ENDPOINT1_URL));
+
+        assertEquals("Results non-distinct people",expectedResult,result);
+    }
+
+    @Test
     public void testTimeouts()
     {
         System.out.println("testTimeouts");

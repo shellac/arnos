@@ -40,6 +40,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import com.hp.hpl.jena.sparql.engine.binding.BindingComparator;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,6 +57,7 @@ import org.wf.arnos.controller.model.sparql.Result;
 import org.wf.arnos.queryhandler.task.FetchBooleanResponseTask;
 import org.wf.arnos.queryhandler.task.FetchModelResponseTask;
 import org.wf.arnos.queryhandler.task.FetchResultSetResponseTask;
+import org.wf.arnos.queryhandler.task.FetchUpdateResponseTask;
 
 /**
  * A query handler that uses multithreading to handle endpoint quering.
@@ -176,7 +178,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     private transient List<Boolean> askResultList;
 
-
     /**
      * Stores the results of an ASK query.
      * @param b Boolean value of query
@@ -189,6 +190,22 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         }
     }
 
+    /**
+     * A container for SPARQL SELECT results gathered by the threads.
+     */
+    private transient List<String> updateResultList;
+
+    /**
+     * Stores the results of an ASK query.
+     * @param b Boolean value of query
+     */
+    public final void addResult(final String s)
+    {
+        synchronized (this)
+        {
+            updateResultList.add(s);
+        }
+    }
 
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
@@ -350,6 +367,30 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     }
 
     /**
+     * This method handles a SPARQL UPDATE query.
+     * It forward the query onto the provided endpoint and returns any response.
+     * @param query SPARQL DESCRIBE query
+     * @param endpoints List of endpoints to query over
+     * @return Response string
+     */
+    public final String handleUpdate(String s, Endpoint endpoint)
+    {
+        updateResultList = new ArrayList<String>();
+
+        fetchUpdateQueryAndWait(s, endpoint);
+
+        String result = "";
+        if (updateResultList.size() == 1)
+        {
+            result = updateResultList.get(0);
+        }
+
+        updateResultList.clear();
+
+        return result;
+    }
+
+    /**
      * Merge all result models together and re-issue the request over the merged model.
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @return Model serialised as a string
@@ -450,6 +491,33 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         // once threads have compeleted, construct results
         LOG.debug("Threads completed, constructing results");
+    }
+
+   /**
+     * Issues the update query to the given endpoint.
+     * This method blocks until the query has finished
+     * @param query U{DATE Query (INSERT, DELETE, etc)
+     * @param endpoints Set of endpoints
+     */
+    private void fetchUpdateQueryAndWait(final String query, final Endpoint endpoint)
+    {
+        doneSignal = new CountDownLatch(1);
+
+        // fire off a thread to handle quering each endpoint
+        String url = endpoint.getLocation();
+        LOG.debug("Querying " + url);
+
+        taskExecutor.execute(new FetchUpdateResponseTask(this, query, url, doneSignal));
+
+        // block until all threads have finished
+        try
+        {
+            doneSignal.await();
+        }
+        catch (InterruptedException ex)
+        {
+            LOG.warn("Error while waiting on thread", ex);
+        }
     }
 
     /**

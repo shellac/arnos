@@ -226,4 +226,69 @@ public class JenaQueryWrapperTest {
     {
         assertEquals("",JenaQueryWrapper.getInstance().convertStreamToString(null));
     }
+
+
+    @Test
+    public void testExceptionHandling()
+    {
+        System.out.println("testExceptionHandling");
+
+        String query = Sparql.SELECT_QUERY_BOOKS;
+        String result = "";
+
+        // force get method
+        JenaQueryWrapper.getInstance().setUrlLimit(10000);
+
+        String actualResult = JenaQueryWrapper.getInstance().execQuery(query, "http://localhost:7999/nothing");
+
+        assertEquals(result, actualResult);
+
+        JenaQueryWrapper.getInstance().execQuery(query, null);
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query.substring(0, 20), Sparql.ENDPOINT1_URL+"error");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL+"error");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT4_URL+"toolong");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT4_URL+"interrupt");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT4_URL+"414");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT4_URL+"404");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT4_URL+"301");
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, "xyz://"+Sparql.ENDPOINT4_URL);
+
+        assertEquals(result, actualResult);
+
+        // force post method
+        JenaQueryWrapper.getInstance().setUrlLimit(10);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, "xyz://"+Sparql.ENDPOINT4_URL);
+
+        assertEquals(result, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, "http://localhost:7999/nothing");
+
+        assertEquals(result, actualResult);
+    }
+
 }

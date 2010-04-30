@@ -37,7 +37,6 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import jena.query;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,7 +210,7 @@ public class QueryController
                 }
                 else
                 {
-                    logger.warn("Unable to determin this query type");
+                    logger.warn("Unknown query type");
                 }
 
                 // put this result into the cache if available
@@ -223,7 +222,13 @@ public class QueryController
             }
             catch (QueryParseException qpe)
             {
-                return "";
+                if (isUpdateQuery(queryString))
+                {
+                    logger.info("QueryType is SPARQL UPDATE");
+                    if (endpoints.size() != 1) return "Error: UPDATE Query can only run over a single endpoint";
+                    result = queryHandler.handleUpdate(queryString, endpoints.get(0));
+                }
+                else result = "";
             }
         } // END if (result == null)
 
@@ -251,5 +256,29 @@ public class QueryController
 
         if (logger.isDebugEnabled()) logger.debug("Listing failed, no project named '" + projectName + "'");
         throw new ResourceNotFoundException();
+    }
+
+    /**
+     * Checks if given query is an update query
+     * @param s
+     * @return <code>true</code> if query is a sparql update, <code>false</code> otherwise
+     */
+    private boolean isUpdateQuery(String s)
+    {
+        ArrayList <String>commands = new ArrayList<String>();
+        commands.add("MODIFY");
+        commands.add("INSERT");
+        commands.add("LOAD");
+        commands.add("DELETE");
+        commands.add("CREATE");
+        commands.add("DROP");
+        commands.add("CLEAR");
+
+        for (String command : commands)
+        {
+            if (s.contains(command)) return true;
+        }
+
+        return false;
     }
 }

@@ -476,6 +476,10 @@ public class Sparql {
         endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
     }
 
+    public static final String UPDATE_QUERY = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+        + "INSERT { <http://example/egbook3> dc:title  \"This is an example title\" }";
+    public static final String UPDATE_QUERY_RESULT = "OK";
+    
     static
     {
         endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);

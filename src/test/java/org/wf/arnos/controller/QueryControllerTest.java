@@ -268,4 +268,19 @@ public class QueryControllerTest
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("semantic web programming"));
     }
+
+    @Test
+    public void testUpdateQuery()
+    {
+        String query = Sparql.UPDATE_QUERY;
+        StringWriter writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, query, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("error"));
+
+        writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
+        buffer = writer.getBuffer();
+        assertEquals(Sparql.UPDATE_QUERY_RESULT, buffer.toString());
+    }
 }

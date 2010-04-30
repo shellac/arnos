@@ -70,7 +70,11 @@ public class LocalServer {
 
             String result = "";
 
-            if (thisEndpoint.equals(Sparql.ENDPOINT4_URL))
+            if (query.equals(Sparql.UPDATE_QUERY))
+            {
+                result = Sparql.UPDATE_QUERY_RESULT;
+            }
+            else if (thisEndpoint.equals(Sparql.ENDPOINT4_URL))
             {
                 try
                 {
@@ -80,6 +84,26 @@ public class LocalServer {
                         this.wait(60 * 1000);
                     }
                 } catch (InterruptedException ex) { }
+            }
+            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL+"toolong"))
+            {
+                response.setStatus(HttpServletResponse.SC_REQUEST_URI_TOO_LONG);
+                response.sendError(HttpServletResponse.SC_REQUEST_URI_TOO_LONG);
+            }
+            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL+"interrupt"))
+            {
+                try {
+                    response.getWriter().close();
+                    throw new IOException("Interrupt requested");
+                } catch (Throwable ex) {
+                    Logger.getLogger(LocalServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL))
+            {
+                String remainder = thisEndpoint.replace(Sparql.ENDPOINT4_URL, "");
+                int responseCode = new Integer(remainder);
+                response.setStatus(responseCode);
             }
             else
             {

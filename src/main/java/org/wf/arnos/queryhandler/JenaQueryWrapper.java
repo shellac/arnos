@@ -329,17 +329,15 @@ public class JenaQueryWrapper implements QueryWrapperInterface
             httpConnection.setReadTimeout(REQUEST_TIMEOUT);
             httpConnection.setDoInput(true);
             httpConnection.connect();
-            try
-            {
-                return execCommon();
-            }
-            catch (QueryExceptionHTTP qEx)
+            if (httpConnection.getResponseCode() == 414) /*HttpServletResponse.SC_REQUEST_URI_TOO_LONG*/
             {
                 // Back-off and try POST if something complain about long URIs
                 // Broken
-                if (qEx.getResponseCode() == 414 /*HttpServletResponse.SC_REQUEST_URI_TOO_LONG*/ )
-                    return execPost(p, serviceURL);
-                throw qEx;
+                return execPost(p, serviceURL);
+            }
+            else
+            {
+                return execCommon();
             }
         }
         catch (java.net.ConnectException connEx)
@@ -428,7 +426,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
         }
         catch (JenaException rdfEx)
         {
-            throw new QueryExceptionHTTP(rdfEx) ;
+            throw new JenaException(rdfEx) ;
         }
     }
 }

@@ -34,12 +34,12 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.shared.JenaException;
 import com.hp.hpl.jena.sparql.engine.http.HttpParams;
 import com.hp.hpl.jena.sparql.engine.http.Params;
 import com.hp.hpl.jena.sparql.engine.http.QueryExceptionHTTP;
 import com.hp.hpl.jena.sparql.util.Convert;
-import com.hp.hpl.jena.sparql.util.graph.GraphUtils;
 import com.hp.hpl.jena.util.FileUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -52,6 +52,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wf.arnos.exception.ArnosRuntimeException;
@@ -92,7 +93,12 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     /**
      * Max length a GET request can be before being converted into a POST request.
      */
-    private static final int URL_LIMIT = 2 * 1024;
+    private static int URL_LIMIT = 2 * 1024;
+
+    public void setUrlLimit(int i)
+    {
+        URL_LIMIT = i;
+    }
 
    /**
     * A handle to the unique Singleton instance.
@@ -129,12 +135,12 @@ public class JenaQueryWrapper implements QueryWrapperInterface
        try
        {
            String s = System.getProperty("arnos.connection.timeout");
-           if (s != null && s.length() > 0)
+           if (StringUtils.isNotEmpty(s))
            {
                CONNECTION_TIMEOUT = Integer.parseInt(s);
            }
            s = System.getProperty("arnos.request.timeout");
-           if (s != null && s.length() > 0)
+           if (StringUtils.isNotEmpty(s))
            {
                REQUEST_TIMEOUT = Integer.parseInt(s);
            }
@@ -177,7 +183,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      */
     public final ResultSet stringToResultSet(final String s)
     {
-        if (s != null && s.length() > 0)
+        if (StringUtils.isNotEmpty(s))
         {
             return ResultSetFactory.fromXML(s);
         }
@@ -192,9 +198,9 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      */
     public final Model stringToModel(final String s)
     {
-        Model model = GraphUtils.makeJenaDefaultModel();
+        Model model = ModelFactory.createDefaultModel();
 
-        if (s != null && s.length() > 0)
+        if (StringUtils.isNotEmpty(s))
         {
             StringReader in = new StringReader(s);
             model.read(in, null);
@@ -209,7 +215,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      */
     public final boolean stringToBoolean(final String s)
     {
-        if (s == null || s.length() < 1) return false;
+        if (StringUtils.isEmpty(s)) return false;
 
         String check = s.toLowerCase(Locale.ENGLISH);
         check = check.replace("\n", "");

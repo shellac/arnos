@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.queryhandler;
 
+import java.io.IOException;
 import org.wf.arnos.utils.Sparql;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -74,6 +75,13 @@ public class JenaQueryWrapperTest {
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
         assertEquals(result, actualResult);
+
+        // force post method
+        JenaQueryWrapper.getInstance().setUrlLimit(10);
+
+        JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
+
+        assertEquals(result, actualResult);
     }
 
     @Test
@@ -87,6 +95,13 @@ public class JenaQueryWrapperTest {
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
         assertEquals(result, actualResult);
+
+        // force post method
+        JenaQueryWrapper.getInstance().setUrlLimit(10);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
+
+        assertEquals(result, actualResult);
     }
 
     @Test
@@ -98,6 +113,13 @@ public class JenaQueryWrapperTest {
         String result = Sparql.getResult(Sparql.ENDPOINT1_URL,query);
 
         String actualResult = JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
+
+        assertEquals(result, actualResult);
+
+        // force post method
+        JenaQueryWrapper.getInstance().setUrlLimit(10);
+
+        JenaQueryWrapper.getInstance().execQuery(query, Sparql.ENDPOINT1_URL);
 
         assertEquals(result, actualResult);
     }
@@ -119,6 +141,18 @@ public class JenaQueryWrapperTest {
         actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery2, Sparql.ENDPOINT1_URL);
 
         assertEquals(describeResult2, actualResult);
+
+        // force post method
+        JenaQueryWrapper.getInstance().setUrlLimit(10);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery1, Sparql.ENDPOINT1_URL);
+
+        assertEquals(describeResult1, actualResult);
+
+        actualResult = JenaQueryWrapper.getInstance().execQuery(describeQuery2, Sparql.ENDPOINT1_URL);
+
+        assertEquals(describeResult2, actualResult);
+
     }
 
     @Test
@@ -137,6 +171,13 @@ public class JenaQueryWrapperTest {
         Statement statement = model.createStatement(book,title,"Harry Potter and the Chamber of Secrets");
 
         assertTrue(actualModel.contains(statement));
+
+        actualModel  = JenaQueryWrapper.getInstance().stringToModel(null);
+        assertTrue(null != actualModel);
+        assertTrue(actualModel.isEmpty());
+        actualModel  = JenaQueryWrapper.getInstance().stringToModel("");
+        assertTrue(null != actualModel);
+        assertTrue(actualModel.isEmpty());
     }
 
     @Test
@@ -156,6 +197,9 @@ public class JenaQueryWrapperTest {
         assertTrue(b);
         b = JenaQueryWrapper.getInstance().stringToBoolean(askResult.replace(">", "&gt;"));
         assertFalse(b);
+
+        assertFalse(JenaQueryWrapper.getInstance().stringToBoolean(null));
+        assertFalse(JenaQueryWrapper.getInstance().stringToBoolean(""));
     }
 
     @Test
@@ -172,5 +216,14 @@ public class JenaQueryWrapperTest {
             numResults++;
         }
         assertEquals(numResults,7);
+
+        assertNull(JenaQueryWrapper.getInstance().stringToResultSet(null));
+        assertNull(JenaQueryWrapper.getInstance().stringToResultSet(""));
+    }
+
+    @Test
+    public void testconvertStreamToString() throws IOException
+    {
+        assertEquals("",JenaQueryWrapper.getInstance().convertStreamToString(null));
     }
 }

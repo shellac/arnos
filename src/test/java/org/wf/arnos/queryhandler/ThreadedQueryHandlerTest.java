@@ -40,10 +40,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.easymock.EasyMockSupport;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
@@ -54,7 +56,7 @@ import org.wf.arnos.utils.LocalServer;
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class ThreadedQueryHandlerTest {
+public class ThreadedQueryHandlerTest extends EasyMockSupport {
     Query selectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS);
     Query constructQuery = QueryFactory.create(Sparql.CONSTRUCT_QUERY_BOOKS);
     Query askQuery = QueryFactory.create(Sparql.ASK_QUERY_ALICE);
@@ -184,7 +186,21 @@ public class ThreadedQueryHandlerTest {
             numResults++;
         }
         assertEquals("Results with all endpoints",Sparql.MAX_LIMIT,numResults);
+
+        // remove query limit
+        Query noLimitSelectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS_NO_LIMIT);
+        result = queryHandler.handleSelect(noLimitSelectQuery, endpoints);
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with all endpoints",11,numResults);
     }
+
 
     @Test
     public void testHandleDistinctSelect()
@@ -437,5 +453,24 @@ public class ThreadedQueryHandlerTest {
             numResults++;
         }
         assertEquals("Results with endpoints 1 & 2",7,numResults);
+    }
+
+    @Test
+    public void testCacheHandling()
+    {
+        CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
+
+        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setMaxPoolSize(1);
+        executor.initialize();
+        queryHandler.setTaskExecutor(executor);
+
+        assertEquals(false,queryHandler.hasCache());
+        queryHandler.setCache(mockCache);
+        assertEquals(true,queryHandler.hasCache());
+
+        assertEquals(mockCache,queryHandler.getCache());
+
     }
 }

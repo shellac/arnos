@@ -70,6 +70,12 @@ public class Sparql {
         + "WHERE \n"
         + "  { ?book dc:title ?title }    LIMIT "+MAX_LIMIT;
 
+    public static final String SELECT_QUERY_BOOKS_NO_LIMIT = "PREFIX books:   <http://example.org/book/>\n"
+        + "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
+        + "SELECT ?book ?title\n"
+        + "WHERE \n"
+        + "  { ?book dc:title ?title }";
+
     public static final String SELECT_QUERY_PEOPLE = "PREFIX people:   <http://example.org/people/>\n"
         + "PREFIX dc:      <http://purl.org/dc/elements/1.1/>\n"
         + "SELECT ?name\n"
@@ -267,16 +273,19 @@ public class Sparql {
     {
         // associate endpoints, queries and results
         endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_BOOKS);
+        endpoint1Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_7_BOOKS);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
 
         endpoint2Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
+        endpoint2Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_EMPTY_BOOKS);
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
 
         endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_BOOKS);
+        endpoint3Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_4_ADDITIONAL_BOOKS);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
         endpoint3Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);

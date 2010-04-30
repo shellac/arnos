@@ -50,7 +50,6 @@ import static org.springframework.util.ReflectionUtils.FieldCallback;
  */
 public class LoggerPostProcessor implements BeanPostProcessor
 {
-
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException
     {
         return bean;

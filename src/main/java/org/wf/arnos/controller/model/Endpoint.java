@@ -104,7 +104,7 @@ public class Endpoint implements Comparable<Endpoint>
     @Override
     public final boolean equals(final Object obj)
     {
-        if (this == obj) return false;
+        if (this == obj) return true;
 
         if (!(obj instanceof Endpoint)) return false;
 

@@ -21,6 +21,7 @@ public class EndpointTest {
 
         String initUri = "TestURI";
         Endpoint ep = new Endpoint(initUri);
+
         String expectedResult = "$HGBW%@";
         assertEquals(initUri,ep.getLocation());
         ep.setLocation(expectedResult);
@@ -31,6 +32,22 @@ public class EndpointTest {
 
         ep.setLocation(null);
         assertEquals(0, ep.hashCode());
+    }
+
+    @Test
+    public void testEquals()
+    {
+        System.out.println("testEquals");
+
+        String initUri = "TestURI";
+        Endpoint ep = new Endpoint(initUri);
+
+        assertEquals(true,ep.equals(ep));
+        assertEquals(false,ep.equals(initUri));
+        assertEquals(false,ep.equals(new Project(initUri)));
+        assertEquals(false,ep.equals(new Endpoint(initUri+"other")));
+        assertEquals(true,ep.equals(new Endpoint(initUri)));
+
     }
 
     @Test

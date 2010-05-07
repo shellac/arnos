@@ -31,7 +31,10 @@
  */
 package org.wf.arnos.beans;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,14 +48,37 @@ import static org.junit.Assert.*;
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
 public class ArnosPropertyPlaceholderConfigurerTest {
-    Resource existingFile1 = new FileSystemResource("./src/main/webapp/WEB-INF/log4j.xml");
-    Resource existingFile2 = new FileSystemResource("./src/main/webapp/WEB-INF/application.properties");
-    Resource missingFile = new FileSystemResource("missingfile.txt");
+    static Resource existingFile1;
+    static Resource existingFile2;
+    static Resource missingFile = new FileSystemResource("missingfile.txt");
 
     @BeforeClass
-    public static void setUp()
+    public static void setUp() throws IOException
     {
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
+
+        // Create a temporary properties file
+        Properties properties = new Properties();
+        properties.setProperty("test.1.a", "aaa");
+        properties.setProperty("test.1.b", "aaa");
+
+        File f = File.createTempFile("prop1", "test");
+        f.deleteOnExit();
+
+        try { properties.store(new FileOutputStream(f), null); } catch (IOException e) { }
+        
+        existingFile1 = new FileSystemResource(f.getAbsolutePath());
+
+        properties = new Properties();
+        properties.setProperty("test.2.a", "ccc");
+        properties.setProperty("test.2.b", "ddd");
+
+        f = File.createTempFile("prop2", "test");
+        f.deleteOnExit();
+
+        try { properties.store(new FileOutputStream(f), null); } catch (IOException e) { }
+
+        existingFile2 = new FileSystemResource(f.getAbsolutePath());
     }
 
     @Test
@@ -62,9 +88,17 @@ public class ArnosPropertyPlaceholderConfigurerTest {
 
         PropertyPlaceholderConfigurer bean = new ArnosPropertyPlaceholderConfigurer();
 
-        expectedBean.setLocations(new Resource[]{existingFile1});
+        try
+        {
+            expectedBean.setLocations(new Resource[]{existingFile1});
+        }
+        catch (Exception e) {}
 
-        bean.setLocations(new Resource[]{existingFile1,missingFile});
+        try
+        {
+            bean.setLocations(new Resource[]{existingFile1,missingFile});
+        }
+        catch (Exception e) {}
 
         assertTrue(expectedBean.equals(bean));
 
@@ -72,9 +106,17 @@ public class ArnosPropertyPlaceholderConfigurerTest {
 
         bean = new ArnosPropertyPlaceholderConfigurer();
 
+        try
+        {
         expectedBean.setLocations(new Resource[]{existingFile1,existingFile2});
+        }
+        catch (Exception e) {}
 
+        try
+        {
         bean.setLocations(new Resource[]{existingFile1,missingFile, existingFile2});
+        }
+        catch (Exception e) {}
 
         assertTrue(expectedBean.equals(bean));
 
@@ -83,9 +125,17 @@ public class ArnosPropertyPlaceholderConfigurerTest {
 
         bean = new ArnosPropertyPlaceholderConfigurer();
 
+        try
+        {
         expectedBean.setLocations(new Resource[]{existingFile1});
+        }
+        catch (Exception e) {}
 
+        try
+        {
         bean.setLocations(new Resource[]{existingFile2});
+        }
+        catch (Exception e) {}
 
         assertFalse(expectedBean.equals(bean));
     }

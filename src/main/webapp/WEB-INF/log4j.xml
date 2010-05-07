@@ -51,7 +51,7 @@
     <!-- configure Tomcat -->
     <logger name="log4j.logger.org.apache.catalina">
         <level value="WARN"/>
-    </logger >
+    </logger>
 
     <!-- configure Spring framework -->
     <logger name="org.springframework">

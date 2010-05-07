@@ -32,10 +32,8 @@
 package org.wf.arnos.controller.model;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -82,6 +80,7 @@ public class ProjectsManagerTest {
     public void testMisc()
     {
         manager = new ProjectsManager();
+        manager.logger = LogFactory.getLog(ProjectsManager.class);
         assertEquals(null,manager.getFileName());
         manager.setFileName(fileName);
         assertEquals(fileName,manager.getFileName());

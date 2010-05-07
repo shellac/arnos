@@ -67,6 +67,7 @@ public class EndpointControllerTest {
         f.deleteOnExit();
 
         ProjectsManager manager = new ProjectsManager();
+        manager.logger = LogFactory.getLog(ProjectsManager.class);
         manager.setFileName(f.getAbsolutePath());
 
         // setup default projects

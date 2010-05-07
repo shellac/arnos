@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.wf.arnos.logger.Logger;
 
 /**
  * This class manages all interactions with projects.
@@ -56,7 +57,8 @@ public class ProjectsManager
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ProjectsManager.class);
+    @Logger
+    public static transient Log logger;
 
     /**
      * The list of managed projects.
@@ -312,7 +314,7 @@ public class ProjectsManager
         }
         catch (IOException ioe)
         {
-            LOG.error("Unable to save model to persistant storage layer ("
+            if (logger != null) logger.error("Unable to save model to persistant storage layer ("
                     + fileName + ")", ioe);
             return false;
         }
@@ -336,20 +338,20 @@ public class ProjectsManager
             try
             {
                 projects = ((List<Project>) xstream.fromXML(xmlString));
-                if (LOG.isDebugEnabled()) LOG.debug("Projects model loaded");
+                if (logger != null && logger.isDebugEnabled()) logger.debug("Projects model loaded");
                 return true;
             }
             catch (XStreamException xse)
             {
-                if (LOG.isInfoEnabled()) LOG.info(xmlString);
-                LOG.error("Unable to parse xml string", xse);
+                if (logger != null && logger.isInfoEnabled()) logger.info(xmlString);
+                logger.error("Unable to parse xml string", xse);
                 return false;
             }
 
         }
         catch (IOException ioe)
         {
-            LOG.warn("Unable to load data from persistant storage layer ("
+            if (logger != null) logger.warn("Unable to load data from persistant storage layer ("
                     + file.getAbsolutePath() + ")\n" + ioe.getMessage());
             return false;
         }

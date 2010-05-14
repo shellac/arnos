@@ -133,6 +133,17 @@ public class QueryControllerTest
     }
 
     @Test
+    public void testMissingCache()
+    {
+        controller.cacheHandler = null;
+        StringWriter writer = new StringWriter();
+        controller.executeQuery(PROJECT_NAME, QueryString, writer);
+        StringBuffer buffer = writer.getBuffer();
+        int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
+        assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
+    }
+
+    @Test
     public void testExecuteQueryWithSpecificEndpoints()
     {
         StringWriter writer = new StringWriter();

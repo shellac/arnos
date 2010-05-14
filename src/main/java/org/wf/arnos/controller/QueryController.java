@@ -178,8 +178,12 @@ public class QueryController
         if (queryString == null) return "";
 
         logger.debug("Fetching result from cache");
-        result = cacheHandler.get(cacheString);
 
+        if (cacheHandler != null)
+        {
+            result = cacheHandler.get(cacheString);
+        }
+        
         if (result == null)
         {
             logger.info("Passing to " + queryHandler.getClass());

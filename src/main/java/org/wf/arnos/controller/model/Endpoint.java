@@ -96,8 +96,6 @@ public class Endpoint implements Comparable<Endpoint>
             id = toHexString(hash);
         }
         catch (Exception e) { }
-
-        System.out.println("ID FOR " +  location + " is "+id);
         return id;
     }
 

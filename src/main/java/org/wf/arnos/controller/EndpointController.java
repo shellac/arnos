@@ -121,10 +121,11 @@ public class EndpointController
             checkProject(projectName);
 
             manager.addEndpoint(projectName, endpoint);
-            message = "endpoint '" + endpoint + "' added";
+//            message = "endpoint '" + endpoint + "' added";
 
             Endpoint ep = new Endpoint(endpoint);
             result = ep.getIdentifier();
+            message = result;
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);

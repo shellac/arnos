@@ -102,6 +102,7 @@ public class EndpointControllerTest {
         // check result
         assertEquals(3,getNumOfEndpoints());
         assertEquals("",result);
+        assertEquals(true,model.asMap().get("message").toString().contains(expectedResult));
     }
 
     @Test

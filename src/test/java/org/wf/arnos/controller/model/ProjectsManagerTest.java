@@ -33,6 +33,7 @@ package org.wf.arnos.controller.model;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.AfterClass;
@@ -242,6 +243,16 @@ public class ProjectsManagerTest {
         manager.setFileName(fileName);
 
         assertEquals("Persistance enabled",2, manager.getProjectCount());
+
+        List <Endpoint> endpoints = manager.getEndpoints(projectName1);
+        assertNotNull(endpoints);
+        assertEquals(2,endpoints.size());
+        Endpoint expected1 = new Endpoint(endpoint1);
+        assertTrue(endpoints.contains(expected1));
+
+        assertTrue(!endpoints.get(0).getIdentifier().equals(""));
+        assertTrue(endpoints.get(0).getLocation().equals(endpoint2) || endpoints.get(1).getLocation().equals(endpoint2));
+        
 
         manager.removeProject(p1);
 

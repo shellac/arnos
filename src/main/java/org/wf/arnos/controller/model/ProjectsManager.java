@@ -41,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.wf.arnos.logger.Logger;
@@ -306,16 +305,15 @@ public class ProjectsManager
         XStream xstream = new XStream();
         String xmlString = xstream.toXML(projects);
 
+        File file = new File(fileName);
+
         try
         {
-            File file = new File(fileName);
-
             FileUtils.writeStringToFile(file, xmlString);
         }
         catch (IOException ioe)
         {
-            if (logger != null) logger.error("Unable to save model to persistant storage layer ("
-                    + fileName + ")", ioe);
+            if (logger != null) logger.error("Unable to save model to persistant storage layer (" + file.getAbsolutePath() + ")", ioe);
             return false;
         }
 
@@ -338,7 +336,7 @@ public class ProjectsManager
             try
             {
                 projects = ((List<Project>) xstream.fromXML(xmlString));
-                if (logger != null && logger.isDebugEnabled()) logger.debug("Projects model loaded");
+                if (logger != null && logger.isDebugEnabled()) logger.debug("Projects model loaded from " + file.getAbsolutePath());
                 return true;
             }
             catch (XStreamException xse)
@@ -351,8 +349,7 @@ public class ProjectsManager
         }
         catch (IOException ioe)
         {
-            if (logger != null) logger.warn("Unable to load data from persistant storage layer ("
-                    + file.getAbsolutePath() + ")\n" + ioe.getMessage());
+            if (logger != null) logger.warn("Unable to load data from persistant storage layer (" + file.getAbsolutePath() + "): " + ioe.getMessage());
             return false;
         }
     }

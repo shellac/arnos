@@ -42,12 +42,12 @@ public class Endpoint implements Comparable<Endpoint>
     /**
      * A SPARQL endpoint URI.
      */
-    private transient String location = "";
+    private String location = "";
 
     /**
      * A unique, rest-safe representation of this endpoint.
      */
-    private transient String id = "";
+    private String id = "";
 
     /**
      * The digest algorithm used to generate the id.
@@ -68,25 +68,7 @@ public class Endpoint implements Comparable<Endpoint>
     public final void setLocation(final String paramURI)
     {
         this.location = paramURI;
-    }
-
-    /**
-     * Default constructor.
-     * @param uri URI for this endpoint
-     */
-    public Endpoint(final String uri)
-    {
-        this.location = uri;
-    }
-
-    /**
-     * Returns the rest-safe identifier for this endpoint.
-     * @return a string digest representing this location
-     */
-    public final String getIdentifier()
-    {
-        if (!"".equals(id)) return id;
-
+        
         try
         {
             MessageDigest md = MessageDigest.getInstance(DIGEST_ALGORITHM);
@@ -96,6 +78,23 @@ public class Endpoint implements Comparable<Endpoint>
             id = toHexString(hash);
         }
         catch (Exception e) { }
+    }
+
+    /**
+     * Default constructor.
+     * @param uri URI for this endpoint
+     */
+    public Endpoint(final String uri)
+    {
+        setLocation(uri);
+    }
+
+    /**
+     * Returns the rest-safe identifier for this endpoint.
+     * @return a string digest representing this location
+     */
+    public final String getIdentifier()
+    {
         return id;
     }
 

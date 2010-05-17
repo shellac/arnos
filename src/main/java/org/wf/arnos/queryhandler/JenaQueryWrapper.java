@@ -183,11 +183,18 @@ public class JenaQueryWrapper implements QueryWrapperInterface
      */
     public final ResultSet stringToResultSet(final String s)
     {
-        if (StringUtils.isNotEmpty(s))
+        try
         {
-            return ResultSetFactory.fromXML(s);
+            if (StringUtils.isNotEmpty(s))
+            {
+                return ResultSetFactory.fromXML(s);
+            }
         }
-
+        catch (Exception e)
+        {
+            LOG.warn("Unable to parse result set");
+            LOG.debug(s);
+        }
         return null;
     }
 

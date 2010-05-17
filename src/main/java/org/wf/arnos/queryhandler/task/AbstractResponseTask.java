@@ -48,7 +48,7 @@ abstract class AbstractResponseTask implements Runnable
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(FetchModelResponseTask.class);
+    private static Log LOG;
 
     /**
      * Handle to query processor for posting results back.
@@ -94,6 +94,8 @@ abstract class AbstractResponseTask implements Runnable
     {
         super();
 
+        LOG = LogFactory.getLog(this.getClass());
+
         this.handler = paramHandler;
         this.query = paramQuery;
         this.url = paramUrl;
@@ -129,7 +131,7 @@ abstract class AbstractResponseTask implements Runnable
         // check cache copy
         if (handler.hasCache() && handler.getCache().contains(cacheKey))
         {
-            LOG.debug("Lookup construct from cache");
+            LOG.debug("Lookup query from cache");
 
             return handler.getCache().get(cacheKey);
         }

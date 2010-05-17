@@ -76,9 +76,12 @@ public class FetchModelResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
+                LOG.debug("Cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }
+
+            LOG.debug("Cache hit");
 
             if (resultsString != null && resultsString.length() > 0)
             {

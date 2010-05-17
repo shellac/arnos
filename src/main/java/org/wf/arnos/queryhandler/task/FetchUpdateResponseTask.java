@@ -70,6 +70,8 @@ public class FetchUpdateResponseTask extends AbstractResponseTask
     {
         try
         {
+            LOG.debug("Querying " + url);
+
             String resultsString = getQueryWrapper().execQuery(query, url);
 
             handler.addResult(resultsString);

@@ -79,15 +79,18 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
+                LOG.debug("Cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
                 putInCache(resultsString);
             }
+            
+            LOG.debug("Cache hit. Got:"+resultsString);
 
             if (resultsString != null && resultsString.length() > 0)
             {
                 ResultSet resultSet = querywrapper.stringToResultSet(resultsString);
 
-                while (resultSet.hasNext())
+                while (resultSet != null && resultSet.hasNext())
                 {
                     QuerySolution sol = resultSet.next();
                     handler.addResult(new Result(sol));

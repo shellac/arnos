@@ -77,12 +77,14 @@ public class FetchBooleanResponseTask extends AbstractResponseTask
             // check cache copy
             if (resultsString == null)
             {
+                LOG.debug("Cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
                 ans = getQueryWrapper().stringToBoolean(resultsString);
                 putInCache(ans.toString());
             }
             else
             {
+                LOG.debug("Cache hit");
                 ans = Boolean.valueOf(resultsString);
             }
 

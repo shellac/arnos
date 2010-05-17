@@ -177,27 +177,27 @@ public class QueryController
 
         if (queryString == null) return "";
 
-        logger.debug("Fetching result from cache");
-
         if (cacheHandler != null)
         {
+            logger.debug("Fetching result from cache");
             result = cacheHandler.get(cacheString);
         }
         
         if (result == null)
         {
-            logger.info("Passing to " + queryHandler.getClass());
+            logger.info("Cache miss. Passing to " + queryHandler.getClass());
 
-            logger.debug("Querying against  " + endpoints.size() + " endpoints");
+            logger.debug("Querying against " + endpoints.size() + " endpoints");
 
             // process the SPARQL query to best determin how to handle this query
             try
             {
                 Query query = QueryFactory.create(queryString);
 
+                logger.debug("Query type:"+ query.getQueryType());
+
                 if (query.getQueryType() == Query.QueryTypeSelect)
                 {
-                    // this is a simple select query. Results can be appended, and limited as required
                     result = queryHandler.handleSelect(query, endpoints);
                 }
                 else if (query.getQueryType() == Query.QueryTypeConstruct)
@@ -232,7 +232,11 @@ public class QueryController
                     if (endpoints.size() != 1) return "Error: UPDATE Query can only run over a single endpoint";
                     result = queryHandler.handleUpdate(queryString, endpoints.get(0));
                 }
-                else result = "";
+                else
+                {
+                    logger.error(qpe.getMessage());
+                    result = "";
+                }
             }
         } // END if (result == null)
 

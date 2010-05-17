@@ -197,7 +197,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
     /**
      * Stores the results of an ASK query.
-     * @param b Boolean value of query
+     * @param s String query result
      */
     public final void addResult(final String s)
     {
@@ -215,6 +215,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     public final String handleConstruct(final Query query, final List<Endpoint> endpoints)
     {
+        LOG.info("handling CONSTRUCT");
+
         fetchModelsAndWait(query, endpoints);
         return mergeModelResults(query);
     }
@@ -228,8 +230,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     public final String handleSelect(final Query query, final List<Endpoint> endpoints)
     {
+        LOG.info("handling SELECT");
+
         fetchResultSetAndWait(query, endpoints);
-        
+
         StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
 
         content.append("<?xml version=\"1.0\"?><sparql xmlns=\"http://www.w3.org/2005/sparql-results#\"><head>");
@@ -309,6 +313,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     public final String handleAsk(final Query query, final List<Endpoint> endpoints)
     {
+        LOG.info("handling ASK");
+
         askResultList = new LinkedList<Boolean>();
         doneSignal = new CountDownLatch(endpoints.size());
 
@@ -362,6 +368,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      */
     public final String handleDescribe(final Query query, final List<Endpoint> endpoints)
     {
+        LOG.info("handling DESCRIBE");
+
         fetchModelsAndWait(query, endpoints);
         return mergeModelResults(query);
     }
@@ -369,12 +377,14 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * This method handles a SPARQL UPDATE query.
      * It forward the query onto the provided endpoint and returns any response.
-     * @param query SPARQL DESCRIBE query
-     * @param endpoints List of endpoints to query over
+     * @param s Update query
+     * @param endpoint Endpoint to query
      * @return Response string
      */
     public final String handleUpdate(String s, Endpoint endpoint)
     {
+        LOG.info("handling UPDATE");
+
         updateResultList = new ArrayList<String>();
 
         fetchUpdateQueryAndWait(s, endpoint);

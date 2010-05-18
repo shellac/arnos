@@ -179,5 +179,11 @@ public class ArnosPropertyPlaceholderConfigurerTest {
         expectedBean.setLocations(new Resource[]{existingFile2});
 
         assertTrue(expectedBean.equals(bean));
+
+        assertTrue(expectedBean.equals(expectedBean));
+
+        assertFalse(expectedBean.equals(1));
+
+        assertFalse(expectedBean.equals(new StringBuffer()));
     }
 }

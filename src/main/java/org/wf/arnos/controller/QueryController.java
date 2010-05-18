@@ -194,8 +194,6 @@ public class QueryController
             {
                 Query query = QueryFactory.create(queryString);
 
-                logger.debug("Query type:"+ query.getQueryType());
-
                 if (query.getQueryType() == Query.QueryTypeSelect)
                 {
                     result = queryHandler.handleSelect(query, endpoints);

@@ -299,16 +299,16 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoint Endpoint to query
      * @return Response string
      */
-    public final String handleUpdate(String s, Endpoint endpoint)
+    public final String handleUpdate(final String s, final Endpoint endpoint)
     {
         LOG.info("handling UPDATE");
 
-        String result = fetchUpdateQueryAndWait(s, endpoint);
-        return result;
+        return fetchUpdateQueryAndWait(s, endpoint);
     }
 
     /**
      * Merge all result models together and re-issue the request over the merged model.
+     * @param mergedResults The merged results from endpoints
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @return Model serialised as a string
      */
@@ -348,6 +348,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * This method blocks until all results are returned
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @param endpoints Set of endpoints
+     * @return Combined set of results as a Jena Model
      */
     private Model fetchModelsAndWait(final Query query, final List<Endpoint> endpoints)
     {
@@ -418,7 +419,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * Issues the update query to the given endpoint.
      * This method blocks until the query has finished
      * @param query U{DATE Query (INSERT, DELETE, etc)
-     * @param endpoints Set of endpoints
+     * @param endpoint Endpoint to query
+    * @return the result (if any)
      */
     private String fetchUpdateQueryAndWait(final String query, final Endpoint endpoint)
     {
@@ -447,6 +449,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
     /**
      * Uses Jena's SortedResultSet to sort the results.
+     * @param selectResultList Reference to the list of results to sort
      * @param conditions The sort conditions from the query
      */
     private void sortResults(List<Result> selectResultList, final List<SortCondition> conditions)

@@ -100,30 +100,13 @@ public class JenaQueryWrapper implements QueryWrapperInterface
         URL_LIMIT = i;
     }
 
-   /**
-    * A handle to the unique Singleton instance.
-    */
-   private static final JenaQueryWrapper SINGLETON;
-
-   static
-   {
-        try
-        {
-            // Perform initialization here
-            SINGLETON = new JenaQueryWrapper();
-        }
-        catch (Throwable e)
-        {
-            throw new ArnosRuntimeException(e);
-        }
-   }
 
    /**
     * @return The unique instance of this class.
     */
    public static JenaQueryWrapper getInstance()
    {
-        return SINGLETON;
+        return new JenaQueryWrapper();
     }
 
    /**

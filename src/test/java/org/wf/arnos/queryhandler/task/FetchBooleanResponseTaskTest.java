@@ -32,6 +32,8 @@
 package org.wf.arnos.queryhandler.task;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.easymock.EasyMockSupport;
@@ -75,7 +77,10 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testFetchAskResponseTask");
 
+        List <Boolean> askResults = new LinkedList<Boolean>();
+
         FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                askResults,
                 Sparql.ENDPOINT1_URL,
                 askQuery,
                 doneSignal)
@@ -97,8 +102,6 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true);
-        
-        mockThreadedQueryHandler.addResult(true);
 
         replayAll();
 
@@ -106,8 +109,13 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         verifyAll();
 
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertTrue("Got the expected result", askResults.get(0));
+
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
+
+        askResults.clear();
 
         resetAll();
 
@@ -119,15 +127,16 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
                 .andReturn(askResult.replace(">", "\n "));
 
         expect(mockQueryWrapper.stringToBoolean((String) notNull()))
-                .andReturn(true);
-
-        mockThreadedQueryHandler.addResult(true);
+                .andReturn(false);
         
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertFalse("Got the expected result", askResults.get(0));
     }
 
 
@@ -148,7 +157,10 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
 
+        List <Boolean> askResults = new LinkedList<Boolean>();
+
         FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                askResults,
                 Sparql.ENDPOINT1_URL,
                 askQuery,
                 doneSignal)
@@ -171,19 +183,22 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true);
 
-        mockThreadedQueryHandler.addResult(true);
-        
         replayAll();
 
         fetcher.run();
 
         verifyAll();
 
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertTrue("Got the expected result", askResults.get(0));
+        
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // check the results has been put into the cache
         assertTrue(cache.contains(fetcher.cacheKey));
+
+        askResults.clear();
 
         resetAll();
 
@@ -195,7 +210,25 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToBoolean(askResult))
                 .andReturn(true).anyTimes();
 
-        mockThreadedQueryHandler.addResult(true);
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertTrue(cache.contains(fetcher.cacheKey));
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertTrue("Got the expected result", askResults.get(0));
+
+        resetAll();
+
+        // run the query again, check the cache was used (no call to execQuery)
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
+        expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
+
+        expect(mockQueryWrapper.stringToBoolean(askResult))
+                .andReturn(true).anyTimes();
 
         replayAll();
 
@@ -204,6 +237,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         verifyAll();
 
         assertTrue(cache.contains(fetcher.cacheKey));
+        assertEquals("Got the expected number of results",2,askResults.size());
+        assertTrue("Got the expected result", askResults.get(1));
     }
 
     @Test
@@ -211,7 +246,10 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testExceptionThrowing");
 
+        List <Boolean> askResults = new LinkedList<Boolean>();
+
         FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                askResults,
                 "err"+Sparql.ENDPOINT1_URL,
                 askQuery,
                 doneSignal)

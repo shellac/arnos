@@ -48,6 +48,11 @@ public class FetchUpdateResponseTask extends AbstractResponseTask
     private static final Log LOG = LogFactory.getLog(FetchUpdateResponseTask.class);
 
     /**
+     * The result to return.
+     */
+    private StringBuffer result;
+
+    /**
      * Constructor for thread.
      * @param paramHandler handling class
      * @param paramQuery SPARQL query
@@ -55,11 +60,13 @@ public class FetchUpdateResponseTask extends AbstractResponseTask
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
     public FetchUpdateResponseTask(final QueryHandlerInterface paramHandler,
+                                                        StringBuffer result,
                                                         final String paramQuery,
                                                         final String paramUrl,
                                                         final CountDownLatch paramDoneSignal)
     {
         super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        this.result = result;
     }
 
     /**
@@ -72,9 +79,7 @@ public class FetchUpdateResponseTask extends AbstractResponseTask
         {
             LOG.debug("Querying " + url);
 
-            String resultsString = getQueryWrapper().execQuery(query, url);
-
-            handler.addResult(resultsString);
+            result.append(getQueryWrapper().execQuery(query, url));
         }
         catch (Exception ex)
         {

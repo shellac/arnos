@@ -65,4 +65,13 @@ public class EndpointTest {
         assertEquals(true,0 < ep.compareTo(new Endpoint("S")));
   }
 
+    @Test
+    public void testIdentifierGeneration()
+    {
+        System.out.println("testIdentifierGeneration");
+
+        String initUri = "TestURI";
+        Endpoint ep = new Endpoint(initUri);
+        assertTrue(!ep.getIdentifier().equals(""));
+  }
 }

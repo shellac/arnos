@@ -116,9 +116,10 @@ public class MultithreadedQueryHandlerTest {
         
         taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.initialize();
+        taskExecutor.setCorePoolSize(10);
         for (int i=0; i<numberOfTests;i++)
         {
-            taskExecutor.execute(new Request(doneSignal));
+            taskExecutor.execute(new Request(doneSignal), 100);
         }
 
         // block until all threads have finished

@@ -32,6 +32,7 @@
 package org.wf.arnos.queryhandler.task;
 
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -77,7 +78,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
+        Model model = ModelFactory.createDefaultModel();
+        
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
@@ -97,17 +101,19 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult(isA(Model.class));
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
 
+        assertEquals(7,model.size());
+
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
+        model.removeAll();
+        
         resetAll();
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
@@ -118,14 +124,13 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult(isA(Model.class));
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
 
+        assertEquals(7,model.size());
     }
 
     @Test
@@ -135,7 +140,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
+        Model model = ModelFactory.createDefaultModel();
+
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
@@ -159,19 +167,21 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult(isA(Model.class));
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
 
+        assertEquals(7,model.size());
+
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // run the query again, check the query wrapper is not called
         
+        model.removeAll();
+
         resetAll();
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
@@ -183,13 +193,13 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult(isA(Model.class));
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals(7,model.size());
     }
 
     @Test
@@ -207,7 +217,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
             fail("Unable to create cache");
         }
 
+        Model model = ModelFactory.createDefaultModel();
+
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
@@ -230,13 +243,13 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult((Model)anyObject());
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals(7,model.size());
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
@@ -244,6 +257,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         // check the results has been put into the cache
         assertTrue(cache.contains(fetcher.cacheKey));
 
+        model.removeAll();
+        
         resetAll();
 
         // run the query again, check the cache was used
@@ -254,13 +269,13 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
 
-        mockThreadedQueryHandler.addResult(isA(Model.class));
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals(7,model.size());
 
         assertTrue(cache.contains(fetcher.cacheKey));
     }
@@ -274,7 +289,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         
         CountDownLatch doneSignal = new CountDownLatch(1);
 
+        Model model = ModelFactory.createDefaultModel();
+
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 Sparql.CONSTRUCT_QUERY_BOOKS,
                 doneSignal);
@@ -289,7 +307,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testExceptionThrowing");
 
+        Model model = ModelFactory.createDefaultModel();
+
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
@@ -324,7 +345,10 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testExceptionHandling");
 
+        Model model = ModelFactory.createDefaultModel();
+
         FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 doneSignal)
@@ -342,6 +366,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
                 .andReturn("");
+
+        model = ModelFactory.createDefaultModel();
 
         replayAll();
 
@@ -361,6 +387,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull()))
                 .andReturn(null);
 
+        model = ModelFactory.createDefaultModel();
+        
         replayAll();
 
         fetcher.run();

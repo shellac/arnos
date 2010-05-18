@@ -48,6 +48,9 @@ public class FetchModelResponseTask extends AbstractResponseTask
      */
     private static final Log LOG = LogFactory.getLog(FetchModelResponseTask.class);
 
+    /* Reference to model where results can be combined */
+    private Model mergedModel;
+
     /**
      * Constructor for thread.
      * @param paramHandler handling class
@@ -56,11 +59,13 @@ public class FetchModelResponseTask extends AbstractResponseTask
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
     public FetchModelResponseTask(final QueryHandlerInterface paramHandler,
+                                                        Model model,
                                                         final String paramQuery,
                                                         final String paramUrl,
                                                         final CountDownLatch paramDoneSignal)
     {
         super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        this.mergedModel = model;
     }
 
     /**
@@ -87,7 +92,10 @@ public class FetchModelResponseTask extends AbstractResponseTask
             {
                 Model model  = getQueryWrapper().stringToModel(resultsString);
 
-                handler.addResult(model);
+                synchronized(handler)
+                {
+                    mergedModel.add(model);
+                }
             }
         }
         catch (Exception ex)

@@ -65,11 +65,11 @@
         <property name="queueCapacity" value="25" />
     </bean>
 
-    <!-- Cache setup -->
+    <!-- Cache setup 
     <bean class="org.wf.arnos.cachehandler.SimpleCacheHandler">
         <constructor-arg value="${ehcache.file:./WEB-INF/ehcache.xml}"/>
     </bean>
-
+-->
     <!-- JMX Beans -->
     <bean id="exporter"
           class="org.springframework.jmx.export.MBeanExporter"

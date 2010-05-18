@@ -49,7 +49,6 @@ import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import static org.junit.Assert.*;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
-import org.wf.arnos.queryhandler.mocks.MockThreadPoolTaskExecutor;
 import org.wf.arnos.utils.LocalServer;
 
 /**
@@ -100,50 +99,6 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
     @AfterClass
     public static void tearDown() {
         LocalServer.stop();
-    }
-
-
-    @Test
-    public void testTaskInitalization()
-    {
-        System.out.println("testTaskInitalization");
-
-        List<Endpoint> endpoints = new ArrayList<Endpoint>();
-        // add test endpoints - unit test relies on successful connection with following endpoints
-        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
-        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
-        
-        ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
-
-        MockThreadPoolTaskExecutor executor = new MockThreadPoolTaskExecutor(queryHandler);
-        queryHandler.setTaskExecutor(executor);
-
-        String results = queryHandler.handleSelect(selectQuery, endpoints);
-
-        assertEquals(2, executor.selectTasksRunning);
-        assertEquals(0, executor.constructTasksRunning);
-        assertEquals(0, executor.askTasksRunning);
-        assertEquals(0, executor.describeTasksRunning);
-
-        executor.reset();
-
-        results = queryHandler.handleConstruct(constructQuery, endpoints);
-
-        assertEquals(0, executor.selectTasksRunning);
-        assertEquals(2, executor.constructTasksRunning);
-        assertEquals(0, executor.askTasksRunning);
-        assertEquals(0, executor.describeTasksRunning);
-
-        executor.reset();
-
-        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
-
-        results = queryHandler.handleAsk(askQuery, endpoints);
-
-        assertEquals(0, executor.selectTasksRunning);
-        assertEquals(0, executor.constructTasksRunning);
-        assertEquals(3, executor.askTasksRunning);
-        assertEquals(0, executor.describeTasksRunning);
     }
 
     @Test
@@ -430,7 +385,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         result = queryHandler.handleDescribe(describeQuery, endpoints);
         end = System.currentTimeMillis();
 
-        assertTrue("Min timeout reached ("+(end-start)+")", end-start >= maxtimeout);
+        assertTrue("Min timeout reached ("+(end-start)+" >= " + maxtimeout+")", end-start >= maxtimeout);
         assertTrue("Max timeout within limits ("+(end-start)+")", end-start < maxMultipleOfTimeoutToExpect);
 
 

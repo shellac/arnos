@@ -83,20 +83,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     private static final int DEFAULT_SB_LENGTH = 133;
 
     /**
-     * Latch signal to indicate that tasks have finished.
-     */
-    private transient CountDownLatch doneSignal;
-
-    /**
-     * Acccessor for the countdownlatch.
-     * @return The CountDownLatch
-     */
-    public final CountDownLatch getLatch()
-    {
-        return doneSignal;
-    }
-
-    /**
      * Spring's taskexecutor for handling threads.
      */
     @Autowired
@@ -140,74 +126,6 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
 
     /**
-     * A container for SPARQL SELECT results gathered by the threads.
-     */
-    private transient List<Result> selectResultList;
-
-    /**
-     * Adds a result.
-     * @param r A single SPARQL SELECT result object.
-     */
-    public final void addResult(final Result r)
-    {
-        synchronized (this)
-        {
-            selectResultList.add(r);
-        }
-    }
-
-    /**
-     * Holder for construct query results.
-     */
-    private transient Model mergedResults;
-
-    /**
-     * Adds a construct query results model.
-     * @param m Model to add
-     */
-    public final void addResult(final Model m)
-    {
-        synchronized (this)
-        {
-            mergedResults.add(m);
-        }
-    }
-
-    /**
-     * A Container for ASK query responses.
-     */
-    private transient List<Boolean> askResultList;
-
-    /**
-     * Stores the results of an ASK query.
-     * @param b Boolean value of query
-     */
-    public final void addResult(final Boolean b)
-    {
-        synchronized (this)
-        {
-            askResultList.add(b);
-        }
-    }
-
-    /**
-     * A container for SPARQL SELECT results gathered by the threads.
-     */
-    private transient List<String> updateResultList;
-
-    /**
-     * Stores the results of an ASK query.
-     * @param s String query result
-     */
-    public final void addResult(final String s)
-    {
-        synchronized (this)
-        {
-            updateResultList.add(s);
-        }
-    }
-
-    /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
      * @param query SPARQL CONSTRUCT query
      * @param endpoints List of endpoints to conduct query accross
@@ -217,8 +135,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         LOG.info("handling CONSTRUCT");
 
-        fetchModelsAndWait(query, endpoints);
-        return mergeModelResults(query);
+        Model model = fetchModelsAndWait(query, endpoints);
+        return mergeModelResults(model, query);
     }
 
     /**
@@ -232,7 +150,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         LOG.info("handling SELECT");
 
-        fetchResultSetAndWait(query, endpoints);
+        List<Result> selectResultList = fetchResultSetAndWait(query, endpoints);
 
         StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
 
@@ -266,7 +184,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         if (query.hasOrderBy())
         {
-            sortResults(query.getOrderBy());
+            sortResults(selectResultList, query.getOrderBy());
         }
 
         for (int i = 0; i < selectResultList.size(); i++)
@@ -315,8 +233,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         LOG.info("handling ASK");
 
-        askResultList = new LinkedList<Boolean>();
-        doneSignal = new CountDownLatch(endpoints.size());
+        List <Boolean> askResultList = new LinkedList<Boolean>();
+        CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -324,7 +242,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchBooleanResponseTask(this, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchBooleanResponseTask(this, askResultList, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -370,8 +288,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         LOG.info("handling DESCRIBE");
 
-        fetchModelsAndWait(query, endpoints);
-        return mergeModelResults(query);
+        Model model = fetchModelsAndWait(query, endpoints);
+        return mergeModelResults(model, query);
     }
 
     /**
@@ -385,18 +303,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     {
         LOG.info("handling UPDATE");
 
-        updateResultList = new ArrayList<String>();
-
-        fetchUpdateQueryAndWait(s, endpoint);
-
-        String result = "";
-        if (updateResultList.size() == 1)
-        {
-            result = updateResultList.get(0);
-        }
-
-        updateResultList.clear();
-
+        String result = fetchUpdateQueryAndWait(s, endpoint);
         return result;
     }
 
@@ -405,7 +312,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @return Model serialised as a string
      */
-    private String mergeModelResults(final Query query)
+    private String mergeModelResults(Model mergedResults, final Query query)
     {
 
         // now the model has been generated, run the query on the merged results
@@ -442,12 +349,12 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @param endpoints Set of endpoints
      */
-    private void fetchModelsAndWait(final Query query, final List<Endpoint> endpoints)
+    private Model fetchModelsAndWait(final Query query, final List<Endpoint> endpoints)
     {
         // start a new model
-        mergedResults = ModelFactory.createDefaultModel();
+        Model mergedResults = ModelFactory.createDefaultModel();
 
-        doneSignal = new CountDownLatch(endpoints.size());
+        CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -455,7 +362,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchModelResponseTask(this, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchModelResponseTask(this, mergedResults, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -467,6 +374,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         {
             LOG.warn("Error while waiting on threads", ex);
         }
+
+        return mergedResults;
     }
 
     /**
@@ -475,10 +384,10 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @param endpoints Set of endpoints
      */
-    private void fetchResultSetAndWait(final Query query, final List<Endpoint> endpoints)
+    private List<Result> fetchResultSetAndWait(final Query query, final List<Endpoint> endpoints)
     {
-        selectResultList = new LinkedList<Result>();
-        doneSignal = new CountDownLatch(endpoints.size());
+        List<Result> selectResultList = new LinkedList<Result>();
+        CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -486,7 +395,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchResultSetResponseTask(this, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchResultSetResponseTask(this, selectResultList, query.serialize(), url, doneSignal));
         }
 
         // block until all threads have finished
@@ -501,6 +410,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         // once threads have compeleted, construct results
         LOG.debug("Threads completed, constructing results");
+
+        return selectResultList;
     }
 
    /**
@@ -509,15 +420,17 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query U{DATE Query (INSERT, DELETE, etc)
      * @param endpoints Set of endpoints
      */
-    private void fetchUpdateQueryAndWait(final String query, final Endpoint endpoint)
+    private String fetchUpdateQueryAndWait(final String query, final Endpoint endpoint)
     {
-        doneSignal = new CountDownLatch(1);
+        CountDownLatch doneSignal = new CountDownLatch(1);
+
+        StringBuffer result = new StringBuffer();
 
         // fire off a thread to handle quering each endpoint
         String url = endpoint.getLocation();
         LOG.debug("Querying " + url);
 
-        taskExecutor.execute(new FetchUpdateResponseTask(this, query, url, doneSignal));
+        taskExecutor.execute(new FetchUpdateResponseTask(this, result, query, url, doneSignal));
 
         // block until all threads have finished
         try
@@ -528,13 +441,15 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         {
             LOG.warn("Error while waiting on thread", ex);
         }
+
+        return result.toString();
     }
 
     /**
      * Uses Jena's SortedResultSet to sort the results.
      * @param conditions The sort conditions from the query
      */
-    private void sortResults(final List<SortCondition> conditions)
+    private void sortResults(List<Result> selectResultList, final List<SortCondition> conditions)
     {
         Comparator<Binding> comparator = new BindingComparator(conditions);
         SortedSet<Binding> sorted = new TreeSet<Binding>(comparator);
@@ -560,6 +475,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             }
         }
 
-        selectResultList = sortedResultList;
+        selectResultList.clear();
+        selectResultList.addAll(sortedResultList);
     }
 }

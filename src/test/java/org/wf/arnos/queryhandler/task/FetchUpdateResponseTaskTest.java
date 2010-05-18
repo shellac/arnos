@@ -72,7 +72,10 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
+        StringBuffer result = new StringBuffer();
+        
         FetchUpdateResponseTask fetcher = new FetchUpdateResponseTask(mockThreadedQueryHandler,
+                result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
                 doneSignal)
@@ -89,13 +92,13 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
                 andReturn(queryResult);
 
-        mockThreadedQueryHandler.addResult(queryResult);
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals("Result is as expected", queryResult, result.toString());
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
@@ -110,14 +113,16 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
         
         CountDownLatch doneSignal = new CountDownLatch(1);
 
+        StringBuffer result = null;
+
         FetchUpdateResponseTask fetcher = new FetchUpdateResponseTask(mockThreadedQueryHandler,
+                result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
         assertTrue(wrapper instanceof JenaQueryWrapper);
-
 
         assertEquals(null,fetcher.getFromCache());
     }
@@ -130,7 +135,10 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
 
         CountDownLatch doneSignal = new CountDownLatch(1);
 
+        StringBuffer result = null;
+
         FetchUpdateResponseTask fetcher = new FetchUpdateResponseTask(mockThreadedQueryHandler,
+                result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
                 doneSignal)
@@ -152,6 +160,8 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
         fetcher.run();
 
         verifyAll();
+
+        assertNull(result);
 
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
     }

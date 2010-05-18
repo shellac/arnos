@@ -51,7 +51,7 @@ abstract class AbstractResponseTask implements Runnable
     private static Log LOG;
 
     /**
-     * Handle to query processor for posting results back.
+     * Handle to query processor for caching
      */
     protected final transient QueryHandlerInterface handler;
 

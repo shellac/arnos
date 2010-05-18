@@ -33,6 +33,7 @@ package org.wf.arnos.queryhandler.task;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +52,11 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
     private static final Log LOG = LogFactory.getLog(FetchResultSetResponseTask.class);
 
     /**
+     * A reference to the list of results
+     */
+    private List<Result> resultObject;
+
+    /**
      * Constructor for thread.
      * @param paramHandler handling class
      * @param paramQuery SPARQL query
@@ -58,11 +64,13 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
     public FetchResultSetResponseTask(final QueryHandlerInterface paramHandler,
+                                                final List<Result> resultObject,
                                                 final String paramQuery,
                                                 final String paramUrl,
                                                 final CountDownLatch paramDoneSignal)
     {
         super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        this.resultObject = resultObject;
     }
 
     /**
@@ -81,10 +89,14 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
             {
                 LOG.debug("Cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
+
+                LOG.debug("Got " + resultsString.length());
                 putInCache(resultsString);
             }
-            
-            LOG.debug("Cache hit. Got:"+resultsString);
+            else
+            {
+                LOG.debug("Cache hit");
+            }
 
             if (resultsString != null && resultsString.length() > 0)
             {
@@ -93,7 +105,10 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
                 while (resultSet != null && resultSet.hasNext())
                 {
                     QuerySolution sol = resultSet.next();
-                    handler.addResult(new Result(sol));
+                    synchronized(handler)
+                    {
+                        resultObject.add(new Result(sol));
+                    }
                 }
             }
         }

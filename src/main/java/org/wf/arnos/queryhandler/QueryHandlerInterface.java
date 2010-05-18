@@ -105,28 +105,4 @@ public interface QueryHandlerInterface
      * @return Boolean, <code>true</code> if a cache exists, <code>false</code> otherwise
      */
     boolean hasCache();
-
-    /**
-     * Adds a construct query results model.
-     * @param m Model to add
-     */
-    void addResult(Model m);
-
-    /**
-     * Adds a result.
-     * @param r A single SPARQL SELECT result object.
-     */
-    void addResult(Result r);
-
-    /**
-     * Stores the results of an ASK query.
-     * @param b Boolean value of query result
-     */
-    void addResult(Boolean b);
-
-    /**
-     * Stores the results of an UPDATE query.
-     * @param s String value of result
-     */
-    void addResult(String s);
 }

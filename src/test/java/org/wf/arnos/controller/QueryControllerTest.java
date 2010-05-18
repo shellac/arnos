@@ -78,7 +78,7 @@ public class QueryControllerTest
 
         ThreadedQueryHandler queryHandler = new ThreadedQueryHandler();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setMaxPoolSize(10);
+        executor.setCorePoolSize(10);
         executor.initialize();
         queryHandler.setTaskExecutor(executor);
 

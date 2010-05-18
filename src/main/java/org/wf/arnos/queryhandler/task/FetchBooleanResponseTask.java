@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.queryhandler.task;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +49,11 @@ public class FetchBooleanResponseTask extends AbstractResponseTask
     private static final Log LOG = LogFactory.getLog(FetchBooleanResponseTask.class);
 
     /**
+     * A reference to the list of results 
+     */
+    private List <Boolean> askResults;
+
+    /**
      * Constructor for thread.
      * @param paramHandler handling class
      * @param paramQuery SPARQL query
@@ -55,11 +61,13 @@ public class FetchBooleanResponseTask extends AbstractResponseTask
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
     public FetchBooleanResponseTask(final QueryHandlerInterface paramHandler,
+                                                List <Boolean> askResultList,
                                                 final String paramQuery,
                                                 final String paramUrl,
                                                 final CountDownLatch paramDoneSignal)
     {
         super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        this.askResults = askResultList;
     }
 
     /**
@@ -88,7 +96,10 @@ public class FetchBooleanResponseTask extends AbstractResponseTask
                 ans = Boolean.valueOf(resultsString);
             }
 
-            handler.addResult(ans);
+            synchronized(handler)
+            {
+                askResults.add(ans);
+            }
         }
         catch (Exception ex)
         {

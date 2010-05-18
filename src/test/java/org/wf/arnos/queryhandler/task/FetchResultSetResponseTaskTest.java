@@ -32,6 +32,8 @@
 package org.wf.arnos.queryhandler.task;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.Before;
@@ -79,7 +81,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL, selectQuery);
 
+        List <Result> results = new LinkedList<Result>();
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
@@ -99,14 +103,13 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
-        mockThreadedQueryHandler.addResult(isA(Result.class));
-        expectLastCall().times(7);
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals("Got expected number of results",7, results.size());
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
@@ -119,7 +122,10 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
 
+        List <Result> results = new LinkedList<Result>();
+
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
@@ -143,9 +149,6 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
-
-        mockThreadedQueryHandler.addResult(isA(Result.class));
-        expectLastCall().times(7);
         
         replayAll();
 
@@ -153,6 +156,8 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         verifyAll();
 
+        assertEquals("Got expected number of results",7, results.size());
+        
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
@@ -169,14 +174,15 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
-        mockThreadedQueryHandler.addResult(isA(Result.class));
-        expectLastCall().times(7);
-
+        results.clear();
+        
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals("Got expected number of results",7, results.size());
     }
 
     @Test
@@ -193,8 +199,11 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         {
             fail("Unable to create cache");
         }
-        
+
+        List <Result> results = new LinkedList<Result>();
+
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
@@ -218,15 +227,13 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
-        mockThreadedQueryHandler.addResult(isA(Result.class));
-        expectLastCall().times(7);
-
         replayAll();
 
         fetcher.run();
 
         verifyAll();
 
+        assertEquals("Got expected number of results",7, results.size());
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
@@ -244,14 +251,15 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
 
-        mockThreadedQueryHandler.addResult(isA(Result.class));
-        expectLastCall().times(7);
+        results.clear();
         
         replayAll();
 
         fetcher.run();
 
         verifyAll();
+
+        assertEquals("Got expected number of results",7, results.size());
 
         assertTrue(cache.contains(fetcher.cacheKey));
     }
@@ -262,7 +270,10 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         System.out.println("testInstantiation");
         // for complete coverage, test creating the original object
 
-        FetchModelResponseTask fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+        List <Result> results = new LinkedList<Result>();
+
+        FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal);
@@ -277,7 +288,10 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testExceptionThrowing");
 
+        List <Result> results = new LinkedList<Result>();
+
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)
@@ -312,7 +326,10 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testExceptionHandling");
 
+        List <Result> results = new LinkedList<Result>();
+
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,
+                results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
                 doneSignal)

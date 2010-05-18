@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -174,5 +175,31 @@ public class EndpointControllerTest {
         model = new ExtendedModelMap();
         assertEquals("",controller.removeEndpoint(PROJECT_NAME, "", (Model)model));
         assertEquals("Missing endpoint",model.asMap().get("message"));
+    }
+
+    @Test
+    public void testDisableDebugMode()
+    {
+        System.out.println("testDisableDebugMode");
+
+        org.apache.log4j.LogManager.getLogger("org.wf.arnos.controller.EndpointController").setLevel(org.apache.log4j.Level.OFF);
+        Model model = new ExtendedModelMap();
+
+        try
+        {
+            controller.listEndpoints("", model);
+            fail("Exception not thrown");
+        }
+        catch (Exception e){}
+        try
+        {
+            controller.listEndpoints(PROJECT_NAME+"missing", model);
+            fail("Exception not thrown");
+        }
+        catch (Exception e){}
+        controller.addEndpoint(PROJECT_NAME, Sparql.ENDPOINT1_URL, model);
+        controller.removeEndpoint(PROJECT_NAME, Sparql.ENDPOINT1_URL, model);
+
+        assertEquals(1,getNumOfEndpoints());
     }
 }

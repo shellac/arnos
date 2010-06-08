@@ -76,8 +76,6 @@ public class EndpointController
     @RequestMapping(value = "")
     public final String listEndpoints(@PathVariable final String projectName, final Model model)
     {
-        ArrayList <String> endpoints = new ArrayList<String>();
-
         checkProject(projectName);
 
         if (logger.isDebugEnabled())
@@ -86,12 +84,8 @@ public class EndpointController
         }
 
         List<Endpoint> endpointList = manager.getEndpoints(projectName);
-        for (Endpoint ep : endpointList)
-        {
-            endpoints.add(ep.getLocation());
-        }
 
-        model.addAttribute("endpoints", endpoints);
+        model.addAttribute("endpoints", endpointList);
 
         return "";
     }
@@ -121,7 +115,6 @@ public class EndpointController
             checkProject(projectName);
 
             manager.addEndpoint(projectName, endpoint);
-//            message = "endpoint '" + endpoint + "' added";
 
             Endpoint ep = new Endpoint(endpoint);
             result = ep.getIdentifier();
@@ -141,7 +134,7 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return String representing view name
      */
-    @RequestMapping(value = "/remove", method = RequestMethod.POST)
+    @RequestMapping(value = "/remove", method = RequestMethod.DELETE)
     public final String removeEndpoint(@PathVariable final String projectName,
                                                        @RequestParam("url") final String endpoint,
                                                       final Model model)

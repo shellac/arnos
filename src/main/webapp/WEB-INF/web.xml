@@ -13,6 +13,14 @@
         <param-name>webAppRootKey</param-name>
         <param-value>arnos</param-value>
     </context-param>
+    <filter>
+        <filter-name>HiddenHttpMethodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>HiddenHttpMethodFilter</filter-name>
+        <url-pattern>/projects/*</url-pattern>
+    </filter-mapping>
     <listener>
         <description>Spring Log4J listener configuration</description>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>

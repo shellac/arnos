@@ -54,6 +54,7 @@
                             <property name="aliases">
                                 <map>
                                     <entry key="endpoint" value="org.wf.arnos.controller.model.Endpoint" />
+                                    <entry key="project" value="org.wf.arnos.controller.model.Project" />
                                 </map>
                             </property>
                          </bean>

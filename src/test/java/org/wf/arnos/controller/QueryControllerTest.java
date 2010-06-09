@@ -204,6 +204,11 @@ public class QueryControllerTest
         controller.executeGetQuery(PROJECT_NAME, duplicateEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_duplicateEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
+
+        // test with post request
+        controller.executePostQuery(PROJECT_NAME, duplicateEndpoints, QueryString, writer);
+        buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("error"));
     }
 
     @Test

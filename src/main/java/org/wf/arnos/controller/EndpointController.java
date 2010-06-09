@@ -73,7 +73,7 @@ public class EndpointController
      * @param model Supplied model to return data
      * @return View name
      */
-    @RequestMapping(value = "")
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public final String listEndpoints(@PathVariable final String projectName, final Model model)
     {
         checkProject(projectName);

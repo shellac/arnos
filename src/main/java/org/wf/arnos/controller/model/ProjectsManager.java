@@ -302,7 +302,8 @@ public class ProjectsManager
     {
         if (fileName == null) return false;
         
-        XStream xstream = new XStream();
+        XStream xstream = getXStream();
+        
         String xmlString = xstream.toXML(projects);
 
         File file = new File(fileName);
@@ -332,7 +333,8 @@ public class ProjectsManager
         {
             String xmlString = FileUtils.readFileToString(file);
 
-            XStream xstream = new XStream();
+            XStream xstream = getXStream();
+
             try
             {
                 projects = ((List<Project>) xstream.fromXML(xmlString));
@@ -352,5 +354,17 @@ public class ProjectsManager
             if (logger != null) logger.warn("Unable to load data from persistant storage layer (" + file.getAbsolutePath() + "): " + ioe.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Utility function to obtain an xstream object and automatically set the appropiate aliases
+     * @return XStream object
+     */
+    private XStream getXStream()
+    {
+        XStream xstream = new XStream();
+        xstream.alias("endpoint", Endpoint.class);
+        xstream.alias("project", Project.class);
+        return xstream;
     }
 }

@@ -234,11 +234,15 @@ WHERE
               });
               
               $("form").submit(function() {
-                  var action = this.action;
+                  if (typeof this.modified == "undefined")
+                  {
+                      var action = this.action;
 
-                  action = action.substring(action.lastIndexOf(path)+ path.length);
+                      action = action.substring(action.lastIndexOf(path)+ path.length);
 
-                  this.action = $("#serveraddress").val() + "/" + $("#project").val() + action;
+                      this.action = $("#serveraddress").val() + "/" + $("#project").val() + action;
+                      this.modified = true;
+                  }
               });
 
             });

@@ -126,7 +126,7 @@ public class QueryControllerTest
     public void testExecuteQueryAcrossAllEndpoints()
     {
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, QueryString, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
         StringBuffer buffer = writer.getBuffer();
         int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
         assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
@@ -137,7 +137,7 @@ public class QueryControllerTest
     {
         controller.cacheHandler = null;
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, QueryString, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
         StringBuffer buffer = writer.getBuffer();
         int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
         assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
@@ -153,7 +153,7 @@ public class QueryControllerTest
         String noEndPoints = "";
         int expected_noEndPoints = 0;
         
-        controller.executeQuery(PROJECT_NAME, noEndPoints, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, noEndPoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_noEndPoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -161,7 +161,7 @@ public class QueryControllerTest
         // test with the first endpoint
         String oneEndpoint = ep1.getIdentifier();
         int expected_oneEndpoint = 7;
-        controller.executeQuery(PROJECT_NAME, oneEndpoint, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, oneEndpoint, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_oneEndpoint,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -169,7 +169,7 @@ public class QueryControllerTest
         // test with endpoints 1 & 2
         String twoEndpoints = ep1.getIdentifier() + "+" + ep2.getIdentifier();
         int expected_twoEndpoints = 7;
-        controller.executeQuery(PROJECT_NAME, twoEndpoints, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, twoEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_twoEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -177,7 +177,7 @@ public class QueryControllerTest
         // test with endpoints 1 & 3
         String anotherTwoEndpoints = ep1.getIdentifier() + "+" + ep3.getIdentifier();
         int expected_anotherTwoEndpoints = Sparql.MAX_LIMIT;
-        controller.executeQuery(PROJECT_NAME, anotherTwoEndpoints, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, anotherTwoEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_anotherTwoEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -185,7 +185,7 @@ public class QueryControllerTest
         // test with endpoints 2 & 3
         String thirdEndpoint = ep2.getIdentifier() + "+" + ep3.getIdentifier();
         int expected_thirdEndpoint = 4;
-        controller.executeQuery(PROJECT_NAME, thirdEndpoint, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, thirdEndpoint, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_thirdEndpoint,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -193,7 +193,7 @@ public class QueryControllerTest
         // test with all endpoints 1, 2 & 3
         String allEndpoints = ep1.getIdentifier() + "+" + ep2.getIdentifier() + "+" + ep3.getIdentifier();
         int expected_allEndpoints = Sparql.MAX_LIMIT;
-        controller.executeQuery(PROJECT_NAME, allEndpoints, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, allEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_allEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
         writer = new StringWriter();
@@ -201,7 +201,7 @@ public class QueryControllerTest
         // test with duplicate endpoints 3, 2 & 3
         String duplicateEndpoints = ep3.getIdentifier() + "+" + ep2.getIdentifier() + "+" + ep3.getIdentifier();
         int expected_duplicateEndpoints = 8;
-        controller.executeQuery(PROJECT_NAME, duplicateEndpoints, QueryString, writer);
+        controller.executeGetQuery(PROJECT_NAME, duplicateEndpoints, QueryString, writer);
         buffer = writer.getBuffer();
         assertEquals(expected_duplicateEndpoints,StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">"));
     }
@@ -212,7 +212,7 @@ public class QueryControllerTest
         StringWriter writer = new StringWriter();
         try
         {
-            controller.executeQuery(null, QueryString, writer);
+            controller.executeQueryAcrossAllEndpoints(null, QueryString, writer);
             fail("ResourceNotFoundException not thrown");
         }
         catch (ResourceNotFoundException e)
@@ -222,7 +222,7 @@ public class QueryControllerTest
 
         try
         {
-            controller.executeQuery(PROJECT_NAME, QueryString, null);
+            controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, null);
         }
         catch (Exception e)
         {
@@ -231,7 +231,7 @@ public class QueryControllerTest
 
         try
         {
-            controller.executeQuery(PROJECT_NAME+"other", QueryString, writer);
+            controller.executeQueryAcrossAllEndpoints(PROJECT_NAME+"other", QueryString, writer);
             fail("ResourceNotFoundException not thrown");
         }
         catch (ResourceNotFoundException e)
@@ -240,14 +240,14 @@ public class QueryControllerTest
         }
 
         writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, null, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, null, writer);
         StringBuffer buffer = writer.getBuffer();
         assertEquals("",buffer.toString());
         
         writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, "", writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, "", writer);
         buffer = writer.getBuffer();
-        assertEquals("",buffer.toString());
+        assertTrue(buffer.toString().toLowerCase().contains("error"));
     }
 
     @Test
@@ -255,7 +255,7 @@ public class QueryControllerTest
     {
         String query = Sparql.ASK_QUERY_ALICE;
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, query, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("true"));
     }
@@ -265,7 +265,7 @@ public class QueryControllerTest
     {
         String query = Sparql.DESCRIBE_QUERY_BOOK_2;
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, query, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("j.k. rowling"));
     }
@@ -275,7 +275,7 @@ public class QueryControllerTest
     {
         String query = Sparql.CONSTRUCT_QUERY_BOOKS;
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, query, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("semantic web programming"));
     }
@@ -285,13 +285,20 @@ public class QueryControllerTest
     {
         String query = Sparql.UPDATE_QUERY;
         StringWriter writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, query, writer);
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("error"));
 
         writer = new StringWriter();
-        controller.executeQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
+        controller.executePostQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
         buffer = writer.getBuffer();
         assertEquals(Sparql.UPDATE_QUERY_RESULT, buffer.toString());
+
+        // test sending an update as a get
+        writer = new StringWriter();
+        buffer = writer.getBuffer();
+        controller.executeGetQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
+        buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("error"));
     }
 }

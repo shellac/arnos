@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
@@ -88,8 +89,8 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/query")
-    public final void executeQuery(@PathVariable final String projectName,
+    @RequestMapping(value = "/{projectName}/query", method = RequestMethod.GET)
+    public final void executeQueryAcrossAllEndpoints(@PathVariable final String projectName,
                                                  @RequestParam("query") final String query,
                                                  final java.io.Writer writer)
     {
@@ -117,13 +118,12 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/{endpoints}/query")
-    public final void executeQuery(@PathVariable final String projectName,
+    @RequestMapping(value = "/{projectName}/{endpoints}/query", method = RequestMethod.GET)
+    public final void executeGetQuery(@PathVariable final String projectName,
                                                 @PathVariable final String endpointList,
                                                  @RequestParam("query") final String query,
                                                  final java.io.Writer writer)
     {
-        System.out.println("endpointList:" + endpointList);
         checkProject(projectName);
 
         List<Endpoint> endpoints = manager.getEndpoints(projectName);
@@ -138,7 +138,6 @@ public class QueryController
             {
                 if (ep.getIdentifier().equals(id))
                 {
-                    System.out.println("Adding id");
                     endpointSubset.add(ep);
                 }
             }
@@ -155,6 +154,68 @@ public class QueryController
         {
             logger.error("Unable to write output", e);
         }
+    }
+
+    /**
+     * Runs the provided query over endpoints listed in the endpoints variable.
+     * @param projectName Name of project
+     * @param endpointList set of endpoint ids seperated by plus symbol. E.g. id1+id2+id3
+     * @param query SPARQL Query
+     * @param writer Writer to send results to
+     */
+    @RequestMapping(value = "/{projectName}/{endpoints}/query", method = RequestMethod.POST)
+    public final void executePostQuery(@PathVariable final String projectName,
+                                                 @PathVariable final String endpointList,
+                                                 @RequestParam("query") final String query,
+                                                 final java.io.Writer writer)
+    {
+        checkProject(projectName);
+
+        List<Endpoint> endpoints = manager.getEndpoints(projectName);
+
+        List<Endpoint> endpointSubset = new ArrayList();
+
+        String [] endpointIDs = endpointList.split("\\+");
+
+        for(String id : endpointIDs)
+        {
+            for (Endpoint ep : endpoints)
+            {
+                if (ep.getIdentifier().equals(id))
+                {
+                    endpointSubset.add(ep);
+                }
+            }
+        }
+
+        String result;
+        if (endpointSubset.size() != 1)
+        {
+            result = "<error>POST method should only be made to a single endpoint</error>";
+        }
+        else if (isUpdateQuery(query))
+        {
+            logger.info("QueryType is SPARQL UPDATE");
+            result = queryHandler.handleUpdate(query, endpointSubset.get(0));
+        }
+        else
+        {
+            result = "<error>Incorrect http method used</error>";
+            logger.error(result);
+        }
+
+        try
+        {
+            writer.append(result);
+            writer.flush();
+        }
+        catch (Exception e)
+        {
+            logger.error("Unable to write output", e);
+        }
+
+        // flush cache as an update has been made to endpoints
+        // could this be limited to specific endpoint?
     }
 
     /**
@@ -224,17 +285,8 @@ public class QueryController
             }
             catch (QueryParseException qpe)
             {
-                if (isUpdateQuery(queryString))
-                {
-                    logger.info("QueryType is SPARQL UPDATE");
-                    if (endpoints.size() != 1) return "Error: UPDATE Query can only run over a single endpoint";
-                    result = queryHandler.handleUpdate(queryString, endpoints.get(0));
-                }
-                else
-                {
-                    logger.error(qpe.getMessage());
-                    result = "";
-                }
+                logger.error(qpe.getMessage());
+                result = "<error>Unknown query type</error>";
             }
         } // END if (result == null)
 

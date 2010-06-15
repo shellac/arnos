@@ -154,6 +154,7 @@ abstract class AbstractResponseTask implements Runnable
         if (handler.hasCache())
         {
             LOG.debug("Putting result in cache");
+            
             handler.getCache().put(projectName, cacheKey, s);
         }
     }

@@ -90,6 +90,7 @@ abstract class AbstractResponseTask implements Runnable
      * @param paramHandler handling class
      * @param paramQuery SPARQL query
      * @param paramUrl Endpoint url
+     * @param projectName Name of project
      * @param paramDoneSignal Latch signal to use to notify parent when completed
      */
     protected AbstractResponseTask(final QueryHandlerInterface paramHandler,

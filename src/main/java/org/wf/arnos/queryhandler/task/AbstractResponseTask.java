@@ -68,7 +68,7 @@ abstract class AbstractResponseTask implements Runnable
     /**
      * Name of project used for project-specific caching.
      */
-    protected final transient String projectName;
+    protected final transient String project;
 
     /**
      * A latch to signal when thread completed.
@@ -105,7 +105,7 @@ abstract class AbstractResponseTask implements Runnable
         this.handler = paramHandler;
         this.query = paramQuery;
         this.url = paramUrl;
-        this.projectName = projectName;
+        this.project = projectName;
         this.doneSignal = paramDoneSignal;
 
         // calculate the key to use for cache lookup.
@@ -136,11 +136,11 @@ abstract class AbstractResponseTask implements Runnable
     public String getFromCache()
     {
         // check cache copy
-        if (handler.hasCache() && handler.getCache().contains(projectName, cacheKey))
+        if (handler.hasCache() && handler.getCache().contains(project, cacheKey))
         {
             LOG.debug("Lookup query from cache");
 
-            return handler.getCache().get(projectName, cacheKey);
+            return handler.getCache().get(project, cacheKey);
         }
         return null;
     }
@@ -155,7 +155,7 @@ abstract class AbstractResponseTask implements Runnable
         {
             LOG.debug("Putting result in cache");
             
-            handler.getCache().put(projectName, cacheKey, s);
+            handler.getCache().put(project, cacheKey, s);
         }
     }
 

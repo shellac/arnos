@@ -57,6 +57,7 @@ public class MultithreadedQueryHandlerTest {
 
     CountDownLatch doneSignal;
     ThreadPoolTaskExecutor taskExecutor;
+    String projectName = "testProject";
 
     static int limit = 10;
     static HashMap<Endpoint,Integer> matrix = new HashMap<Endpoint,Integer>();
@@ -197,7 +198,7 @@ public class MultithreadedQueryHandlerTest {
         private void issueRequest(List<Endpoint> endpoints, int expectedResults)
         {
 
-            String result = queryHandler.handleSelect(sparqlQuery, endpoints);
+            String result = queryHandler.handleSelect(projectName, sparqlQuery, endpoints);
             ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
             int numResults = 0;

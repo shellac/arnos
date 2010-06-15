@@ -67,9 +67,10 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
                                                 final List<Result> resultObject,
                                                 final String paramQuery,
                                                 final String paramUrl,
+                                                final String projectName,
                                                 final CountDownLatch paramDoneSignal)
     {
-        super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        super(paramHandler, paramQuery, paramUrl, projectName, paramDoneSignal);
         this.resultObject = resultObject;
     }
 
@@ -89,7 +90,7 @@ public class FetchResultSetResponseTask extends AbstractResponseTask
             {
                 LOG.debug("Cache miss");
                 resultsString = getQueryWrapper().execQuery(query, url);
-
+                
                 LOG.debug("Got " + resultsString.length());
                 putInCache(resultsString);
             }

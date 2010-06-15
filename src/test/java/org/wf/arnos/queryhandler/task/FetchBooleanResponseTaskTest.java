@@ -63,6 +63,8 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
     CountDownLatch doneSignal;
 
+    String projectName = "testProject";
+
     @Before
     public void setUp()
     {
@@ -83,6 +85,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
                 askResults,
                 Sparql.ENDPOINT1_URL,
                 askQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -163,6 +166,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
                 askResults,
                 Sparql.ENDPOINT1_URL,
                 askQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -172,7 +176,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
             }
         };
 
-        assertFalse(cache.contains(fetcher.cacheKey));
+        assertFalse(cache.contains(projectName,fetcher.cacheKey));
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
@@ -196,7 +200,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // check the results has been put into the cache
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName,fetcher.cacheKey));
 
         askResults.clear();
 
@@ -216,7 +220,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         verifyAll();
 
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName,fetcher.cacheKey));
         assertEquals("Got the expected number of results",1,askResults.size());
         assertTrue("Got the expected result", askResults.get(0));
 
@@ -236,7 +240,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
         verifyAll();
 
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName,fetcher.cacheKey));
         assertEquals("Got the expected number of results",2,askResults.size());
         assertTrue("Got the expected result", askResults.get(1));
     }
@@ -252,6 +256,7 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
                 askResults,
                 "err"+Sparql.ENDPOINT1_URL,
                 askQuery,
+                projectName,
                 doneSignal)
         {
             @Override

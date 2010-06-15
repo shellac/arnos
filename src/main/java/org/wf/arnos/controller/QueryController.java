@@ -196,7 +196,7 @@ public class QueryController
         else if (isUpdateQuery(query))
         {
             logger.info("QueryType is SPARQL UPDATE");
-            result = queryHandler.handleUpdate(query, endpointSubset.get(0));
+            result = queryHandler.handleUpdate(projectName, query, endpointSubset.get(0));
             // clear the cache elements for this project
             if (cacheHandler != null)
             {
@@ -238,7 +238,7 @@ public class QueryController
 
         String cacheString = generateCacheKey(project, queryString, endpoints);
 
-        if (cacheHandler != null)
+        if (cacheHandler != null && cacheHandler.contains(project, cacheString) )
         {
             logger.debug("Fetching result from cache");
             return cacheHandler.get(project, cacheString);
@@ -257,19 +257,19 @@ public class QueryController
 
                 if (query.getQueryType() == Query.QueryTypeSelect)
                 {
-                    result = queryHandler.handleSelect(query, endpoints);
+                    result = queryHandler.handleSelect(project, query, endpoints);
                 }
                 else if (query.getQueryType() == Query.QueryTypeConstruct)
                 {
-                    result = queryHandler.handleConstruct(query, endpoints);
+                    result = queryHandler.handleConstruct(project, query, endpoints);
                 }
                 else if (query.getQueryType() == Query.QueryTypeAsk)
                 {
-                    result = queryHandler.handleAsk(query, endpoints);
+                    result = queryHandler.handleAsk(project, query, endpoints);
                 }
                 else if (query.getQueryType() == Query.QueryTypeDescribe)
                 {
-                    result = queryHandler.handleDescribe(query, endpoints);
+                    result = queryHandler.handleDescribe(project, query, endpoints);
                 }
                 else
                 {

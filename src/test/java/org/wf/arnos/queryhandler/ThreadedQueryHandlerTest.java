@@ -61,6 +61,8 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
     Query askQuery = QueryFactory.create(Sparql.ASK_QUERY_ALICE);
     Query describeQuery = QueryFactory.create(Sparql.DESCRIBE_QUERY_BOOK_2);
 
+    String projectName = "testProject";
+    
     // maximum number of results we're expecting
     private static final int MAX_LIMIT = 10;
 
@@ -117,7 +119,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         executor.initialize();
         queryHandler.setTaskExecutor(executor);
 
-        String result = queryHandler.handleSelect(selectQuery, endpoints);
+        String result = queryHandler.handleSelect(projectName, selectQuery, endpoints);
 
         ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
@@ -131,7 +133,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         // now add another result set
         endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
-        result = queryHandler.handleSelect(selectQuery, endpoints);
+        result = queryHandler.handleSelect(projectName, selectQuery, endpoints);
         results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
         numResults = 0;
@@ -144,7 +146,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         // remove query limit
         Query noLimitSelectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS_NO_LIMIT);
-        result = queryHandler.handleSelect(noLimitSelectQuery, endpoints);
+        result = queryHandler.handleSelect(projectName, noLimitSelectQuery, endpoints);
         results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
         numResults = 0;
@@ -175,7 +177,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         queryHandler.setTaskExecutor(executor);
 
         Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE);
-        String result = queryHandler.handleSelect(query, endpoints);
+        String result = queryHandler.handleSelect(projectName, query, endpoints);
 
         ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
@@ -189,7 +191,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         // now use the distinct query to filter results
         query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_DISTINCT);
-        result = queryHandler.handleSelect(query, endpoints);
+        result = queryHandler.handleSelect(projectName, query, endpoints);
         results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
         numResults = 0;
@@ -219,7 +221,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         queryHandler.setTaskExecutor(executor);
 
         Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_ORDERED);
-        String result = queryHandler.handleSelect(query, endpoints);
+        String result = queryHandler.handleSelect(projectName, query, endpoints);
 
         ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 
@@ -256,7 +258,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         queryHandler.setTaskExecutor(executor);
 
         String queryBefore = describeQuery.toString();
-        String result = queryHandler.handleDescribe(describeQuery, endpoints);
+        String result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
 
         assertEquals(queryBefore,describeQuery.toString());
 
@@ -266,7 +268,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         assertFalse(result.contains("Scholastic Paperbacks"));
 
         // run the same query again to make sure we get the same results
-        result = queryHandler.handleDescribe(describeQuery, endpoints);
+        result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
 
         assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
         assertTrue(result.contains("J.K. Rowling"));
@@ -276,7 +278,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         // add our slightly more knowledgeable endpoint
         endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
 
-        result = queryHandler.handleDescribe(describeQuery, endpoints);
+        result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
 
         assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
         assertTrue(result.contains("J.K. Rowling"));
@@ -299,14 +301,14 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         executor.initialize();
         queryHandler.setTaskExecutor(executor);
 
-        String result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        String result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
 
         assertEquals(7,StringUtils.countMatches(result,"rdf:about"));
 
         endpoints.remove(new Endpoint(Sparql.ENDPOINT1_URL));
         endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
 
-        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
 
         assertEquals(3,StringUtils.countMatches(result,"rdf:about"));
 
@@ -315,11 +317,11 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         constructQuery.setLimit(10);
         constructQuery.setDistinct(false);
-        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
         assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
         
         constructQuery.setDistinct(true);
-        result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
         assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
     }
 
@@ -343,7 +345,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         String query = Sparql.UPDATE_QUERY;
         String expectedResult = Sparql.UPDATE_QUERY_RESULT;
 
-        String result = queryHandler.handleUpdate(query, new Endpoint(Sparql.ENDPOINT1_URL));
+        String result = queryHandler.handleUpdate(projectName, query, new Endpoint(Sparql.ENDPOINT1_URL));
 
         assertEquals("Results non-distinct people",expectedResult,result);
     }
@@ -369,7 +371,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         queryHandler.setTaskExecutor(executor);
 
         long start = System.currentTimeMillis();
-        String result = queryHandler.handleDescribe(constructQuery.cloneQuery(), endpoints);
+        String result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
         long end = System.currentTimeMillis();
 
         // check we've got the result we expected
@@ -382,7 +384,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         System.out.println("Testing timeout with describe");
 
         start = System.currentTimeMillis();
-        result = queryHandler.handleDescribe(describeQuery, endpoints);
+        result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
         end = System.currentTimeMillis();
 
         assertTrue("Min timeout reached ("+(end-start)+" >= " + maxtimeout+")", end-start >= maxtimeout);
@@ -397,7 +399,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         Query query = QueryFactory.create(Sparql.SELECT_QUERY_PEOPLE_ORDERED);
 
         start = System.currentTimeMillis();
-        result = queryHandler.handleSelect(query, endpoints);
+        result = queryHandler.handleSelect(projectName, query, endpoints);
         end = System.currentTimeMillis();
         
         assertTrue("Min timeout reached ("+(end-start)+")", end-start >= maxtimeout);
@@ -422,7 +424,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         System.out.println("Testing timeout with select");
 
-        result = queryHandler.handleSelect(selectQuery, endpoints);
+        result = queryHandler.handleSelect(projectName, selectQuery, endpoints);
 
         results = JenaQueryWrapper.getInstance().stringToResultSet(result);
 

@@ -131,11 +131,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to conduct query accross
      * @return Result as an xml string
      */
-    public final String handleConstruct(final Query query, final List<Endpoint> endpoints)
+    public final String handleConstruct(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling CONSTRUCT");
 
-        Model model = fetchModelsAndWait(query, endpoints);
+        Model model = fetchModelsAndWait(projectName, query, endpoints);
         return mergeModelResults(model, query);
     }
 
@@ -146,11 +146,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleSelect(final Query query, final List<Endpoint> endpoints)
+    public final String handleSelect(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling SELECT");
 
-        List<Result> selectResultList = fetchResultSetAndWait(query, endpoints);
+        List<Result> selectResultList = fetchResultSetAndWait(projectName, query, endpoints);
 
         StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
 
@@ -229,7 +229,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleAsk(final Query query, final List<Endpoint> endpoints)
+    public final String handleAsk(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling ASK");
 
@@ -242,7 +242,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchBooleanResponseTask(this, askResultList, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchBooleanResponseTask(this, askResultList, query.serialize(), url, projectName, doneSignal));
         }
 
         // block until all threads have finished
@@ -284,11 +284,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleDescribe(final Query query, final List<Endpoint> endpoints)
+    public final String handleDescribe(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling DESCRIBE");
 
-        Model model = fetchModelsAndWait(query, endpoints);
+        Model model = fetchModelsAndWait(projectName, query, endpoints);
         return mergeModelResults(model, query);
     }
 
@@ -299,11 +299,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoint Endpoint to query
      * @return Response string
      */
-    public final String handleUpdate(final String s, final Endpoint endpoint)
+    public final String handleUpdate(final String projectName, final String s, final Endpoint endpoint)
     {
         LOG.info("handling UPDATE");
 
-        return fetchUpdateQueryAndWait(s, endpoint);
+        return fetchUpdateQueryAndWait(projectName, s, endpoint);
     }
 
     /**
@@ -350,7 +350,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints Set of endpoints
      * @return Combined set of results as a Jena Model
      */
-    private Model fetchModelsAndWait(final Query query, final List<Endpoint> endpoints)
+    private Model fetchModelsAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         // start a new model
         Model mergedResults = ModelFactory.createDefaultModel();
@@ -363,7 +363,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchModelResponseTask(this, mergedResults, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchModelResponseTask(this, mergedResults, query.serialize(), url, projectName, doneSignal));
         }
 
         // block until all threads have finished
@@ -385,7 +385,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @param endpoints Set of endpoints
      */
-    private List<Result> fetchResultSetAndWait(final Query query, final List<Endpoint> endpoints)
+    private List<Result> fetchResultSetAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         List<Result> selectResultList = new LinkedList<Result>();
         CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
@@ -396,7 +396,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchResultSetResponseTask(this, selectResultList, query.serialize(), url, doneSignal));
+            taskExecutor.execute(new FetchResultSetResponseTask(this, selectResultList, query.serialize(), url, projectName, doneSignal));
         }
 
         // block until all threads have finished
@@ -422,7 +422,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoint Endpoint to query
     * @return the result (if any)
      */
-    private String fetchUpdateQueryAndWait(final String query, final Endpoint endpoint)
+    private String fetchUpdateQueryAndWait(final String projectName, final String query, final Endpoint endpoint)
     {
         CountDownLatch doneSignal = new CountDownLatch(1);
 
@@ -432,7 +432,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         String url = endpoint.getLocation();
         LOG.debug("Querying " + url);
 
-        taskExecutor.execute(new FetchUpdateResponseTask(this, result, query, url, doneSignal));
+        taskExecutor.execute(new FetchUpdateResponseTask(this, result, query, url, projectName, doneSignal));
 
         // block until all threads have finished
         try

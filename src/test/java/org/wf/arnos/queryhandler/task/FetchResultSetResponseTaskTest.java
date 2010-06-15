@@ -65,6 +65,8 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
     CountDownLatch doneSignal;
 
+    String projectName = "testProject";
+    
     @Before
     public void setUp()
     {
@@ -86,6 +88,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -128,6 +131,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -140,9 +144,9 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andReturn(false);
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
         
-        mockCache.put((String)anyObject(), (String)anyObject());
+        mockCache.put((String)anyObject(), (String)anyObject(), (String)anyObject());
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
                 andReturn(selectResult);
@@ -168,8 +172,8 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andReturn(true);
-        expect(mockCache.get((String)anyObject())).andReturn(selectResult);
+        expect(mockCache.contains((String) notNull(),(String) notNull())).andReturn(true);
+        expect(mockCache.get((String)anyObject(), (String)anyObject())).andReturn(selectResult);
 
         expect(mockQueryWrapper.stringToResultSet(selectResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToResultSet(selectResult));
@@ -206,6 +210,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -216,7 +221,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         };
 
 
-        assertFalse(cache.contains(fetcher.cacheKey));
+        assertFalse(cache.contains(projectName, fetcher.cacheKey));
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
@@ -239,7 +244,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // check the results has been put into the cache
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName, fetcher.cacheKey));
 
         resetAll();
 
@@ -261,7 +266,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         assertEquals("Got expected number of results",7, results.size());
 
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName, fetcher.cacheKey));
     }
 
     @Test
@@ -276,6 +281,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
@@ -294,6 +300,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -332,6 +339,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 results,
                 Sparql.ENDPOINT1_URL,
                 selectQuery,
+                projectName,
                 doneSignal)
         {
             @Override

@@ -66,6 +66,11 @@ abstract class AbstractResponseTask implements Runnable
     protected final transient String query;
 
     /**
+     * Name of project used for project-specific caching.
+     */
+    protected final transient String projectName;
+
+    /**
      * A latch to signal when thread completed.
      */
     protected final transient CountDownLatch doneSignal;
@@ -90,6 +95,7 @@ abstract class AbstractResponseTask implements Runnable
     protected AbstractResponseTask(final QueryHandlerInterface paramHandler,
                                                            final String paramQuery,
                                                            final String paramUrl,
+                                                           final String projectName,
                                                            final CountDownLatch paramDoneSignal)
     {
         super();
@@ -99,6 +105,7 @@ abstract class AbstractResponseTask implements Runnable
         this.handler = paramHandler;
         this.query = paramQuery;
         this.url = paramUrl;
+        this.projectName = projectName;
         this.doneSignal = paramDoneSignal;
 
         // calculate the key to use for cache lookup.
@@ -129,11 +136,11 @@ abstract class AbstractResponseTask implements Runnable
     public String getFromCache()
     {
         // check cache copy
-        if (handler.hasCache() && handler.getCache().contains(cacheKey))
+        if (handler.hasCache() && handler.getCache().contains(projectName, cacheKey))
         {
             LOG.debug("Lookup query from cache");
 
-            return handler.getCache().get(cacheKey);
+            return handler.getCache().get(projectName, cacheKey);
         }
         return null;
     }
@@ -147,7 +154,7 @@ abstract class AbstractResponseTask implements Runnable
         if (handler.hasCache())
         {
             LOG.debug("Putting result in cache");
-            handler.getCache().put(cacheKey, s);
+            handler.getCache().put(projectName, cacheKey, s);
         }
     }
 

@@ -58,6 +58,8 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
 
     CountDownLatch doneSignal;
 
+    String projectName = "testProject";
+
     @Before
     public void setUp()
     {
@@ -78,6 +80,7 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
                 result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -119,6 +122,7 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
                 result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
+                projectName,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
@@ -141,6 +145,7 @@ public class FetchUpdateResponseTaskTest extends EasyMockSupport
                 result,
                 Sparql.ENDPOINT1_URL,
                 updateQuery,
+                projectName,
                 doneSignal)
         {
             @Override

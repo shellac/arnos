@@ -62,9 +62,10 @@ public class FetchModelResponseTask extends AbstractResponseTask
                                                         Model model,
                                                         final String paramQuery,
                                                         final String paramUrl,
+                                                        final String projectName,
                                                         final CountDownLatch paramDoneSignal)
     {
-        super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        super(paramHandler, paramQuery, paramUrl, projectName, paramDoneSignal);
         this.mergedModel = model;
     }
 

@@ -63,9 +63,10 @@ public class FetchUpdateResponseTask extends AbstractResponseTask
                                                         StringBuffer result,
                                                         final String paramQuery,
                                                         final String paramUrl,
+                                                        final String projectName,
                                                         final CountDownLatch paramDoneSignal)
     {
-        super(paramHandler, paramQuery, paramUrl, paramDoneSignal);
+        super(paramHandler, paramQuery, paramUrl, projectName, paramDoneSignal);
         this.result = result;
     }
 

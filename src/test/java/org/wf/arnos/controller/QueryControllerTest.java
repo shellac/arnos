@@ -107,6 +107,7 @@ public class QueryControllerTest
             fail("Unable to create cache");
         }
 
+        cache.flushAll(PROJECT_NAME);
         controller.cacheHandler = cache;
         QueryController.logger = LogFactory.getLog(QueryController.class);
     }
@@ -129,6 +130,7 @@ public class QueryControllerTest
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
         StringBuffer buffer = writer.getBuffer();
         int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
+        System.out.println("testExecuteQueryAcrossAllEndpoints\n"+buffer.toString());
         assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
     }
 

@@ -46,47 +46,52 @@ public interface QueryHandlerInterface
 {
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
+     * @param projectName Name of project
      * @param query SPARQL CONSTRUCT query
      * @param endpoints List of endpoints to conduct query accross
      * @return Result as an xml string
      */
-    String handleConstruct(Query query, List<Endpoint> endpoints);
+    String handleConstruct(String projectName, Query query, List<Endpoint> endpoints);
 
     /**
      * This method handles a SELECT SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
+     * @param projectName Name of project
      * @param query SPARQL SELECT query
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    String handleSelect(Query query, List<Endpoint> endpoints);
+    String handleSelect(String projectName, Query query, List<Endpoint> endpoints);
 
     /**
      * This method handles a ASK SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
+     * @param projectName Name of project
      * @param query SPARQL ASK query
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    String handleAsk(Query query, List<Endpoint> endpoints);
+    String handleAsk(String projectName, Query query, List<Endpoint> endpoints);
 
     /**
      * This method handles a DESCRIBE SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
+     * @param projectName Name of project
      * @param query SPARQL DESCRIBE query
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    String handleDescribe(Query query, List<Endpoint> endpoints);
+    String handleDescribe(String projectName, Query query, List<Endpoint> endpoints);
 
     /**
      * This method handles a SPARQL UPDATE query.
      * It forward the query onto the provided endpoint and returns any response.
+     * @param projectName Name of project
      * @param query SPARQL UPDATE query (not a Query object as it can't parse UPDATE statements)
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    String handleUpdate(String query, Endpoint endpoint);
+    String handleUpdate(String projectName, String query, Endpoint endpoint);
 
     /**
      * Public accessor for cache (if present).

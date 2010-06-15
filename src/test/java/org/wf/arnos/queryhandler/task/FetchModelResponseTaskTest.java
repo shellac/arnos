@@ -64,6 +64,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
     CountDownLatch doneSignal;
 
+    String projectName = "testProject";
+
     @Before
     public void setUp()
     {
@@ -84,6 +86,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -146,6 +149,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -158,8 +162,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andReturn(false);
-        mockCache.put((String)anyObject(), (String)anyObject());
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
+        mockCache.put((String)anyObject(), (String)anyObject(), (String)anyObject());
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
                 andReturn(constructResult);
@@ -187,8 +191,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
-        expect(mockCache.contains((String) notNull())).andReturn(true);
-        expect(mockCache.get((String)anyObject())).andReturn(constructResult);
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(true);
+        expect(mockCache.get((String)anyObject(), (String)anyObject())).andReturn(constructResult);
 
         expect(mockQueryWrapper.stringToModel(constructResult))
                 .andReturn(JenaQueryWrapper.getInstance().stringToModel(constructResult));
@@ -223,6 +227,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -232,7 +237,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
             }
         };
 
-        assertFalse(cache.contains(fetcher.cacheKey));
+        assertFalse(cache.contains(projectName,fetcher.cacheKey));
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
         expect(mockThreadedQueryHandler.getCache()).andReturn(cache).anyTimes();
@@ -255,7 +260,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
 
         // check the results has been put into the cache
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName,fetcher.cacheKey));
 
         model.removeAll();
         
@@ -277,7 +282,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         assertEquals(7,model.size());
 
-        assertTrue(cache.contains(fetcher.cacheKey));
+        assertTrue(cache.contains(projectName,fetcher.cacheKey));
     }
 
     @Test
@@ -295,6 +300,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 Sparql.CONSTRUCT_QUERY_BOOKS,
+                projectName,
                 doneSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
@@ -313,6 +319,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
+                projectName,
                 doneSignal)
         {
             @Override
@@ -351,6 +358,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 model,
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
+                projectName,
                 doneSignal)
         {
             @Override

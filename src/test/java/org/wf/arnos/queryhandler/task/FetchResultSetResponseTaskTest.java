@@ -198,6 +198,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
         try
         {
             cache = new SimpleCacheHandler(new File(SimpleCacheHandlerTest.CACHE_SETTINGS));
+            cache.flushAll(projectName);
         }
         catch (Exception ex)
         {
@@ -219,7 +220,6 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
                 return mockQueryWrapper;
             }
         };
-
 
         assertFalse(cache.contains(projectName, fetcher.cacheKey));
 

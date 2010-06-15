@@ -39,33 +39,38 @@ public interface CacheHandlerInterface
 {
     /**
      * Adds an entry to the cache.
+     * @param project Project name
      * @param key Identifier for cache
      * @param value Response to cache
      */
-    void put(String key, String value);
+    void put(String project, String key, String value);
 
     /**
      * Gets a response from the cache.
+     * @param project Project name
      * @param key Lookup key
      * @return Cached value, or null if missing
      */
-    String get(String key);
+    String get(String project, String key);
 
     /**
      * Checks for the existance of a cache object.
+     * @param project Project name
      * @param key Lookup key
      * @return <code>true</code> if cache exists, <code>false</code> otherwise
      */
-    boolean contains(String key);
+    boolean contains(String project, String key);
 
     /**
      * Remove a specific key from the cache.
+     * @param project Project name
      * @param key Cache key
      */
-    void flush(String key);
+    void flush(String project, String key);
 
     /**
-     * Remove all keys from the cache.
+     * Remove all keys from the cache for a given project
+     * @param project Project name
      */
-    void flushAll();
+    void flushAll(String project);
 }

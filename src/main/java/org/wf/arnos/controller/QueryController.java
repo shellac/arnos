@@ -31,10 +31,10 @@
  */
 package org.wf.arnos.controller;
 
-import java.util.List;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.apache.commons.lang.StringUtils;
@@ -98,7 +98,7 @@ public class QueryController
 
         List<Endpoint> endpoints = manager.getEndpoints(projectName);
 
-        String result = handleQuery(query, endpoints);
+        String result = handleQuery(projectName, query, endpoints);
 
         try
         {
@@ -143,7 +143,7 @@ public class QueryController
             }
         }
 
-        String result = handleQuery(query, endpointSubset);
+        String result = handleQuery(projectName, query, endpointSubset);
 
         try
         {
@@ -197,6 +197,12 @@ public class QueryController
         {
             logger.info("QueryType is SPARQL UPDATE");
             result = queryHandler.handleUpdate(query, endpointSubset.get(0));
+            // clear the cache elements for this project
+            if (cacheHandler != null)
+            {
+                logger.debug("Caching result");
+                cacheHandler.flushAll(projectName);
+            }
         }
         else
         {
@@ -224,26 +230,20 @@ public class QueryController
      * @param endpoints List of endpoint urls to run the query against
      * @return An RDF model
      */
-    private final String handleQuery(final String queryString, List<Endpoint> endpoints)
+    private final String handleQuery(final String project, final String queryString, List<Endpoint> endpoints)
     {
         String result = null;
 
-        // generate the cache key for this query
-        String cacheString = queryString;
-
-        // sort the list so that caching is order-independent
-        Collections.sort(endpoints);
-
-        for (Endpoint e : endpoints) { cacheString += e.getIdentifier(); }
-
         if (queryString == null) return "";
+
+        String cacheString = generateCacheKey(project, queryString, endpoints);
 
         if (cacheHandler != null)
         {
             logger.debug("Fetching result from cache");
-            result = cacheHandler.get(cacheString);
+            return cacheHandler.get(project, cacheString);
         }
-        
+
         if (result == null)
         {
             logger.info("Cache miss. Passing to " + queryHandler.getClass());
@@ -280,7 +280,7 @@ public class QueryController
                 if (cacheHandler != null)
                 {
                     logger.debug("Caching result");
-                    cacheHandler.put(cacheString, result);
+                    cacheHandler.put(project, cacheString, result);
                 }
             }
             catch (QueryParseException qpe)
@@ -289,7 +289,6 @@ public class QueryController
                 result = "<error>Unknown query type</error>";
             }
         } // END if (result == null)
-
         return result;
     }
 
@@ -338,5 +337,25 @@ public class QueryController
         }
 
         return false;
+    }
+
+    /**
+     * Generates a unique key for this request.
+     * @param project
+     * @param queryString
+     * @param endpoints
+     * @return
+     */
+    private String generateCacheKey(final String project, final String queryString, List<Endpoint> endpoints)
+    {
+        // generate the cache key for this query
+        String cacheString = queryString;
+
+        // sort the list so that caching is order-independent
+        Collections.sort(endpoints);
+
+        for (Endpoint e : endpoints) { cacheString += e.getIdentifier(); }
+
+        return cacheString;
     }
 }

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
@@ -128,12 +129,13 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
     /**
      * Adds an entry to the cache.
+     * @param project Identifier for cache
      * @param key Identifier for cache
      * @param value Response to cache
      */
-    public final void put(final String key, final String value)
+    public final void put(final String project, final String key, final String value)
     {
-        Element element = new Element(generateKey(key), value);
+        Element element = new Element(generateKey(project,key), value);
         cache.put(element);
     }
 
@@ -142,9 +144,9 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * @param key Lookup key
      * @return Cached value, or null if not in cache
      */
-    public final String get(final String key)
+    public final String get(final String project, final String key)
     {
-        Element element = cache.get(generateKey(key));
+        Element element = cache.get(generateKey(project,key));
 
         if (element == null) return null;
 
@@ -157,9 +159,9 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * @param key Lookup key
      * @return <code>true</code> if cache exists, <code>false</code> otherwise
      */
-    public final boolean contains(final String key)
+    public final boolean contains(final String project, final String key)
     {
-        Element element = cache.get(generateKey(key));
+        Element element = cache.get(generateKey(project,key));
 
         if (element == null) return false;
 
@@ -170,17 +172,21 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * Remove a specific key from the cache.
      * @param key Cache key
      */
-    public final void flush(final String key)
+    public final void flush(final String project, final String key)
     {
-        cache.remove(generateKey(key));
+        cache.remove(generateKey(project,key));
     }
 
     /**
      * Remove all keys from the cache.
      */
-    public final void flushAll()
+    public final void flushAll(final String project)
     {
-        cache.removeAll();
+        List<String> keys = cache.getKeys();
+        for(String key : keys)
+        {
+            if (keyBelongsToProject(project, key)) cache.remove(key);
+        }
     }
 
     /**
@@ -197,11 +203,16 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * @param s Full string representation of the key
      * @return Digest version of the key
      */
-    private String generateKey(final String s)
+    private String generateKey(final String project, final String s)
     {
         digest.reset();
         digest.update(s.getBytes());
-        return convertToHex(digest.digest());
+        return project + "_" + convertToHex(digest.digest());
+    }
+
+    private boolean keyBelongsToProject(final String project, final String key)
+    {
+        return key.startsWith(project+"_");
     }
 
     /**

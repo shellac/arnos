@@ -57,6 +57,8 @@ public class SimpleCacheHandlerTest
     SimpleCacheHandler cache;
     String key = "abc";
     String value = "simple text content";
+    String projectName1 = "testProject";
+    String projectName2 = "anotherTestProject";
     public static final String CACHE_SETTINGS = "./src/main/webapp/WEB-INF/ehcache.xml";
 
     public SimpleCacheHandlerTest() {
@@ -249,45 +251,59 @@ public class SimpleCacheHandlerTest
     @Test
     public void testPut() throws Throwable
     {
-        assertNull(cache.get(key));
-        cache.put(key,value);
-        assertEquals(value,cache.get(key));
-        cache.put(key,value+"more text");
-        assertEquals(value+"more text",cache.get(key));
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName2,key));
+        cache.put(projectName1,key,value);
+        assertEquals(value,cache.get(projectName1,key));
+        assertNull(cache.get(projectName2,key));
+        cache.put(projectName1,key,value+"more text");
+        assertEquals(value+"more text",cache.get(projectName1,key));
+        assertEquals(null,cache.get(projectName2,key));
     }
 
     @Test
     public void testContains() throws Throwable
     {
-        assertFalse(cache.contains(key));
-        cache.put(key,value);
-        assertTrue(cache.contains(key));
-        cache.put(key,value+"more text");
-        assertTrue(cache.contains(key));
-        cache.flush(key);
-        assertFalse(cache.contains(key));
-    }
-
-    @Test
-    public void testFlushAll()
-    {
-        assertNull(cache.get(key));
-        cache.put(key,value);
-        cache.put(key+"22",value);
-        cache.flushAll();
-        assertNull(cache.get(key));
-        assertNull(cache.get(key+"22"));
+        assertFalse(cache.contains(projectName1,key));
+        cache.put(projectName1,key,value);
+        assertTrue(cache.contains(projectName1,key));
+        cache.put(projectName1,key,value+"more text");
+        assertTrue(cache.contains(projectName1,key));
+        cache.flush(projectName1,key);
+        assertFalse(cache.contains(projectName1,key));
     }
 
     @Test
     public void testFlush()
     {
-        assertNull(cache.get(key));
-        cache.put(key,value);
-        assertEquals(value,cache.get(key));
-        cache.flush(key);
-        assertNull(cache.get(key));
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName2,key));
+        cache.put(projectName1,key,value);
+        cache.put(projectName2,key,value);
+        assertEquals(value,cache.get(projectName1,key));
+        assertEquals(value,cache.get(projectName2,key));
+        cache.flush(projectName1,key);
+        assertNull(cache.get(projectName1,key));
+        assertEquals(value,cache.get(projectName2,key));
     }
+
+    @Test
+    public void testFlushAll()
+    {
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName2,key));
+        cache.put(projectName1,key,value);
+        cache.put(projectName1,key+"22",value);
+        cache.put(projectName2,key,value);
+        assertEquals(value,cache.get(projectName1,key));
+        assertEquals(value,cache.get(projectName1,key+"22"));
+        assertEquals(value,cache.get(projectName2,key));
+        cache.flushAll(projectName1);
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName1,key+"22"));
+        assertEquals(value,cache.get(projectName2,key));
+    }
+
 
     @Test
     public void testRepeatedlySetupCache()
@@ -310,9 +326,9 @@ public class SimpleCacheHandlerTest
             {
                 cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
 
-                cache.put("test", "value");
+                cache.put(projectName1, "test", "value");
 
-                assertEquals("value",cache.get("test"));
+                assertEquals("value",cache.get(projectName1,"test"));
 
                 cache.close();
             }

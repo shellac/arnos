@@ -119,7 +119,7 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/{endpoints}/query", method = RequestMethod.GET)
+    @RequestMapping(value = "/{projectName}/{endpointList}/query", method = RequestMethod.GET)
     public final void executeGetQuery(@PathVariable final String projectName,
                                                 @PathVariable final String endpointList,
                                                  @RequestParam("query") final String query,
@@ -164,7 +164,7 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/{endpoints}/query", method = RequestMethod.POST)
+    @RequestMapping(value = "/{projectName}/{endpointList}/query", method = RequestMethod.POST)
     public final void executePostQuery(@PathVariable final String projectName,
                                                  @PathVariable final String endpointList,
                                                  @RequestParam("query") final String query,
@@ -201,7 +201,7 @@ public class QueryController
             // clear the cache elements for this project
             if (cacheHandler != null)
             {
-                logger.debug("Caching result");
+                logger.debug("Update invalidates cache. Flushing...");
                 cacheHandler.flushAll(projectName);
             }
         }
@@ -247,7 +247,7 @@ public class QueryController
 
         if (result == null)
         {
-            logger.info("Cache miss. Passing to " + queryHandler.getClass());
+            logger.info("Cache miss");
 
             logger.debug("Querying against " + endpoints.size() + " endpoints");
 

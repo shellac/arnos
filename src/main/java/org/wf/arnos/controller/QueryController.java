@@ -80,6 +80,7 @@ public class QueryController
     /**
      * The cache handler, autowired in.
      */
+    @Autowired(required = false)
     public transient CacheHandlerInterface cacheHandler;
 
     /**
@@ -275,7 +276,7 @@ public class QueryController
                 {
                     logger.warn("Unknown query type");
                 }
-
+                
                 // put this result into the cache if available
                 if (cacheHandler != null)
                 {

@@ -134,33 +134,27 @@ input[type=submit]:hover
                 <form action="./projects/testproject/query" method="get" enctype="application/x-www-form-urlencoded">
                     <p>
                         <textarea name="query" rows="10">
-PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
-PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
-PREFIX xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt;
-PREFIX owl: &lt;http://www.w3.org/2002/07/owl#&gt;
-PREFIX skos: &lt;http://www.w3.org/2004/02/skos/core#&gt;
-SELECT DISTINCT ?type
-    WHERE {
-      ?thing a ?type
-    }    LIMIT 10
+PREFIX books:   <http://example.org/book/>
+PREFIX dc:      <http://purl.org/dc/elements/1.1/>
+SELECT ?book ?title
+WHERE
+  { ?book dc:title ?title }  LIMIT 10
                         </textarea>
                         <br/>
 
                     </p>
                     <p><input type="submit" value="Get SELECT Results" /></p>
                 </form>
-                <form action="./projects/testproject/query" method="get" enctype="application/x-www-form-urlencoded">
+                <form action="./projects/testproject/query" method="post" enctype="application/x-www-form-urlencoded" id="updaterequest">
                     <p>
                         <textarea name="query" rows="10">
 PREFIX dc:      <http://purl.org/dc/elements/1.1/>
-CONSTRUCT { $book dc:title $title }
-WHERE
-  { $book dc:title $title }    LIMIT 10
+INSERT { <http://example/egbook3> dc:title  "This is an example title" }
                         </textarea>
                         <br/>
-
                     </p>
-                    <p><input type="submit" value="Get CONSTRUCT Results" /></p>
+                    <p>Endpoint ID:<input id="endpoint" value="966249ebcdc8fdda81f41d8f266725acbfa5cffa"/></p>
+                    <p><input type="submit" value="POST SPARQL UPDATE" /></p>
                 </form>
             </div>
 
@@ -234,17 +228,26 @@ WHERE
               });
               
               $("form").submit(function() {
-                  if (typeof this.modified == "undefined")
+                  var arnos = $.cookies.get( 'arnos' );
+                  if (arnos == null || typeof arnos == "undefined")
                   {
-                      var action = this.action;
-
-                      action = action.substring(action.lastIndexOf(path)+ path.length);
-
-                      this.action = $("#serveraddress").val() + "/" + $("#project").val() + action;
-                      this.modified = true;
+                      arnos = $("#serveraddress").val() + "/" + $("#project").val();
                   }
+                  var action = this.action;
+                  action = action.substring(action.lastIndexOf("/"));
+                  this.action = arnos + action;
               });
 
+            $("#updaterequest").submit(function() {
+                  var arnos = $.cookies.get( 'arnos' );
+                  if (arnos == null || typeof arnos == "undefined")
+                  {
+                      arnos = $("#serveraddress").val() + "/" + $("#project").val();
+                  }
+                  var action = this.action;
+                  action = action.substring(action.lastIndexOf("/"));
+                  this.action = arnos + "/" + $("#endpoint").val() + action;
+              });
             });
         </script>
     </body>

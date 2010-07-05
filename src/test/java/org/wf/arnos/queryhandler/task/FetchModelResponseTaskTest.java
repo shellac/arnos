@@ -34,6 +34,7 @@ package org.wf.arnos.queryhandler.task;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.Before;
@@ -163,7 +164,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
 
         expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
-        mockCache.put((String)anyObject(), (String)anyObject(), (String)anyObject());
+        mockCache.put((String)anyObject(), (List)anyObject(), (String)anyObject(), (String)anyObject());
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
                 andReturn(constructResult);

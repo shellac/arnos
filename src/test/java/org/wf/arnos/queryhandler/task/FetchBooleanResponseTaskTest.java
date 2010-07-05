@@ -144,6 +144,73 @@ public class FetchBooleanResponseTaskTest extends EasyMockSupport
 
 
     @Test
+    public void testMockUseOfCache()
+    {
+        System.out.println("testMockUseOfCache");
+
+        List <Boolean> askResults = new LinkedList<Boolean>();
+
+        FetchBooleanResponseTask fetcher = new FetchBooleanResponseTask(mockThreadedQueryHandler,
+                askResults,
+                Sparql.ENDPOINT1_URL,
+                askQuery,
+                projectName,
+                doneSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+
+       CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
+        expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
+
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).andReturn(askResult);
+
+        mockCache.put((String)anyObject(), (List)anyObject(), (String)anyObject(), (String)anyObject());
+
+        expect(mockQueryWrapper.stringToBoolean(askResult)).andReturn(true);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertTrue("Got the expected result", askResults.get(0));
+
+        // now check we've got the expected number of results
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+
+        askResults.clear();
+
+        resetAll();
+
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(true).anyTimes();
+        expect(mockThreadedQueryHandler.getCache()).andReturn(mockCache).anyTimes();
+
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(true);
+        expect(mockCache.get((String)anyObject(), (String)anyObject())).andReturn(askResult);
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertEquals("Got the expected number of results",1,askResults.size());
+        assertFalse("Got the expected result", askResults.get(0));
+    }
+
+
+    @Test
     public void testRealUseOfCache()
     {
         System.out.println("testRealUseOfCache");

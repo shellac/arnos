@@ -31,9 +31,11 @@
  */
 package org.wf.arnos.queryhandler.task;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.queryhandler.JenaQueryWrapper;
 import org.wf.arnos.queryhandler.QueryHandlerInterface;
 import org.wf.arnos.queryhandler.QueryWrapperInterface;
@@ -155,8 +157,10 @@ abstract class AbstractResponseTask implements Runnable
         if (handler.hasCache())
         {
             LOG.debug("Putting result in cache");
-            
-            handler.getCache().put(project, cacheKey, s);
+
+            ArrayList <Endpoint>list = new ArrayList<Endpoint>();
+            list.add(new Endpoint(url));
+            handler.getCache().put(project, list, cacheKey, s);
         }
     }
 

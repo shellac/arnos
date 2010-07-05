@@ -196,13 +196,14 @@ public class QueryController
         }
         else if (isUpdateQuery(query))
         {
+            Endpoint ep = endpointSubset.get(0);
             logger.info("QueryType is SPARQL UPDATE");
-            result = queryHandler.handleUpdate(projectName, query, endpointSubset.get(0));
+            result = queryHandler.handleUpdate(projectName, query, ep);
             // clear the cache elements for this project
             if (cacheHandler != null)
             {
                 logger.debug("Update invalidates cache. Flushing...");
-                cacheHandler.flushAll(projectName);
+                cacheHandler.flush(projectName, ep);
             }
         }
         else
@@ -281,7 +282,7 @@ public class QueryController
                 if (cacheHandler != null)
                 {
                     logger.debug("Caching result");
-                    cacheHandler.put(project, cacheString, result);
+                    cacheHandler.put(project, endpoints, cacheString, result);
                 }
             }
             catch (QueryParseException qpe)

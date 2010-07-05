@@ -31,7 +31,6 @@
  */
 package org.wf.arnos.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -42,6 +41,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.ProjectsManager;
 import org.wf.arnos.exception.ResourceNotFoundException;
@@ -66,6 +66,12 @@ public class EndpointController
      */
     @Autowired
     public transient ProjectsManager manager;
+
+    /**
+     * The cache handler, autowired in.
+     */
+    @Autowired(required = false)
+    public transient CacheHandlerInterface cacheHandler;
 
     /**
      * List all the endpoints associated with a project.
@@ -155,6 +161,46 @@ public class EndpointController
         }
 
         if (logger.isDebugEnabled()) logger.debug(message);
+
+        model.addAttribute("message", message);
+        return "";
+    }
+
+
+    /**
+     * Flush caches for a given endpoint
+     * @param projectName
+     * @param endpointList
+     * @param model
+     * @return
+     */
+    @RequestMapping(value = "/flush", method = RequestMethod.GET)
+    public final String flushEndpoint(@PathVariable final String projectName,
+                                                       @RequestParam("url") final String endpoint,
+                                                       final Model model)
+    {
+        String result = "";
+        String message = "";
+
+        if (StringUtils.isEmpty(endpoint))
+        {
+            message = "Missing endpoint";
+        }
+        else
+        {
+            checkProject(projectName);
+
+            if (logger.isDebugEnabled()) logger.debug("Flushing cache for " + endpoint);
+
+            Endpoint ep = new Endpoint(endpoint);
+            String epId = ep.getIdentifier();
+            if (cacheHandler != null)
+            {
+                cacheHandler.flush(projectName, epId);
+            }
+
+            message = "Cache flushed for " + endpoint;
+        }
 
         model.addAttribute("message", message);
         return "";

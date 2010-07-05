@@ -37,6 +37,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import net.sf.ehcache.CacheException;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.junit.After;
@@ -45,6 +47,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.exception.ArnosRuntimeException;
 import static org.junit.Assert.*;
 
@@ -60,6 +63,9 @@ public class SimpleCacheHandlerTest
     String projectName1 = "testProject";
     String projectName2 = "anotherTestProject";
     public static final String CACHE_SETTINGS = "./src/main/webapp/WEB-INF/ehcache.xml";
+    Endpoint ep1;
+    Endpoint ep2;
+    List<Endpoint> endpoints;
 
     public SimpleCacheHandlerTest() {
     }
@@ -76,6 +82,11 @@ public class SimpleCacheHandlerTest
     {
         try
         {
+            ep1 = new Endpoint("http://www.somewhere.com/test1");
+            ep2 = new Endpoint("http://www.somewhere.com/test2");
+            endpoints = new ArrayList<Endpoint>();
+            endpoints.add(ep1);
+            endpoints.add(ep2);
             cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
         }
         catch (Exception e)
@@ -253,21 +264,33 @@ public class SimpleCacheHandlerTest
     {
         assertNull(cache.get(projectName1,key));
         assertNull(cache.get(projectName2,key));
-        cache.put(projectName1,key,value);
+        cache.put(projectName1, endpoints, key,value);
         assertEquals(value,cache.get(projectName1,key));
         assertNull(cache.get(projectName2,key));
-        cache.put(projectName1,key,value+"more text");
+        cache.put(projectName1, endpoints, key,value+"more text");
         assertEquals(value+"more text",cache.get(projectName1,key));
         assertEquals(null,cache.get(projectName2,key));
+
+        try
+        {
+            cache.put(projectName1, null, key,value);
+            fail("Except npe to be raised");
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        cache.put(projectName1, new ArrayList<Endpoint>(), key,value);
     }
 
     @Test
     public void testContains() throws Throwable
     {
         assertFalse(cache.contains(projectName1,key));
-        cache.put(projectName1,key,value);
+        cache.put(projectName1, endpoints, key,value);
         assertTrue(cache.contains(projectName1,key));
-        cache.put(projectName1,key,value+"more text");
+        cache.put(projectName1 ,endpoints, key,value+"more text");
         assertTrue(cache.contains(projectName1,key));
         cache.flush(projectName1,key);
         assertFalse(cache.contains(projectName1,key));
@@ -278,8 +301,8 @@ public class SimpleCacheHandlerTest
     {
         assertNull(cache.get(projectName1,key));
         assertNull(cache.get(projectName2,key));
-        cache.put(projectName1,key,value);
-        cache.put(projectName2,key,value);
+        cache.put(projectName1, endpoints, key,value);
+        cache.put(projectName2, endpoints, key,value);
         assertEquals(value,cache.get(projectName1,key));
         assertEquals(value,cache.get(projectName2,key));
         cache.flush(projectName1,key);
@@ -292,9 +315,9 @@ public class SimpleCacheHandlerTest
     {
         assertNull(cache.get(projectName1,key));
         assertNull(cache.get(projectName2,key));
-        cache.put(projectName1,key,value);
-        cache.put(projectName1,key+"22",value);
-        cache.put(projectName2,key,value);
+        cache.put(projectName1, endpoints, key,value);
+        cache.put(projectName1, endpoints, key+"22",value);
+        cache.put(projectName2, endpoints, key,value);
         assertEquals(value,cache.get(projectName1,key));
         assertEquals(value,cache.get(projectName1,key+"22"));
         assertEquals(value,cache.get(projectName2,key));
@@ -304,6 +327,53 @@ public class SimpleCacheHandlerTest
         assertEquals(value,cache.get(projectName2,key));
     }
 
+
+    @Test
+    public void testFlushEndpointSpecificData()
+    {
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName2,key));
+
+        // test associating a cache with a specific endpoint, then clearing the cache for that endpoint
+        endpoints = new ArrayList<Endpoint>();
+        endpoints.add(ep1);
+        cache.put(projectName1, endpoints, key,value);
+        cache.put(projectName2, endpoints, key,value);
+
+        endpoints.add(ep2);
+        cache.put(projectName1, endpoints, key+"22",value);
+
+        assertEquals(value,cache.get(projectName1,key));
+        assertEquals(value,cache.get(projectName1,key+"22"));
+        assertEquals(value,cache.get(projectName2,key));
+        cache.flush(projectName1, ep1);
+
+        assertNull(cache.get(projectName1,key));
+        assertNull(cache.get(projectName1,key+"22"));
+
+        // as project 2 had a cache with endpoint 1, this value should also be cleared when we flushed
+        // all associated caches with endpoint 1
+        assertNull(cache.get(projectName2,key));
+
+        endpoints = new ArrayList<Endpoint>();
+        endpoints.add(ep1);
+
+        cache.put(projectName1, endpoints, key,value);
+
+        endpoints = new ArrayList<Endpoint>();
+        endpoints.add(ep2);
+
+        cache.put(projectName1, endpoints, key,value);
+        cache.put(projectName1, endpoints, key+"22",value);
+
+        assertEquals(value,cache.get(projectName1,key));
+        cache.flush(projectName1, ep1);
+
+        // as  endpoint1 was associated with the key, the key will be removed
+        // even though endpoint 2 also had a pointer to the same key
+        assertNull(cache.get(projectName1,key));
+        assertEquals(value,cache.get(projectName1,key+"22"));
+    }
 
     @Test
     public void testRepeatedlySetupCache()
@@ -326,7 +396,7 @@ public class SimpleCacheHandlerTest
             {
                 cache = new SimpleCacheHandler(new File(CACHE_SETTINGS));
 
-                cache.put(projectName1, "test", "value");
+                cache.put(projectName1, endpoints, "test", "value");
 
                 assertEquals("value",cache.get(projectName1,"test"));
 

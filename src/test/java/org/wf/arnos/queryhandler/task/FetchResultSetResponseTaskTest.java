@@ -146,7 +146,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
 
         expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
         
-        mockCache.put((String)anyObject(), (String)anyObject(), (String)anyObject());
+        mockCache.put((String)anyObject(), (List)anyObject(), (String)anyObject(), (String)anyObject());
 
         expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
                 andReturn(selectResult);

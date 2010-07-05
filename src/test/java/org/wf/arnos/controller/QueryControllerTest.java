@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.easymock.EasyMockSupport;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,7 +60,7 @@ import org.wf.arnos.utils.Sparql;
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class QueryControllerTest
+public class QueryControllerTest extends EasyMockSupport
 {
     Project p;
     Endpoint ep1 = new Endpoint(Sparql.ENDPOINT1_URL); // 7 books
@@ -307,5 +308,21 @@ public class QueryControllerTest
         controller.executeGetQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
         buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("error"));
+
+
+        // test cache clearing
+        CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
+
+        controller.cacheHandler = mockCache;
+
+        mockCache.flush(PROJECT_NAME, ep1);
+
+        writer = new StringWriter();
+
+        replayAll();
+
+        controller.executePostQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
+
+        verifyAll();
     }
 }

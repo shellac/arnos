@@ -37,12 +37,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.springframework.core.io.Resource;
+import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.exception.ArnosRuntimeException;
 
 /**
@@ -70,6 +73,11 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      * The Cache Manager.
      */
     private transient CacheManager manager;
+
+    /**
+     * A mapping of cached entries to endpoints so that we can flush all caches for a particular endpoint
+     */
+    private transient HashMap <String, List<String>> endpointMapping;
 
     /**
      * Creates a singleton instance of the cachemanager for spring-configured frameworks.
@@ -100,6 +108,8 @@ public class SimpleCacheHandler implements CacheHandlerInterface
      */
     private void init(final File file) throws CacheException, ArnosRuntimeException
     {
+        endpointMapping = new HashMap<String, List<String>>();
+
         manager = CacheManager.create(file.getAbsolutePath());
 
         cache = manager.getCache(CACHE_NAME);
@@ -130,13 +140,25 @@ public class SimpleCacheHandler implements CacheHandlerInterface
     /**
      * Adds an entry to the cache.
      * @param project Identifier for cache
+     * @param endpoints List of endpoints associated with this cache
      * @param key Identifier for cache
      * @param value Response to cache
      */
-    public final void put(final String project, final String key, final String value)
+    public final void put(final String project, final List<Endpoint> endpoints, final String key, final String value)
     {
-        Element element = new Element(generateKey(project,key), value);
+        String cacheKey = generateKey(project,key);
+        Element element = new Element(cacheKey, value);
         cache.put(element);
+
+        for (Endpoint e : endpoints)
+        {
+            String epId = e.getIdentifier();
+            List <String>cachesForEndpoint = endpointMapping.get(epId);
+            if (cachesForEndpoint == null) cachesForEndpoint = new ArrayList<String>();
+
+            cachesForEndpoint.add(cacheKey);
+            endpointMapping.put(epId, cachesForEndpoint);
+        }
     }
 
     /**
@@ -167,6 +189,29 @@ public class SimpleCacheHandler implements CacheHandlerInterface
 
         return true;
     }
+
+
+    /**
+     * Remove a specific key from the cache.
+     * @param key Cache key
+     */
+    public final void flush(final String project, final Endpoint e)
+    {
+        String epId = e.getIdentifier();
+        List <String>cachesForEndpoint = endpointMapping.get(epId);
+        
+        if (cachesForEndpoint != null)
+        {
+            for(String s : cachesForEndpoint)
+            {
+                cache.remove(s);
+            }
+        }
+
+        // assert empty list back into mapping as these items have all been cleared
+        endpointMapping.put(epId, new ArrayList<String>());
+    }
+
 
     /**
      * Remove a specific key from the cache.

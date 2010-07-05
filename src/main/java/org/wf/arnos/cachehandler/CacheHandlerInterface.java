@@ -31,6 +31,9 @@
  */
 package org.wf.arnos.cachehandler;
 
+import java.util.List;
+import org.wf.arnos.controller.model.Endpoint;
+
 /**
  * Provides a caching mechanism for the arnos application.
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
@@ -40,10 +43,11 @@ public interface CacheHandlerInterface
     /**
      * Adds an entry to the cache.
      * @param project Project name
+     * @param e List of associated endpoints
      * @param key Identifier for cache
      * @param value Response to cache
      */
-    void put(String project, String key, String value);
+    void put(String project, List<Endpoint> e, String key, String value);
 
     /**
      * Gets a response from the cache.
@@ -67,6 +71,13 @@ public interface CacheHandlerInterface
      * @param key Cache key
      */
     void flush(String project, String key);
+
+    /**
+     * Flush all caches associated with the specified project and endpoint
+     * @param project Project name
+     * @param e Endpoint
+     */
+    void flush(String project, Endpoint e);
 
     /**
      * Remove all keys from the cache for a given project

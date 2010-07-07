@@ -64,12 +64,12 @@ public class Result
     /**
      * Bindings array.
      */
-    protected final transient List<String> bindings;
+    protected final transient List<String> bindings = new ArrayList<String>();
 
     /**
      * Value of each binding.
      */
-    protected final transient List<String> values;
+    protected final transient List<String> values = new ArrayList<String>();
 
     /**
      * Returns the list of values for this result.
@@ -93,8 +93,6 @@ public class Result
     {
         binding = ((ResultBinding) sol).getBinding();
 
-        bindings = new ArrayList();
-        values = new ArrayList();
         Iterator vars = sol.varNames();
         while (vars.hasNext())
         {
@@ -159,8 +157,8 @@ public class Result
     public int hashCode()
     {
         int hash = 5;
-        hash = 61 * hash + (this.bindings != null ? this.bindings.hashCode() : 0);
-        hash = 61 * hash + (this.values != null ? this.values.hashCode() : 0);
+        hash = 61 * hash + this.bindings.hashCode();
+        hash = 61 * hash + this.values.hashCode();
         return hash;
     }
 }

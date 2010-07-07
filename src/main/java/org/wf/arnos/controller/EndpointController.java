@@ -192,11 +192,9 @@ public class EndpointController
 
             if (logger.isDebugEnabled()) logger.debug("Flushing cache for " + endpoint);
 
-            Endpoint ep = new Endpoint(endpoint);
-            String epId = ep.getIdentifier();
             if (cacheHandler != null)
             {
-                cacheHandler.flush(projectName, epId);
+                cacheHandler.flush(projectName, new Endpoint(endpoint));
             }
 
             message = "Cache flushed for " + endpoint;

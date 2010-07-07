@@ -234,8 +234,6 @@ public class QueryController
      */
     private final String handleQuery(final String project, final String queryString, List<Endpoint> endpoints)
     {
-        String result = null;
-
         if (queryString == null) return "";
 
         String cacheString = generateCacheKey(project, queryString, endpoints);
@@ -246,51 +244,47 @@ public class QueryController
             return cacheHandler.get(project, cacheString);
         }
 
-        if (result == null)
+        String result = "";
+
+        logger.info("Cache miss");
+
+        logger.debug("Querying against " + endpoints.size() + " endpoints");
+
+        // process the SPARQL query to best determin how to handle this query
+        try
         {
-            logger.info("Cache miss");
+            Query query = QueryFactory.create(queryString);
 
-            logger.debug("Querying against " + endpoints.size() + " endpoints");
-
-            // process the SPARQL query to best determin how to handle this query
-            try
+            if (query.getQueryType() == Query.QueryTypeSelect)
             {
-                Query query = QueryFactory.create(queryString);
-
-                if (query.getQueryType() == Query.QueryTypeSelect)
-                {
-                    result = queryHandler.handleSelect(project, query, endpoints);
-                }
-                else if (query.getQueryType() == Query.QueryTypeConstruct)
-                {
-                    result = queryHandler.handleConstruct(project, query, endpoints);
-                }
-                else if (query.getQueryType() == Query.QueryTypeAsk)
-                {
-                    result = queryHandler.handleAsk(project, query, endpoints);
-                }
-                else if (query.getQueryType() == Query.QueryTypeDescribe)
-                {
-                    result = queryHandler.handleDescribe(project, query, endpoints);
-                }
-                else
-                {
-                    logger.warn("Unknown query type");
-                }
-                
-                // put this result into the cache if available
-                if (cacheHandler != null)
-                {
-                    logger.debug("Caching result");
-                    cacheHandler.put(project, endpoints, cacheString, result);
-                }
+                result = queryHandler.handleSelect(project, query, endpoints);
             }
-            catch (QueryParseException qpe)
+            else if (query.getQueryType() == Query.QueryTypeConstruct)
             {
-                logger.error(qpe.getMessage());
-                result = "<error>Unknown query type</error>";
+                result = queryHandler.handleConstruct(project, query, endpoints);
             }
-        } // END if (result == null)
+            else if (query.getQueryType() == Query.QueryTypeAsk)
+            {
+                result = queryHandler.handleAsk(project, query, endpoints);
+            }
+            else
+            {
+                result = queryHandler.handleDescribe(project, query, endpoints);
+            }
+
+            // put this result into the cache if available
+            if (cacheHandler != null)
+            {
+                logger.debug("Caching result");
+                cacheHandler.put(project, endpoints, cacheString, result);
+            }
+        }
+        catch (QueryParseException qpe)
+        {
+            logger.error(qpe.getMessage());
+            result = "<error>Unknown query type</error>";
+        }
+
         return result;
     }
 

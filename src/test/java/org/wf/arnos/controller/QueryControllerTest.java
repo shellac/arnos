@@ -33,6 +33,7 @@ package org.wf.arnos.controller;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +45,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.easymock.EasyMock.*;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.cachehandler.SimpleCacheHandler;
@@ -145,6 +147,40 @@ public class QueryControllerTest extends EasyMockSupport
         int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
         assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
     }
+
+    @Test
+    public void testWithCache()
+    {
+        CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
+        controller.cacheHandler = mockCache;
+        String testContent = "abc";
+
+        StringWriter writer = new StringWriter();
+
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(false);
+        mockCache.put((String) notNull(), (List<Endpoint>) notNull(),  (String) notNull(),  (String) notNull());
+
+        replayAll();
+
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
+
+        verifyAll();
+
+        resetAll();
+        writer = new StringWriter();
+
+        expect(mockCache.contains((String) notNull(), (String) notNull())).andReturn(true);
+        expect(mockCache.get((String) notNull(), (String) notNull())).andReturn(testContent);
+
+        replayAll();
+
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
+
+        verifyAll();
+        
+        assertEquals(testContent,writer.getBuffer().toString());
+    }
+
 
     @Test
     public void testExecuteQueryWithSpecificEndpoints()
@@ -279,6 +315,16 @@ public class QueryControllerTest extends EasyMockSupport
     }
 
     @Test
+    public void testUnknownQuery()
+    {
+        String query = Sparql.UPDATE_QUERY;
+        StringWriter writer = new StringWriter();
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
+        StringBuffer buffer = writer.getBuffer();
+        assertTrue(buffer.toString().contains("error"));
+    }
+
+    @Test
     public void testConstructQuery()
     {
         String query = Sparql.CONSTRUCT_QUERY_BOOKS;
@@ -302,6 +348,8 @@ public class QueryControllerTest extends EasyMockSupport
         buffer = writer.getBuffer();
         assertEquals(Sparql.UPDATE_QUERY_RESULT, buffer.toString());
 
+        // test error handling
+
         // test sending an update as a get
         writer = new StringWriter();
         buffer = writer.getBuffer();
@@ -309,6 +357,11 @@ public class QueryControllerTest extends EasyMockSupport
         buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("error"));
 
+        writer = new StringWriter();
+        buffer = writer.getBuffer();
+        controller.executePostQuery(PROJECT_NAME, ep1.getIdentifier(), Sparql.ASK_QUERY_ALICE, writer);
+        buffer = writer.getBuffer();
+        assertTrue(buffer.toString().toLowerCase().contains("error"));
 
         // test cache clearing
         CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
@@ -319,6 +372,16 @@ public class QueryControllerTest extends EasyMockSupport
 
         writer = new StringWriter();
 
+        replayAll();
+
+        controller.executePostQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);
+
+        verifyAll();
+
+        controller.cacheHandler = null;
+
+        resetAll();
+        
         replayAll();
 
         controller.executePostQuery(PROJECT_NAME, ep1.getIdentifier(), query, writer);

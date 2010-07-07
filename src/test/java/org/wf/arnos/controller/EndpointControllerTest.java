@@ -35,15 +35,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.easymock.EasyMockSupport;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ui.ExtendedModelMap;
 import static org.junit.Assert.*;
 import org.springframework.ui.Model;
+import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.Project;
 import org.wf.arnos.controller.model.ProjectsManager;
@@ -54,7 +55,7 @@ import org.wf.arnos.utils.Sparql;
  *
  * @author Chris Bailey (c.bailey@bristol.ac.uk)
  */
-public class EndpointControllerTest {
+public class EndpointControllerTest extends EasyMockSupport {
     EndpointController controller;
     static String PROJECT_NAME = "testproject";
     Project p;
@@ -201,5 +202,38 @@ public class EndpointControllerTest {
         controller.removeEndpoint(PROJECT_NAME, Sparql.ENDPOINT1_URL, model);
 
         assertEquals(1,getNumOfEndpoints());
+    }
+
+    @Test
+    public void testFlushEndpoint()
+    {
+        Model model = new ExtendedModelMap();
+        Endpoint ep = new Endpoint(Sparql.ENDPOINT1_URL);
+
+        replayAll();
+
+        controller.flushEndpoint(PROJECT_NAME, ep.getLocation(), model);
+
+        verifyAll();
+        
+        CacheHandlerInterface mockCache = createMock(CacheHandlerInterface.class);
+
+        controller.cacheHandler = mockCache;
+
+        mockCache.flush(PROJECT_NAME, ep);
+
+        replayAll();
+
+        controller.flushEndpoint(PROJECT_NAME, ep.getLocation(), model);
+
+        verifyAll();
+
+        resetAll();
+
+        replayAll();
+
+        controller.flushEndpoint(PROJECT_NAME, null, model);
+
+        verifyAll();
     }
 }

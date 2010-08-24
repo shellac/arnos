@@ -234,7 +234,8 @@ INSERT { <http://example/egbook3> dc:title  "This is an example title" }
                       arnos = $("#serveraddress").val() + "/" + $("#project").val();
                   }
                   var action = this.action;
-                  action = action.substring(action.lastIndexOf("/"));
+                  action = action.substring(action.lastIndexOf("/projects/")+10);
+                  action = action.substring(action.indexOf("/"));
                   this.action = arnos + action;
               });
 
@@ -245,7 +246,8 @@ INSERT { <http://example/egbook3> dc:title  "This is an example title" }
                       arnos = $("#serveraddress").val() + "/" + $("#project").val();
                   }
                   var action = this.action;
-                  action = action.substring(action.lastIndexOf("/"));
+                  action = action.substring(action.lastIndexOf("/projects/")+10);
+                  action = action.substring(action.indexOf("/"));
                   this.action = arnos + "/" + $("#endpoint").val() + action;
               });
             });

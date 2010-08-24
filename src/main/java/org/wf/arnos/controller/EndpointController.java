@@ -157,6 +157,11 @@ public class EndpointController
 
             manager.removeEndpoint(projectName, endpoint);
 
+            if (cacheHandler != null)
+            {
+                cacheHandler.flush(projectName, new Endpoint(endpoint));
+            }
+
             message = "endpoint '" + endpoint + "' removed";
         }
 

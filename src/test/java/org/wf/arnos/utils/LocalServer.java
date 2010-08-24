@@ -31,16 +31,8 @@
  */
 package org.wf.arnos.utils;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
+import org.wf.arnos.utils.handler.EndpointHandler;
 
 
 /**
@@ -54,73 +46,6 @@ public class LocalServer {
     private static final int PORT_NUMBER = 9090;
     public static final String SERVER_URL = "http://localhost:"+PORT_NUMBER;
     
-    static Handler fakeEndpointHandler =new AbstractHandler()
-    {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
-            throws IOException, ServletException
-        {
-            String query = request.getParameter("query");
-
-//            System.out.println("Target is " +target);
-
-            response.setContentType("text/xml");
-            response.setStatus(HttpServletResponse.SC_OK);
-
-            String thisEndpoint = SERVER_URL+target;
-
-            String result = "";
-
-            if (query.equals(Sparql.UPDATE_QUERY))
-            {
-                result = Sparql.UPDATE_QUERY_RESULT;
-            }
-            else if (thisEndpoint.equals(Sparql.ENDPOINT4_URL))
-            {
-                try
-                {
-                    synchronized (this)
-                    {
-                        // this endpoint hangs for 1 minute
-                        this.wait(60 * 1000);
-                    }
-                } catch (InterruptedException ex) { }
-            }
-            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL+"toolong"))
-            {
-                response.setStatus(HttpServletResponse.SC_REQUEST_URI_TOO_LONG);
-                response.sendError(HttpServletResponse.SC_REQUEST_URI_TOO_LONG);
-            }
-            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL+"interrupt"))
-            {
-                try {
-                    response.getWriter().close();
-                    throw new IOException("Interrupt requested");
-                } catch (Throwable ex) {
-                    Logger.getLogger(LocalServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            else if (thisEndpoint.startsWith(Sparql.ENDPOINT4_URL))
-            {
-                String remainder = thisEndpoint.replace(Sparql.ENDPOINT4_URL, "");
-                int responseCode = new Integer(remainder);
-                response.setStatus(responseCode);
-            }
-            else
-            {
-                result = Sparql.getResult(thisEndpoint,query);
-
-                if (result == null)
-                {
-                    throw new Error("No response found for " + query + " query type send to "+thisEndpoint);
-                }
-            }
-
-            response.getWriter().print(result);
-
-            ((Request)request).setHandled(true);
-        }
-    };
-
     /**
      * Starts the webserver with our custom handler.
      */
@@ -128,9 +53,9 @@ public class LocalServer {
     {
         try
         {
-        server = new Server(PORT_NUMBER);
-        server.setHandler(fakeEndpointHandler);
-        server.start();
+            server = new Server(PORT_NUMBER);
+            server.setHandler(new EndpointHandler());
+            server.start();
         }
         catch (Exception e)
         {

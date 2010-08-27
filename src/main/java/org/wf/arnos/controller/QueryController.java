@@ -90,7 +90,7 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/query", method = RequestMethod.GET)
+    @RequestMapping(value = "/{projectName}/query")
     public final void executeQueryAcrossAllEndpoints(@PathVariable final String projectName,
                                                  @RequestParam("query") final String query,
                                                  final java.io.Writer writer)
@@ -119,7 +119,7 @@ public class QueryController
      * @param query SPARQL Query
      * @param writer Writer to send results to
      */
-    @RequestMapping(value = "/{projectName}/{endpointList}/query", method = RequestMethod.GET)
+    @RequestMapping(value = "/{projectName}/{endpointList}/query")
     public final void executeGetQuery(@PathVariable final String projectName,
                                                 @PathVariable final String endpointList,
                                                  @RequestParam("query") final String query,

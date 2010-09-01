@@ -156,6 +156,9 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
             numResults++;
         }
         assertEquals("Results with all endpoints",11,numResults);
+
+        assertTrue(result.contains("datatype"));
+        assertTrue(result.contains("xml:lang"));
     }
 
 
@@ -201,6 +204,9 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
             numResults++;
         }
         assertEquals("Results with all endpoints",4,numResults);
+
+        assertTrue(result.contains("datatype"));
+        assertTrue(result.contains("xml:lang"));
     }
 
     @Test
@@ -224,6 +230,9 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         String result = queryHandler.handleSelect(projectName, query, endpoints);
 
         ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        // test output is valid xml
+        assertTrue("Is valid xml", Sparql.validateXML(result));
 
         String previous = "";
         int numResults = 0;
@@ -262,7 +271,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         assertEquals(queryBefore,describeQuery.toString());
 
-        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("Harry Potter &amp; the Chamber of Secrets"));
         assertTrue(result.contains("J.K. Rowling"));
         assertFalse(result.contains("dc:description"));
         assertFalse(result.contains("Scholastic Paperbacks"));
@@ -270,7 +279,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         // run the same query again to make sure we get the same results
         result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
 
-        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("Harry Potter &amp; the Chamber of Secrets"));
         assertTrue(result.contains("J.K. Rowling"));
         assertFalse(result.contains("dc:description"));
         assertFalse(result.contains("Scholastic Paperbacks"));
@@ -284,6 +293,9 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         assertTrue(result.contains("J.K. Rowling"));
         assertTrue(result.contains("dc:description"));
         assertTrue(result.contains("Scholastic Paperbacks"));
+
+        // test output is valid xml
+        assertTrue("Is valid xml", Sparql.validateXML(result));
     }
 
     @Test
@@ -323,6 +335,9 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         constructQuery.setDistinct(true);
         result = queryHandler.handleDescribe(projectName, constructQuery.cloneQuery(), endpoints);
         assertEquals(8,StringUtils.countMatches(result,"rdf:about"));
+
+        // test output is valid xml
+        assertTrue("Is valid xml", Sparql.validateXML(result));
     }
 
     @Test
@@ -391,7 +406,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
         assertTrue("Max timeout within limits ("+(end-start)+")", end-start < maxMultipleOfTimeoutToExpect);
 
 
-        assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));
+        assertTrue(result.contains("Harry Potter &amp; the Chamber of Secrets"));
         assertTrue(result.contains("J.K. Rowling"));
         assertFalse(result.contains("dc:description"));
         assertFalse(result.contains("Scholastic Paperbacks"));

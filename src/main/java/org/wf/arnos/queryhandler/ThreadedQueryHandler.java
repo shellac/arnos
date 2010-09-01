@@ -210,7 +210,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
                 }
                 if (match) add = false;
             }
-System.out.println(r.toXML());
+
             if (add) content.append(r.toXML());
         }
 

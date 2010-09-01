@@ -204,9 +204,6 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
             numResults++;
         }
         assertEquals("Results with all endpoints",4,numResults);
-
-        assertTrue(result.contains("datatype"));
-        assertTrue(result.contains("xml:lang"));
     }
 
     @Test

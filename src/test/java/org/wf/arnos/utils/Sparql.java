@@ -31,9 +31,13 @@
  */
 package org.wf.arnos.utils;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Test;
+import org.w3c.dom.Document;
 import static org.junit.Assert.*;
 
 /**
@@ -106,7 +110,7 @@ public class Sparql {
         + "        <uri>http://example.org/book/book7</uri>\n"
         + "      </binding>\n"
         + "      <binding name=\"title\">\n"
-        + "        <literal>Harry Potter and the Deathly Hallows</literal>\n"
+        + "        <literal>Harry Potter &amp; the Deathly Hallows</literal>\n"
         + "      </binding>\n"
         + "    </result>\n"
         + "    <result>\n"
@@ -114,7 +118,7 @@ public class Sparql {
         + "        <uri>http://example.org/book/book2</uri>\n"
         + "      </binding>\n"
         + "      <binding name=\"title\">\n"
-        + "        <literal>Harry Potter and the Chamber of Secrets</literal>\n"
+        + "        <literal xml:lang='en'>Harry Potter and the Chamber of Secrets</literal>\n"
         + "      </binding>\n"
         + "    </result>\n"
         + "    <result>\n"
@@ -122,7 +126,7 @@ public class Sparql {
         + "        <uri>http://example.org/book/book4</uri>\n"
         + "      </binding>\n"
         + "      <binding name=\"title\">\n"
-        + "        <literal>Harry Potter and the Goblet of Fire</literal>\n"
+        + "        <literal datatype='http://www.w3.org/2001/XMLSchema#string'>Harry Potter and the Goblet of Fire</literal>\n"
         + "      </binding>\n"
         + "    </result>\n"
         + "    <result>\n"
@@ -308,7 +312,7 @@ public class Sparql {
         + "    xmlns:ns=\"http://example.org/ns#\"\n"
         + "    xmlns=\"http://example.org/book/\">\n"
         + "  <rdf:Description rdf:about=\"http://example.org/book/book3\">\n"
-        + "    <dc:title>Harry Potter and the Prisoner Of Azkaban</dc:title>\n"
+        + "    <dc:title>Harry Potter &amp; the Prisoner Of Azkaban</dc:title>\n"
         + "  </rdf:Description>\n"
         + "  <rdf:Description rdf:about=\"http://example.org/book/book7\">\n"
         + "    <dc:title>Harry Potter and the Deathly Hallows</dc:title>\n"
@@ -427,7 +431,7 @@ public class Sparql {
         + "      </vcard:N>\n"
         + "      <vcard:FN>J.K. Rowling</vcard:FN>\n"
         + "    </dc:creator>\n"
-        + "    <dc:title>Harry Potter and the Chamber of Secrets</dc:title>\n"
+        + "    <dc:title>Harry Potter &amp; the Chamber of Secrets</dc:title>\n"
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
@@ -500,5 +504,22 @@ public class Sparql {
         assertEquals(Sparql.SELECT_RESULT_7_BOOKS, Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
         assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
         assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
+    }
+
+
+    public static boolean validateXML(String s)
+    {
+        try
+        {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(s.getBytes()));
+            doc.getDocumentElement().normalize();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 }

@@ -160,7 +160,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         for (String var : vars)
         {
             content.append("<variable name=\"");
-            content.append(var);
+            content.append(Result.escapeXMLEntities(var));
             content.append("\"/>");
         }
         content.append("</head><results>");
@@ -210,7 +210,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
                 }
                 if (match) add = false;
             }
-
+System.out.println(r.toXML());
             if (add) content.append(r.toXML());
         }
 

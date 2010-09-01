@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.controller.model.sparql;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -40,6 +41,7 @@ import com.hp.hpl.jena.sparql.engine.binding.Binding;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * A single SPARQL SELECT query result.
@@ -98,17 +100,33 @@ public class Result
         {
             String var = vars.next().toString();
 
-            bindings.add(var);
+            bindings.add(escapeXMLEntities(var));
 
             RDFNode n = sol.get(var);
 
             if (n.isLiteral())
             {
-                values.add("<literal>" + ((Literal) n).getLexicalForm() + "</literal>");
+                StringBuffer lit = new StringBuffer("<literal");
+                
+                RDFDatatype dt = n.asNode().getLiteralDatatype();
+                String lang = n.asNode().getLiteralLanguage();
+                
+                if (dt != null && StringUtils.isNotEmpty(dt.toString()))
+                {
+                    lit.append(" datatype=\""+dt.toString()+"\"");
+                }
+                if (StringUtils.isNotEmpty(lang))
+                {
+                    lit.append(" xml:lang=\""+lang+"\"");
+                }
+                
+                 lit.append(">" + escapeXMLEntities(((Literal) n).getLexicalForm()) + "</literal>");
+
+                 values.add(lit.toString());
             }
             else
             {
-                values.add("<uri>" + ((Resource) n).getURI() + "</uri>");
+                values.add("<uri>" + escapeXMLEntities(((Resource) n).getURI()) + "</uri>");
             }
         }
     }
@@ -160,5 +178,21 @@ public class Result
         hash = 61 * hash + this.bindings.hashCode();
         hash = 61 * hash + this.values.hashCode();
         return hash;
+    }
+
+
+    /**
+     * Escapes the xml output using xml entities
+     * @param s RAW XML string
+     * @return Escaped XML string
+     */
+    public static String escapeXMLEntities(String s)
+    {
+        s = s.replace("&", "&amp;");
+        s = s.replace("\"", "&quot;");
+        s = s.replace("'", "&apos;");
+        s = s.replace("<", "&lt;");
+        s = s.replace(">", "&gt;");
+        return s;
     }
 }

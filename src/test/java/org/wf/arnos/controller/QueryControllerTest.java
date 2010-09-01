@@ -127,6 +127,15 @@ public class QueryControllerTest extends EasyMockSupport
     }
 
     @Test
+    public void testValidation()
+    {
+        assertTrue(Sparql.validateXML("<root></root>"));
+        assertTrue(Sparql.validateXML("<root><node id='1'/></root>"));
+        assertFalse(Sparql.validateXML("<root><node></root>"));
+        assertFalse(Sparql.validateXML("<root><node>&</node></root>"));
+    }
+
+    @Test
     public void testExecuteQueryAcrossAllEndpoints()
     {
         StringWriter writer = new StringWriter();
@@ -135,6 +144,9 @@ public class QueryControllerTest extends EasyMockSupport
         int countReturnedInstances = StringUtils.countMatches(buffer.toString(),"<binding name=\"title\">");
         System.out.println("testExecuteQueryAcrossAllEndpoints\n"+buffer.toString());
         assertEquals(Sparql.MAX_LIMIT,countReturnedInstances);
+
+        // test output is valid xml
+        assertTrue("Is valid xml", Sparql.validateXML(buffer.toString()));
     }
 
     @Test
@@ -177,8 +189,9 @@ public class QueryControllerTest extends EasyMockSupport
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
 
         verifyAll();
-        
-        assertEquals(testContent,writer.getBuffer().toString());
+
+        String output = writer.getBuffer().toString();
+        assertEquals(testContent,output);
     }
 
 
@@ -302,6 +315,8 @@ public class QueryControllerTest extends EasyMockSupport
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("true"));
+
+        assertTrue("Is valid xml", Sparql.validateXML(buffer.toString()));
     }
 
     @Test
@@ -312,6 +327,8 @@ public class QueryControllerTest extends EasyMockSupport
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("j.k. rowling"));
+
+        assertTrue("Is valid xml", Sparql.validateXML(buffer.toString()));
     }
 
     @Test
@@ -322,6 +339,8 @@ public class QueryControllerTest extends EasyMockSupport
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().contains("error"));
+
+        assertTrue("Is valid xml", Sparql.validateXML(buffer.toString()));
     }
 
     @Test
@@ -332,6 +351,8 @@ public class QueryControllerTest extends EasyMockSupport
         controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, query, writer);
         StringBuffer buffer = writer.getBuffer();
         assertTrue(buffer.toString().toLowerCase().contains("semantic web programming"));
+
+        assertTrue("Is valid xml", Sparql.validateXML(buffer.toString()));
     }
 
     @Test

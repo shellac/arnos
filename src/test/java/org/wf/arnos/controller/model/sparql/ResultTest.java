@@ -87,4 +87,25 @@ public class ResultTest {
         }
     }
 
+    @Test
+    public void testXMLGeneration()
+    {
+        ResultSet resultSet = ResultSetFactory.fromXML(Sparql.SELECT_RESULT_7_BOOKS);
+        int i = 0 ;
+        String totalXml = "";
+        while (resultSet.hasNext())
+        {
+            QuerySolution sol = resultSet.next();
+            Result r = new Result(sol);
+
+            String xml = r.toXML();
+            assertTrue(Sparql.validateXML(xml));
+
+            totalXml+= xml;
+        }
+
+        // test additional attributes are retained
+        assertTrue(totalXml.contains("datatype"));
+        assertTrue(totalXml.contains("xml:lang"));
+    }
 }

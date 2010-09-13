@@ -34,6 +34,7 @@ package org.wf.arnos.controller;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
+import com.hp.hpl.jena.query.Syntax;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,6 +83,12 @@ public class QueryController
      */
     @Autowired(required = false)
     public transient CacheHandlerInterface cacheHandler;
+
+    /**
+     * The sparql syntax used to parse the query
+     */
+    @Autowired(required = false)
+    public transient Syntax syntax = Syntax.defaultSyntax;
 
     /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
@@ -232,7 +239,7 @@ public class QueryController
      * @param endpoints List of endpoint urls to run the query against
      * @return An RDF model
      */
-    private final String handleQuery(final String project, final String queryString, List<Endpoint> endpoints)
+    protected final String handleQuery(final String project, final String queryString, List<Endpoint> endpoints)
     {
         if (queryString == null) return "";
 
@@ -253,7 +260,7 @@ public class QueryController
         // process the SPARQL query to best determin how to handle this query
         try
         {
-            Query query = QueryFactory.create(queryString);
+            Query query = QueryFactory.create(queryString, syntax);
 
             if (query.getQueryType() == Query.QueryTypeSelect)
             {
@@ -294,7 +301,7 @@ public class QueryController
      * if not found.
      * @param projectName Name of project, provided from request
      */
-    private void checkProject(final String projectName)
+    protected void checkProject(final String projectName)
     {
         if (StringUtils.isEmpty(projectName))
         {
@@ -316,7 +323,7 @@ public class QueryController
      * @param s
      * @return <code>true</code> if query is a sparql update, <code>false</code> otherwise
      */
-    private boolean isUpdateQuery(String s)
+    protected boolean isUpdateQuery(String s)
     {
         ArrayList <String>commands = new ArrayList<String>();
         commands.add("MODIFY");
@@ -329,7 +336,7 @@ public class QueryController
 
         for (String command : commands)
         {
-            if (s.contains(command)) return true;
+            if (s.toUpperCase().contains(command)) return true;
         }
 
         return false;
@@ -342,7 +349,7 @@ public class QueryController
      * @param endpoints
      * @return
      */
-    private String generateCacheKey(final String project, final String queryString, List<Endpoint> endpoints)
+    protected String generateCacheKey(final String project, final String queryString, List<Endpoint> endpoints)
     {
         // generate the cache key for this query
         String cacheString = queryString;

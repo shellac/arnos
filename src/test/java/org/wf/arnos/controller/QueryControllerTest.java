@@ -127,15 +127,6 @@ public class QueryControllerTest extends EasyMockSupport
     }
 
     @Test
-    public void testValidation()
-    {
-        assertTrue(Sparql.validateXML("<root></root>"));
-        assertTrue(Sparql.validateXML("<root><node id='1'/></root>"));
-        assertFalse(Sparql.validateXML("<root><node></root>"));
-        assertFalse(Sparql.validateXML("<root><node>&</node></root>"));
-    }
-
-    @Test
     public void testExecuteQueryAcrossAllEndpoints()
     {
         StringWriter writer = new StringWriter();

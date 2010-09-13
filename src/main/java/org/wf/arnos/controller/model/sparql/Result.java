@@ -82,6 +82,9 @@ public class Result
         return values;
     }
 
+    // records the last integer value in the result (useful for count() queries)
+    public int count = 0;
+
     /**
      * Default length for results stringbuffer constructor.
      */
@@ -106,14 +109,24 @@ public class Result
 
             if (n.isLiteral())
             {
-                StringBuffer lit = new StringBuffer("<literal");
+                StringBuffer lit = new StringBuffer(DEFAULT_SB_LENGTH);
+                lit.append("<literal");
                 
                 RDFDatatype dt = n.asNode().getLiteralDatatype();
                 String lang = n.asNode().getLiteralLanguage();
                 
                 if (dt != null && StringUtils.isNotEmpty(dt.toString()))
                 {
-                    lit.append(" datatype=\""+dt.toString()+"\"");
+                    lit.append(" datatype=\""+dt.getURI()+"\"");
+                    if (dt.getURI().toLowerCase().equals("http://www.w3.org/2001/xmlschema#integer"))
+                    {
+                        String s = ((Literal) n).getLexicalForm().toString();
+                        try
+                        {
+                            count = Integer.parseInt(s);
+                        }
+                        catch (NumberFormatException nfe) {}
+                    }
                 }
                 if (StringUtils.isNotEmpty(lang))
                 {

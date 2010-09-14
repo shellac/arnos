@@ -59,7 +59,9 @@ public class Sparql {
     // minimum number of results we're expecting
     public static final int MIN_LIMIT = 5;
 
-    protected HashMap defaultMap = new QueryMap();
+    HashMap endpoint1Mapping = new QueryMap();
+    HashMap endpoint2Mapping = new QueryMap();
+    HashMap endpoint3Mapping = new QueryMap();
 
     Map<String,HashMap> endpointQueryResultMapping = new HashMap<String,HashMap>();
 
@@ -434,11 +436,11 @@ public class Sparql {
 
     public Sparql()
     {
+        init();
+    }
 
-        HashMap endpoint1Mapping = (HashMap)defaultMap.clone();
-        HashMap endpoint2Mapping = (HashMap)defaultMap.clone();
-        HashMap endpoint3Mapping = (HashMap)defaultMap.clone();
-
+    protected void init()
+    {
         // select
         endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_BOOKS);
         endpoint1Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_7_BOOKS);

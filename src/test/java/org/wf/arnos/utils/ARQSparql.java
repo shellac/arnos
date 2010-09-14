@@ -64,9 +64,9 @@ public class ARQSparql extends Sparql
 
         public ARQSparql()
         {
-            HashMap endpoint1Mapping = new QueryMap(Syntax.syntaxARQ);
-            HashMap endpoint2Mapping = new QueryMap(Syntax.syntaxARQ);
-            HashMap endpoint3Mapping = new QueryMap(Syntax.syntaxARQ);
+            endpoint1Mapping = new QueryMap(Syntax.syntaxARQ);
+            endpoint2Mapping = new QueryMap(Syntax.syntaxARQ);
+            endpoint3Mapping = new QueryMap(Syntax.syntaxARQ);
 
             endpoint1Mapping.put(ARQ_SELECT_COUNT, ARQ_SELECT_COUNT_RESULT_1);
             endpoint2Mapping.put(ARQ_SELECT_COUNT, ARQ_SELECT_COUNT_RESULT_2);
@@ -76,5 +76,7 @@ public class ARQSparql extends Sparql
             endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);
             endpointQueryResultMapping.put(ENDPOINT2_URL, endpoint2Mapping);
             endpointQueryResultMapping.put(ENDPOINT3_URL, endpoint3Mapping);
+
+            init();
         }
 }

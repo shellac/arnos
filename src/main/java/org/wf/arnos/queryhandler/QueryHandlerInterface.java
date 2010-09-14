@@ -32,11 +32,9 @@
 package org.wf.arnos.queryhandler;
 
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.rdf.model.Model;
 import java.util.List;
 import org.wf.arnos.cachehandler.CacheHandlerInterface;
 import org.wf.arnos.controller.model.Endpoint;
-import org.wf.arnos.controller.model.sparql.Result;
 
 /**
  *
@@ -44,6 +42,13 @@ import org.wf.arnos.controller.model.sparql.Result;
  */
 public interface QueryHandlerInterface
 {
+    /**
+     * Parse the stringreturning a Query object
+     * @param query
+     * @return
+     */
+    Query parseQuery(String query);
+    
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
      * @param projectName Name of project

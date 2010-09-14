@@ -72,11 +72,6 @@ public class ARQSparql extends Sparql
             endpoint2Mapping.put(ARQ_SELECT_COUNT, ARQ_SELECT_COUNT_RESULT_2);
             endpoint3Mapping.put(ARQ_SELECT_COUNT, ARQ_SELECT_COUNT_RESULT_0);
 
-            // associate with endpoints
-            endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);
-            endpointQueryResultMapping.put(ENDPOINT2_URL, endpoint2Mapping);
-            endpointQueryResultMapping.put(ENDPOINT3_URL, endpoint3Mapping);
-
             init();
         }
 }

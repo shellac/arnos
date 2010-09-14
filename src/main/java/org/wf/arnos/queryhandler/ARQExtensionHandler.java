@@ -6,6 +6,8 @@
 package org.wf.arnos.queryhandler;
 
 import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.Syntax;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,8 +23,19 @@ public class ARQExtensionHandler extends ThreadedQueryHandler
     private static final Log LOG = LogFactory.getLog(ARQExtensionHandler.class);
 
     /**
-     * This method handles a SELECT SPARQL query.
-     * It uses threads to query each endpoint and then combines the responses.
+     * Parse the string with the ARQ extensions, returning a Query object
+     * @param query
+     * @return
+     */
+    @Override
+    public Query parseQuery(String query)
+    {
+        return QueryFactory.create(query, Syntax.syntaxARQ);
+    }
+
+    /**
+     * This method overrides the default handleSelect to parse count queries to the handleCountQuery function
+     * @param projectName Name of project
      * @param query SPARQL SELECT query
      * @param endpoints List of endpoints to query over
      * @return Response string
@@ -34,7 +47,14 @@ public class ARQExtensionHandler extends ThreadedQueryHandler
         else return super.handleSelect(projectName, query, endpoints);
     }
 
-    public String handleCountQuery(String projectName, Query query, List<Endpoint> endpoints) {
+    /**
+     * This method handles the ARQ count extensions. It totals up the results across all endpoints.
+     * @param projectName Name of project
+     * @param query
+     * @param endpoints
+     * @return
+     */
+    public String handleCountQuery(final String projectName, final Query query, final List<Endpoint> endpoints) {
         LOG.info("handling SELECT (count)");
 
         List<Result> selectResultList = fetchResultSetAndWait(projectName, query, endpoints);

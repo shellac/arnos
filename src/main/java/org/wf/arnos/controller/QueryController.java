@@ -32,9 +32,7 @@
 package org.wf.arnos.controller;
 
 import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QueryParseException;
-import com.hp.hpl.jena.query.Syntax;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,12 +81,6 @@ public class QueryController
      */
     @Autowired(required = false)
     public transient CacheHandlerInterface cacheHandler;
-
-    /**
-     * The sparql syntax used to parse the query
-     */
-    @Autowired(required = false)
-    public transient Syntax syntax = Syntax.defaultSyntax;
 
     /**
      * Primary SPARQL Endpoint of the arnos service. Runs the provided
@@ -260,7 +252,7 @@ public class QueryController
         // process the SPARQL query to best determin how to handle this query
         try
         {
-            Query query = QueryFactory.create(queryString, syntax);
+            Query query = queryHandler.parseQuery(queryString);
 
             if (query.getQueryType() == Query.QueryTypeSelect)
             {

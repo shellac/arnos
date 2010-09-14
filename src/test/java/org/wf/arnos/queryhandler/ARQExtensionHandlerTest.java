@@ -70,7 +70,6 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
         controller = new QueryController();
         controller.manager = manager;
         controller.queryHandler = queryHandler;
-        controller.syntax = Syntax.syntaxARQ;
 
         CacheHandlerInterface cache = null;
         try

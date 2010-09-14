@@ -34,6 +34,7 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.SortCondition;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -123,9 +124,19 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         return cacheHandler != null;
     }
 
+    /**
+     * Parse the stringreturning a Query object
+     * @param query
+     * @return
+     */
+    public Query parseQuery(String query)
+    {
+        return QueryFactory.create(query);
+    }
 
     /**
      * Handles the federated CONSTRUCT sparql query across endpoints.
+     * @param projectName Name of project
      * @param query SPARQL CONSTRUCT query
      * @param endpoints List of endpoints to conduct query accross
      * @return Result as an xml string
@@ -141,6 +152,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * This method handles a SELECT SPARQL query.
      * It uses threads to query each endpoint and then combines the responses.
+     * @param projectName Name of project
      * @param query SPARQL SELECT query
      * @param endpoints List of endpoints to query over
      * @return Response string

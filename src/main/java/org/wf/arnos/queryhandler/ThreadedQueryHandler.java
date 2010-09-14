@@ -79,7 +79,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
     /**
      * Default length for results stringbuffer constructor.
      */
-    private static final int DEFAULT_SB_LENGTH = 133;
+    protected static final int DEFAULT_SB_LENGTH = 133;
 
     /**
      * Spring's taskexecutor for handling threads.
@@ -145,7 +145,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleSelect(final String projectName, final Query query, final List<Endpoint> endpoints)
+    public String handleSelect(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling SELECT");
 
@@ -228,7 +228,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleAsk(final String projectName, final Query query, final List<Endpoint> endpoints)
+    public String handleAsk(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling ASK");
 
@@ -283,7 +283,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints List of endpoints to query over
      * @return Response string
      */
-    public final String handleDescribe(final String projectName, final Query query, final List<Endpoint> endpoints)
+    public String handleDescribe(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         LOG.info("handling DESCRIBE");
 
@@ -298,7 +298,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoint Endpoint to query
      * @return Response string
      */
-    public final String handleUpdate(final String projectName, final String s, final Endpoint endpoint)
+    public String handleUpdate(final String projectName, final String s, final Endpoint endpoint)
     {
         LOG.info("handling UPDATE");
 
@@ -311,7 +311,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @return Model serialised as a string
      */
-    private String mergeModelResults(Model mergedResults, final Query query)
+    protected String mergeModelResults(Model mergedResults, final Query query)
     {
 
         // now the model has been generated, run the query on the merged results
@@ -349,7 +349,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoints Set of endpoints
      * @return Combined set of results as a Jena Model
      */
-    private Model fetchModelsAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
+    protected Model fetchModelsAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         // start a new model
         Model mergedResults = ModelFactory.createDefaultModel();
@@ -384,7 +384,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param query Query returning a RDF model (CONSTRUCT or DESCRIBE)
      * @param endpoints Set of endpoints
      */
-    private List<Result> fetchResultSetAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
+    protected List<Result> fetchResultSetAndWait(final String projectName, final Query query, final List<Endpoint> endpoints)
     {
         List<Result> selectResultList = new LinkedList<Result>();
         CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
@@ -421,7 +421,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param endpoint Endpoint to query
     * @return the result (if any)
      */
-    private String fetchUpdateQueryAndWait(final String projectName, final String query, final Endpoint endpoint)
+    protected String fetchUpdateQueryAndWait(final String projectName, final String query, final Endpoint endpoint)
     {
         CountDownLatch doneSignal = new CountDownLatch(1);
 
@@ -451,7 +451,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
      * @param selectResultList Reference to the list of results to sort
      * @param conditions The sort conditions from the query
      */
-    private void sortResults(List<Result> selectResultList, final List<SortCondition> conditions)
+    protected void sortResults(List<Result> selectResultList, final List<SortCondition> conditions)
     {
         Comparator<Binding> comparator = new BindingComparator(conditions);
         SortedSet<Binding> sorted = new TreeSet<Binding>(comparator);

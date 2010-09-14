@@ -56,7 +56,7 @@ import static org.easymock.EasyMock.*;
  */
 public class AbstractResponseTaskTest extends EasyMockSupport {
     String selectQuery = Sparql.SELECT_QUERY_BOOKS;
-    String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL,selectQuery);
+    String selectResult = new Sparql().getResult(Sparql.ENDPOINT1_URL,selectQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 
@@ -160,7 +160,7 @@ public class AbstractResponseTaskTest extends EasyMockSupport {
 
         // test cache with different response task
         String askQuery = Sparql.ASK_QUERY_ALICE;
-        String askResult = Sparql.getResult(Sparql.ENDPOINT1_URL, askQuery);
+        String askResult = new Sparql().getResult(Sparql.ENDPOINT1_URL, askQuery);
         FetchBooleanResponseTask fetcher2 = new FetchBooleanResponseTask(mockThreadedQueryHandler,
                 askResults,
                 Sparql.ENDPOINT1_URL,

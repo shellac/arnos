@@ -57,7 +57,7 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
 public class FetchModelResponseTaskTest extends EasyMockSupport
 {
     String constructQuery = Sparql.CONSTRUCT_QUERY_BOOKS;
-    String constructResult = Sparql.getResult(Sparql.ENDPOINT1_URL,constructQuery);
+    String constructResult = new Sparql().getResult(Sparql.ENDPOINT1_URL,constructQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 

@@ -55,7 +55,7 @@ import org.wf.arnos.queryhandler.QueryWrapperInterface;
 public class FetchBooleanResponseTaskTest extends EasyMockSupport
 {
     String askQuery = Sparql.ASK_QUERY_ALICE;
-    String askResult = Sparql.getResult(Sparql.ENDPOINT1_URL, askQuery);
+    String askResult = new Sparql().getResult(Sparql.ENDPOINT1_URL, askQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 

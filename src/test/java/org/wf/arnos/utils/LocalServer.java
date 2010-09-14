@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.utils;
 
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.wf.arnos.utils.handler.EndpointHandler;
 
@@ -45,6 +46,7 @@ public class LocalServer {
     private static Server server;
     private static final int PORT_NUMBER = 9090;
     public static final String SERVER_URL = "http://localhost:"+PORT_NUMBER;
+    public static Handler handler = new EndpointHandler(new Sparql());
     
     /**
      * Starts the webserver with our custom handler.
@@ -53,12 +55,14 @@ public class LocalServer {
     {
         try
         {
+            System.out.println("Server using handler:"+handler.getClass());
             server = new Server(PORT_NUMBER);
-            server.setHandler(new EndpointHandler());
+            server.setHandler(handler);
             server.start();
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

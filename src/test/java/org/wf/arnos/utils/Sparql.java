@@ -59,11 +59,9 @@ public class Sparql {
     // minimum number of results we're expecting
     public static final int MIN_LIMIT = 5;
 
+    protected HashMap defaultMap = new QueryMap();
 
-    private static Map<String,QueryMap> endpointQueryResultMapping = new HashMap<String,QueryMap>();
-    private static  QueryMap endpoint1Mapping = new QueryMap();
-    private static  QueryMap endpoint2Mapping = new QueryMap();
-    private static QueryMap endpoint3Mapping = new QueryMap();
+    Map<String,HashMap> endpointQueryResultMapping = new HashMap<String,HashMap>();
 
     /*** SELECT QUERIES ***/
     /*=================*/
@@ -273,28 +271,6 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    static
-    {
-        // associate endpoints, queries and results
-        endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_BOOKS);
-        endpoint1Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_7_BOOKS);
-        endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
-        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
-        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
-
-        endpoint2Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
-        endpoint2Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_EMPTY_BOOKS);
-        endpoint2Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
-        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
-        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
-
-        endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_BOOKS);
-        endpoint3Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_4_ADDITIONAL_BOOKS);
-        endpoint3Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
-        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
-        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
-    }
-
 
 
     /*** CONSTRUCT QUERIES ***/
@@ -359,13 +335,6 @@ public class Sparql {
         + "    xmlns=\"http://example.org/book/\">\n"
         + "</rdf:RDF>";
 
-    static
-    {
-        endpoint1Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
-        endpoint2Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
-        endpoint3Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_3_BOOKS);
-    }
-
 
 
     /*** ASK QUERIES ***/
@@ -392,19 +361,6 @@ public class Sparql {
         + "    <boolean>false</boolean>\n"
         + "  </results>\n"
         + "</sparql>";
-
-    static
-    {
-        endpoint1Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_TRUE);
-        endpoint1Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
-
-        endpoint2Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
-        endpoint2Mapping.put(ASK_QUERY_BOB,ASK_RESULT_TRUE);
-
-        endpoint3Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
-        endpoint3Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
-    }
-
 
 
     /*** DESCRIBE QUERIES ***/
@@ -468,8 +424,56 @@ public class Sparql {
         + "    xmlns=\"http://example.org/book/\">\n"
         + "</rdf:RDF>";
 
-    static
+
+    /*** UPDATE Query ***/
+    /*===============*/
+
+    public static final String UPDATE_QUERY = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
+        + "INSERT { <http://example/egbook3> dc:title  \"This is an example title\" }";
+    public static final String UPDATE_QUERY_RESULT = "OK";
+
+    public Sparql()
     {
+
+        HashMap endpoint1Mapping = (HashMap)defaultMap.clone();
+        HashMap endpoint2Mapping = (HashMap)defaultMap.clone();
+        HashMap endpoint3Mapping = (HashMap)defaultMap.clone();
+
+        // select
+        endpoint1Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_7_BOOKS);
+        endpoint1Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_7_BOOKS);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
+        endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
+
+        endpoint2Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
+        endpoint2Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_EMPTY_BOOKS);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_4_PEOPLE);
+        endpoint2Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_4_PEOPLE);
+
+        endpoint3Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_4_ADDITIONAL_BOOKS);
+        endpoint3Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_4_ADDITIONAL_BOOKS);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_EMPTY_PEOPLE);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_EMPTY_PEOPLE);
+        endpoint3Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_EMPTY_PEOPLE);
+
+        // construct
+        endpoint1Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_7_BOOKS);
+        endpoint2Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_EMPTY_RESULTS);
+        endpoint3Mapping.put(CONSTRUCT_QUERY_BOOKS,CONSTRUCT_RESULT_3_BOOKS);
+
+        // ask
+        endpoint1Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_TRUE);
+        endpoint1Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
+
+        endpoint2Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
+        endpoint2Mapping.put(ASK_QUERY_BOB,ASK_RESULT_TRUE);
+
+        endpoint3Mapping.put(ASK_QUERY_ALICE,ASK_RESULT_FALSE);
+        endpoint3Mapping.put(ASK_QUERY_BOB,ASK_RESULT_FALSE);
+
+        // describe
         endpoint1Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2);
         endpoint1Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
 
@@ -478,32 +482,36 @@ public class Sparql {
 
         endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
         endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
-    }
 
-    public static final String UPDATE_QUERY = "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"
-        + "INSERT { <http://example/egbook3> dc:title  \"This is an example title\" }";
-    public static final String UPDATE_QUERY_RESULT = "OK";
-    
-    static
-    {
+        // associate with endpoints
         endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);
         endpointQueryResultMapping.put(ENDPOINT2_URL, endpoint2Mapping);
         endpointQueryResultMapping.put(ENDPOINT3_URL, endpoint3Mapping);
     }
 
-    public static String getResult(String endpoint, String query)
+    public String getResult(String endpoint, String query)
     {
         String result = null;
-        if (endpointQueryResultMapping.containsKey(endpoint)) result = endpointQueryResultMapping.get(endpoint).get(query);
+        if (endpointQueryResultMapping.containsKey(endpoint)) result = ((QueryMap)endpointQueryResultMapping.get(endpoint)).get(query);
         return result;
     }
 
     @Test
     public void test()
     {
-        assertEquals(Sparql.SELECT_RESULT_7_BOOKS, Sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
-        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
-        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, Sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
+        Sparql sparql = new Sparql();
+        assertEquals(Sparql.SELECT_RESULT_7_BOOKS, sparql.getResult(Sparql.ENDPOINT1_URL, Sparql.SELECT_QUERY_BOOKS));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
+        assertEquals(Sparql.DESCRIBE_RESULT_BOOK_2_ADDITIONAL, sparql.getResult(Sparql.ENDPOINT3_URL,Sparql. DESCRIBE_QUERY_BOOK_2));
+    }
+
+    @Test
+    public void testValidation()
+    {
+        assertTrue(Sparql.validateXML("<root></root>"));
+        assertTrue(Sparql.validateXML("<root><node id='1'/></root>"));
+        assertFalse(Sparql.validateXML("<root><node></root>"));
+        assertFalse(Sparql.validateXML("<root><node>&</node></root>"));
     }
 
 

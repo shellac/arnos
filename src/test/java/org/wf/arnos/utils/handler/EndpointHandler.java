@@ -48,12 +48,19 @@ import org.wf.arnos.utils.Sparql;
  */
 public class EndpointHandler extends AbstractHandler
     {
+        private Sparql sparql;
+
+        public EndpointHandler(Sparql sparql)
+        {
+            this. sparql = sparql;
+        }
+
         public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
         {
             String query = request.getParameter("query");
 
-            System.out.println("Target is " +target);
+            System.out.println("Target is " +target + " sparql is " +sparql.getClass());
 
             response.setContentType("text/xml");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -99,7 +106,7 @@ public class EndpointHandler extends AbstractHandler
             }
             else
             {
-                result = Sparql.getResult(thisEndpoint,query);
+                result = sparql.getResult(thisEndpoint,query);
 
                 if (result == null)
                 {

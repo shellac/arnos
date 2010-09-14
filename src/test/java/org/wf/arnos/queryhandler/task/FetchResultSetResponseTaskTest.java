@@ -56,8 +56,9 @@ import org.wf.arnos.controller.model.sparql.Result;
  */
 public class FetchResultSetResponseTaskTest extends EasyMockSupport
 {
+    Sparql sparql = new Sparql();
     String selectQuery = Sparql.SELECT_QUERY_BOOKS;
-    String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL,selectQuery);
+    String selectResult = sparql.getResult(Sparql.ENDPOINT1_URL,selectQuery);
 
     QueryHandlerInterface mockThreadedQueryHandler;
 
@@ -81,7 +82,7 @@ public class FetchResultSetResponseTaskTest extends EasyMockSupport
     {
         System.out.println("testRun");
 
-        String selectResult = Sparql.getResult(Sparql.ENDPOINT1_URL, selectQuery);
+        String selectResult = sparql.getResult(Sparql.ENDPOINT1_URL, selectQuery);
 
         List <Result> results = new LinkedList<Result>();
         FetchResultSetResponseTask fetcher = new FetchResultSetResponseTask(mockThreadedQueryHandler,

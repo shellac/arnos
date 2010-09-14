@@ -33,6 +33,7 @@ package org.wf.arnos.utils;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.Syntax;
 import java.util.HashMap;
 
 /**
@@ -41,7 +42,11 @@ import java.util.HashMap;
  */
 public class QueryMap extends HashMap<String,String>{
 
+    Syntax syntax = Syntax.defaultSyntax;
+
     public QueryMap(){};
+
+    public QueryMap(Syntax syntax){ this.syntax = syntax; };
 
     @Override
     public String put(String key, String value)
@@ -54,9 +59,9 @@ public class QueryMap extends HashMap<String,String>{
         return super.get(preProcess(key));
     }
 
-    public static String preProcess(String s)
+    public String preProcess(String s)
     {
-        Query selectQuery = QueryFactory.create(s);
+        Query selectQuery = QueryFactory.create(s, syntax);
         return selectQuery.toString();
     }
 }

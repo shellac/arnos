@@ -5,8 +5,12 @@
 
 package org.wf.arnos.queryhandler;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.wf.arnos.utils.handler.EndpointHandler;
-import com.hp.hpl.jena.query.Syntax;
 import org.wf.arnos.utils.ARQSparql;
 import java.io.File;
 import java.util.logging.Level;
@@ -44,7 +48,7 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
     private QueryController controller;
     static String PROJECT_NAME = "testproject";
     static String QueryString = ARQSparql.ARQ_SELECT_COUNT;
-
+    ARQExtensionHandler queryHandler;
 
     @Before
     public void setUp()
@@ -52,7 +56,7 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
         DOMConfigurator.configure("./src/main/webapp/WEB-INF/log4j.xml");
         Logger.getLogger("org.wf.arnos.controller.QueryController").setLevel(Level.ALL);
 
-        ARQExtensionHandler queryHandler = new ARQExtensionHandler();
+        queryHandler = new ARQExtensionHandler();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);
         executor.initialize();
@@ -114,5 +118,59 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
         assertTrue("Is valid xml", Sparql.validateXML(result));
     }
 
+
+    @Test
+    public void testHandleRegularSelect()
+    {
+        Query selectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS);
+        
+        System.out.println("testHandleRegularSelect");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        String result = queryHandler.handleSelect(PROJECT_NAME, selectQuery, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        int numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with endpoints 1 & 2",7,numResults);
+
+        // now add another result set
+        endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
+        result = queryHandler.handleSelect(PROJECT_NAME, selectQuery, endpoints);
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with all endpoints",Sparql.MAX_LIMIT,numResults);
+
+        // remove query limit
+        Query noLimitSelectQuery = QueryFactory.create(Sparql.SELECT_QUERY_BOOKS_NO_LIMIT);
+        result = queryHandler.handleSelect(PROJECT_NAME, noLimitSelectQuery, endpoints);
+        results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+
+        numResults = 0;
+        while (results.hasNext())
+        {
+            results.next();
+            numResults++;
+        }
+        assertEquals("Results with all endpoints",11,numResults);
+
+        assertTrue(result.contains("datatype"));
+        assertTrue(result.contains("xml:lang"));
+    }
 
 }

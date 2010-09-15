@@ -8,13 +8,9 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
-import java.io.StringWriter;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ilrt.researchrevealed.describehandler.BackwardForwardDescribeFactory;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
 

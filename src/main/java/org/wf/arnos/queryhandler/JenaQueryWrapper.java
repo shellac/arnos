@@ -149,8 +149,11 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     {
         try
         {
+            if (LOG.isDebugEnabled()) LOG.debug("Query:\n" + querystring);
             InputStream in = exec(querystring, service);
-            return convertStreamToString(in);
+            String result = convertStreamToString(in);
+            if (LOG.isDebugEnabled()) LOG.debug("Response:\n" + result);
+            return result;
         }
         catch (Exception ex)
         {

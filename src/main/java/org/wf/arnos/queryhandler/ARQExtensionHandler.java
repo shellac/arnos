@@ -8,9 +8,13 @@ package org.wf.arnos.queryhandler;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.sparql.core.describe.DescribeHandlerRegistry;
+import java.io.StringWriter;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ilrt.researchrevealed.describehandler.BackwardForwardDescribeFactory;
 import org.wf.arnos.controller.model.Endpoint;
 import org.wf.arnos.controller.model.sparql.Result;
 
@@ -78,64 +82,15 @@ public class ARQExtensionHandler extends ThreadedQueryHandler
         boolean distinct = false;
         long limit = -1;
 
-        if (query.hasLimit())
+        int count = 0;
+        for (int i = 0; i < selectResultList.size(); i++)
         {
-            limit = query.getLimit();
-            hasLimit = true;
+            Result r = selectResultList.get(i);
+            count += r.count;
         }
-
-        if (query.isDistinct())
-        {
-            distinct = true;
-        }
-
-        if (query.hasOrderBy())
-        {
-            sortResults(selectResultList, query.getOrderBy());
-        }
-
-        if (query.hasAggregators())
-        {
-            int count = 0;
-            for (int i = 0; i < selectResultList.size(); i++)
-            {
-                Result r = selectResultList.get(i);
-                count += r.count;
-            }
-            content.append("<result><binding name=\""+ query.getResultVars().get(0).toString()+"\">");
-            content.append("<literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">"+count+"</literal>");
-            content.append("</binding></result>");
-        }
-        else
-        {
-            for (int i = 0; i < selectResultList.size(); i++)
-            {
-                Result r = selectResultList.get(i);
-                boolean add = true;
-
-                if (!hasLimit || limit > 0)
-                {
-                    if (hasLimit) limit--;
-                }
-                else
-                {
-                    add = false;
-                }
-
-                if (distinct)
-                {
-                    // check a duplicate result hasn't already been added
-                    boolean match = false;
-                    for (int j = 0; j < i; j++)
-                    {
-                        if (r.equals(selectResultList.get(j))) match = true;
-                    }
-                    if (match) add = false;
-                }
-
-                if (add) content.append(r.toXML());
-            }
-        }
+        content.append("<result><binding name=\""+ query.getResultVars().get(0).toString()+"\">");
+        content.append("<literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">"+count+"</literal>");
+        content.append("</binding></result>");
 
         content.append("</results></sparql>");
 

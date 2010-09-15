@@ -300,7 +300,18 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         LOG.info("handling DESCRIBE");
 
         Model model = fetchModelsAndWait(projectName, query, endpoints);
-        return mergeModelResults(model, query);
+
+        // create a string writer to print the model to
+        StringWriter wr = new StringWriter();
+
+        // write out the model
+        model.write(wr);
+
+        // close the models as we don't need them any more
+        model.close();
+
+        // return our string results
+        return wr.toString();
     }
 
     /**

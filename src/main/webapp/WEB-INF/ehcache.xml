@@ -18,7 +18,7 @@
     <cache name="resultsCache"
         maxElementsInMemory="500"
         eternal="false"
-        overflowToDisk="false"
+        overflowToDisk="true"
         diskPersistent="false"
         memoryStoreEvictionPolicy="LFU" />
         

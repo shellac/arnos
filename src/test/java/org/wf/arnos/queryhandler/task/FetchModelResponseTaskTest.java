@@ -64,6 +64,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
     QueryWrapperInterface mockQueryWrapper;
 
     CountDownLatch doneSignal;
+    CountDownLatch countSignal;
 
     String projectName = "testProject";
 
@@ -74,6 +75,7 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         mockQueryWrapper = createMock(QueryWrapperInterface.class);
         mockThreadedQueryHandler = createMock(QueryHandlerInterface.class);
         doneSignal = new CountDownLatch(1);
+        countSignal = new CountDownLatch(1);
     }
     
     @Test
@@ -88,7 +90,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 projectName,
-                doneSignal)
+                doneSignal,
+                countSignal)
         {
             @Override
             protected QueryWrapperInterface getQueryWrapper()
@@ -115,10 +118,12 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
 
         // now check we've got the expected number of results
         assertEquals("Latch correctly set", 0, doneSignal.getCount());
-
-        model.removeAll();
+        assertEquals("Count latch correctly set", 0, countSignal.getCount());
         
         resetAll();
+        doneSignal = new CountDownLatch(1);
+        countSignal = new CountDownLatch(1);
+        model.removeAll();
 
         expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
         
@@ -135,6 +140,48 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
         verifyAll();
 
         assertEquals(7,model.size());
+
+        model.removeAll();
+
+        resetAll();
+        doneSignal = new CountDownLatch(1);
+        countSignal = new CountDownLatch(1);
+
+        fetcher = new FetchModelResponseTask(mockThreadedQueryHandler,
+                model,
+                Sparql.ENDPOINT1_URL,
+                constructQuery,
+                projectName,
+                doneSignal,
+                countSignal)
+        {
+            @Override
+            protected QueryWrapperInterface getQueryWrapper()
+            {
+                return mockQueryWrapper;
+            }
+        };
+        
+        String emptyDescribe = Sparql.DESCRIBE_RESULT_EMPTY_BOOK;
+        expect(mockThreadedQueryHandler.hasCache()).andReturn(false).anyTimes();
+
+        expect(mockQueryWrapper.execQuery((String) notNull(), (String) notNull())).
+                andReturn(emptyDescribe);
+
+        expect(mockQueryWrapper.stringToModel(emptyDescribe))
+                .andReturn(JenaQueryWrapper.getInstance().stringToModel(emptyDescribe));
+
+        replayAll();
+
+        fetcher.run();
+
+        verifyAll();
+
+        assertEquals(0,model.size());
+        
+        // now check we've recorded the number of results
+        assertEquals("Latch correctly set", 0, doneSignal.getCount());
+        assertEquals("Count latch correctly set", 1, countSignal.getCount());
     }
 
     @Test
@@ -151,7 +198,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 projectName,
-                doneSignal)
+                doneSignal,
+                countSignal)
         {
             @Override
             protected QueryWrapperInterface getQueryWrapper()
@@ -229,7 +277,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 projectName,
-                doneSignal)
+                doneSignal,
+                countSignal)
         {
             @Override
             protected QueryWrapperInterface getQueryWrapper()
@@ -302,7 +351,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 Sparql.CONSTRUCT_QUERY_BOOKS,
                 projectName,
-                doneSignal);
+                doneSignal,
+                countSignal);
 
         QueryWrapperInterface wrapper = fetcher.getQueryWrapper();
         assertTrue(wrapper instanceof JenaQueryWrapper);
@@ -321,7 +371,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 projectName,
-                doneSignal)
+                doneSignal,
+                countSignal)
         {
             @Override
             protected QueryWrapperInterface getQueryWrapper()
@@ -360,7 +411,8 @@ public class FetchModelResponseTaskTest extends EasyMockSupport
                 Sparql.ENDPOINT1_URL,
                 constructQuery,
                 projectName,
-                doneSignal)
+                doneSignal,
+                countSignal)
         {
             @Override
             protected QueryWrapperInterface getQueryWrapper()

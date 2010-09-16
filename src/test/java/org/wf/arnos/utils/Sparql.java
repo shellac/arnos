@@ -369,7 +369,7 @@ public class Sparql {
     /*==================*/
 
     public static final String DESCRIBE_QUERY_BOOK_2 = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
-        + "DESCRIBE <http://example.org/book/book2> WHERE {}";
+        + "DESCRIBE <http://example.org/book/book2> WHERE {} LIMIT 10";
 
     public static final String DESCRIBE_QUERY_BOOK_3 = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
         + "DESCRIBE <http://example.org/book/book3> WHERE {}";

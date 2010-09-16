@@ -378,6 +378,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
         Model mergedResults = ModelFactory.createDefaultModel();
 
         CountDownLatch doneSignal = new CountDownLatch(endpoints.size());
+        CountDownLatch countSignal = new CountDownLatch(endpoints.size());
 
         // fire off a thread to handle quering each endpoint
         for (Endpoint ep : endpoints)
@@ -385,7 +386,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             String url = ep.getLocation();
             LOG.debug("Querying " + url);
 
-            taskExecutor.execute(new FetchModelResponseTask(this, mergedResults, query.serialize(), url, projectName, doneSignal));
+            taskExecutor.execute(new FetchModelResponseTask(this, mergedResults, query.serialize(), url, projectName, doneSignal, countSignal));
         }
 
         // block until all threads have finished
@@ -398,6 +399,11 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
             LOG.warn("Error while waiting on threads", ex);
         }
 
+        if (query.isDescribeType() && query.hasLimit())
+        {
+            if (endpoints.size() - countSignal.getCount() > 1) LOG.warn("DESCRIBE query issued with LIMIT. Multiple endpoints returned valid responses, LIMIT not guaranteed to be upheld.");
+        }
+        
         return mergedResults;
     }
 

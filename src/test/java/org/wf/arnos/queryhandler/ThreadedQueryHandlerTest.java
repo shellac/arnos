@@ -283,7 +283,7 @@ public class ThreadedQueryHandlerTest extends EasyMockSupport {
 
         // add our slightly more knowledgeable endpoint
         endpoints.add(new Endpoint(Sparql.ENDPOINT3_URL));
-
+System.out.println("Expecting WARN message");
         result = queryHandler.handleDescribe(projectName, describeQuery, endpoints);
 
         assertTrue(result.contains("Harry Potter and the Chamber of Secrets"));

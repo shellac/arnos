@@ -52,6 +52,11 @@ public class FetchModelResponseTask extends AbstractResponseTask
     private Model mergedModel;
 
     /**
+     * A latch to count the endpoints with valid results.
+     */
+    protected final transient CountDownLatch countSignal;
+
+    /**
      * Constructor for thread.
      * @param paramHandler handling class
      * @param paramQuery SPARQL query
@@ -63,10 +68,12 @@ public class FetchModelResponseTask extends AbstractResponseTask
                                                         final String paramQuery,
                                                         final String paramUrl,
                                                         final String projectName,
-                                                        final CountDownLatch paramDoneSignal)
+                                                        final CountDownLatch paramDoneSignal,
+                                                        final CountDownLatch paramCountSignal)
     {
         super(paramHandler, paramQuery, paramUrl, projectName, paramDoneSignal);
         this.mergedModel = model;
+        this.countSignal = paramCountSignal;
     }
 
     /**
@@ -92,6 +99,9 @@ public class FetchModelResponseTask extends AbstractResponseTask
             if (resultsString != null && resultsString.length() > 0)
             {
                 Model model  = getQueryWrapper().stringToModel(resultsString);
+
+                // record if results have been returned so that warning can be issued
+                if (model.size() > 0) countSignal.countDown();
 
                 synchronized(handler)
                 {

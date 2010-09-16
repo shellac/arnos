@@ -164,7 +164,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_EMPTY_BOOKS = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_EMPTY_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"book\"/>\n"
@@ -174,7 +174,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_EMPTY_PEOPLE = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_EMPTY_PEOPLE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"name\"/>\n"
@@ -183,7 +183,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_2_PEOPLE = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_2_PEOPLE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"name\"/>\n"
@@ -202,7 +202,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_4_PEOPLE = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_4_PEOPLE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"name\"/>\n"
@@ -231,7 +231,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String SELECT_RESULT_4_ADDITIONAL_BOOKS = "<?xml version=\"1.0\"?>\n"
+    public static final String SELECT_RESULT_4_ADDITIONAL_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head>\n"
         + "    <variable name=\"book\"/>\n"
@@ -282,7 +282,7 @@ public class Sparql {
         + "CONSTRUCT { $book dc:title $title }\n"
         + "WHERE\n"
         + "  { $book dc:title $title } ORDER BY ?title LIMIT "+MAX_LIMIT;
-    private static final String CONSTRUCT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
+    public static final String CONSTRUCT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
@@ -311,7 +311,7 @@ public class Sparql {
         + "    <dc:title>Harry Potter and the Philosopher's Stone</dc:title>\n"
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
-    private static final String CONSTRUCT_RESULT_3_BOOKS = "<?xml version=\"1.0\"?>\n"
+    public static final String CONSTRUCT_RESULT_3_BOOKS = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
@@ -328,7 +328,7 @@ public class Sparql {
         + "    <dc:title>Semantic Web Programming</dc:title>\n"
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
-    private static final String CONSTRUCT_RESULT_EMPTY_RESULTS = "<?xml version=\"1.0\"?>\n"
+    public static final String CONSTRUCT_RESULT_EMPTY_RESULTS = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
@@ -348,7 +348,7 @@ public class Sparql {
     public static final String ASK_QUERY_BOB = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
         + "ASK  { ?x foaf:name  \"Bob\" }";
 
-    private static final String ASK_RESULT_TRUE = "<?xml version=\"1.0\"?>\n"
+    public static final String ASK_RESULT_TRUE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head></head>\n"
         + "  <results>\n"
@@ -356,7 +356,7 @@ public class Sparql {
         + "  </results>\n"
         + "</sparql>";
 
-    private static final String ASK_RESULT_FALSE = "<?xml version=\"1.0\"?>\n"
+    public static final String ASK_RESULT_FALSE = "<?xml version=\"1.0\"?>\n"
         + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
         + "  <head></head>\n"
         + "  <results>\n"
@@ -374,7 +374,7 @@ public class Sparql {
     public static final String DESCRIBE_QUERY_BOOK_3 = "PREFIX foaf:    <http://xmlns.com/foaf/0.1/>\n"
         + "DESCRIBE <http://example.org/book/book3> WHERE {}";
 
-    private static final String DESCRIBE_RESULT_BOOK_2 = "<?xml version=\"1.0\"?>\n"
+    public static final String DESCRIBE_RESULT_BOOK_2 = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
@@ -393,7 +393,7 @@ public class Sparql {
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
-    private static final String DESCRIBE_RESULT_BOOK_2_ADDITIONAL = "<?xml version=\"1.0\"?>\n"
+    public static final String DESCRIBE_RESULT_BOOK_2_ADDITIONAL = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"
@@ -417,7 +417,7 @@ public class Sparql {
         + "  </rdf:Description>\n"
         + "</rdf:RDF>";
 
-    private static final String DESCRIBE_RESULT_EMPTY_BOOK = "<?xml version=\"1.0\"?>\n"
+    public static final String DESCRIBE_RESULT_EMPTY_BOOK = "<?xml version=\"1.0\"?>\n"
         + "<rdf:RDF\n"
         + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
         + "    xmlns:vcard=\"http://www.w3.org/2001/vcard-rdf/3.0#\"\n"

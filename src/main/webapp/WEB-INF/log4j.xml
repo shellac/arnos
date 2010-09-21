@@ -55,12 +55,12 @@
 
     <!-- configure Spring framework -->
     <logger name="org.springframework">
-        <level value="INFO" />
+        <level value="WARN" />
     </logger>
 
     <!-- configure Ehcache logging -->
     <logger name="net.sf.ehcache">
-        <level value="INFO" />
+        <level value="WARN" />
     </logger>
 
 

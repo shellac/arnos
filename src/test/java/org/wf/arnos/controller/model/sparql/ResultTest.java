@@ -31,6 +31,9 @@
  */
 package org.wf.arnos.controller.model.sparql;
 
+import com.hp.hpl.jena.sparql.function.library.matches;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
@@ -48,6 +51,72 @@ import static org.junit.Assert.*;
 public class ResultTest {
 
 
+    public static String SELECT_RESULT_7_BOOKS = "<?xml version=\"1.0\"?>\n"
+        + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
+        + "  <head>\n"
+        + "    <variable name=\"book\"/>\n"
+        + "    <variable name=\"title\"/>\n"
+        + "  </head>\n"
+        + "  <results>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book7</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <literal>Harry Potter &amp; the Deathly Hallows</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book2</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <literal xml:lang='en'>Harry Potter and the Chamber of Secrets</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book4</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <literal datatype='http://www.w3.org/2001/XMLSchema#string'>Harry Potter and the Goblet of Fire</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book6</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <bnode>r1</bnode>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book1</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <bnode>r2</bnode>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book3</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <literal>Harry Potter and the Prisoner Of Azkaban</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"book\">\n"
+        + "        <uri>http://example.org/book/book5</uri>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"title\">\n"
+        + "        <bnode>r2</bnode>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "  </results>\n"
+        + "</sparql>";
+
     @Test
     public void testHashCode()
     {
@@ -55,7 +124,7 @@ public class ResultTest {
 
         HashMap <Result,Integer> hash = new HashMap<Result,Integer>();
 
-        ResultSet resultSet = ResultSetFactory.fromXML(Sparql.SELECT_RESULT_7_BOOKS);
+        ResultSet resultSet = ResultSetFactory.fromXML(SELECT_RESULT_7_BOOKS);
         int i = 0 ;
         while (resultSet.hasNext())
         {
@@ -90,7 +159,7 @@ public class ResultTest {
     @Test
     public void testXMLGeneration()
     {
-        ResultSet resultSet = ResultSetFactory.fromXML(Sparql.SELECT_RESULT_7_BOOKS);
+        ResultSet resultSet = ResultSetFactory.fromXML(SELECT_RESULT_7_BOOKS);
         int i = 0 ;
         String totalXml = "";
         while (resultSet.hasNext())
@@ -104,8 +173,43 @@ public class ResultTest {
             totalXml+= xml;
         }
 
+        // test bnode generation
+        assertEquals(3, SubstrCount(totalXml,"<bnode>"));
+
+        Pattern p = Pattern.compile("<bnode>[^<]*</bnode>");
+        Matcher m = p.matcher(totalXml);
+        HashMap <String,String> matches = new HashMap<String,String>();
+
+        boolean result = m.find();
+        // Loop through and create a new String
+        // with the replacements
+        while(result) {
+            String match = totalXml.substring(m.start(),m.end());
+            matches.put(match, "1");
+            result = m.find();
+        }
+
+        assertEquals("2 unique blank nodes", 2, matches.size());
+
         // test additional attributes are retained
         assertTrue(totalXml.contains("datatype"));
         assertTrue(totalXml.contains("xml:lang"));
+    }
+
+    private int SubstrCount(String haystack, String needle)
+    {
+        int lastIndex = 0;
+        int count =0;
+
+        while(lastIndex != -1)
+        {
+
+               lastIndex = haystack.indexOf(needle,lastIndex+1);
+
+               if( lastIndex != -1){
+                     count ++;
+              }
+        }
+        return count;
     }
 }

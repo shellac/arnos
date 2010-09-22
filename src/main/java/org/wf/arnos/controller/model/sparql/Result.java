@@ -137,9 +137,14 @@ public class Result
 
                  values.add(lit.toString());
             }
-            else
+            else if (n.isURIResource())
             {
                 values.add("<uri>" + escapeXMLEntities(((Resource) n).getURI()) + "</uri>");
+            }
+            else
+            {
+                // is a blank node
+                values.add("<bnode>" + ((Resource) n).asNode().getBlankNodeLabel() + "</bnode>");
             }
         }
     }

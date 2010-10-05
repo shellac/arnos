@@ -55,7 +55,6 @@ import java.util.Locale;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wf.arnos.exception.ArnosRuntimeException;
 
 /**
  * This class provides an customized version of Jena's execSelect and execConstruct methods.
@@ -83,7 +82,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     /**
      * Default response timeout.
      */
-    private static int REQUEST_TIMEOUT = 10 * 1000;
+    private static int READ_TIMEOUT = 10 * 1000;
 
     /**
      * URL connecction object.
@@ -125,7 +124,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
            s = System.getProperty("arnos.request.timeout");
            if (StringUtils.isNotEmpty(s))
            {
-               REQUEST_TIMEOUT = Integer.parseInt(s);
+               READ_TIMEOUT = Integer.parseInt(s);
            }
        }
        catch (Exception e)
@@ -135,7 +134,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
        }
 
        LOG.info("Timeout set to " + CONNECTION_TIMEOUT + "ms");
-       LOG.info("Request timeout set to " + REQUEST_TIMEOUT + "ms");
+       LOG.info("Read timeout set to " + READ_TIMEOUT + "ms");
    }
 
     /**
@@ -319,7 +318,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
             httpConnection = (HttpURLConnection) target.openConnection();
             httpConnection.setRequestProperty("Accept", CONTENT_TYPE_RESULT) ;
             httpConnection.setConnectTimeout(CONNECTION_TIMEOUT);
-            httpConnection.setReadTimeout(REQUEST_TIMEOUT);
+            httpConnection.setReadTimeout(READ_TIMEOUT);
             httpConnection.setDoInput(true);
             httpConnection.connect();
             if (httpConnection.getResponseCode() == 414) /*HttpServletResponse.SC_REQUEST_URI_TOO_LONG*/
@@ -356,7 +355,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
             httpConnection.setRequestProperty("Accept", CONTENT_TYPE_RESULT) ;
             httpConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded") ;
             httpConnection.setConnectTimeout(CONNECTION_TIMEOUT);
-            httpConnection.setReadTimeout(REQUEST_TIMEOUT);
+            httpConnection.setReadTimeout(READ_TIMEOUT);
             httpConnection.setDoOutput(true) ;
 
             OutputStream out = httpConnection.getOutputStream();

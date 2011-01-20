@@ -118,7 +118,7 @@ public class Sparql {
         + "        <uri>http://example.org/book/book2</uri>\n"
         + "      </binding>\n"
         + "      <binding name=\"title\">\n"
-        + "        <literal xml:lang='en'>Harry Potter and the Chamber of Secrets</literal>\n"
+        + "        <literal xml:lang='en'>Harry Potter and the Chamber of Secrets我叫柯睿思</literal>\n"
         + "      </binding>\n"
         + "    </result>\n"
         + "    <result>\n"

@@ -255,6 +255,22 @@ public class QueryControllerTest extends EasyMockSupport
     }
 
     @Test
+    public void testUTF8Handling()
+    {
+        StringWriter writer = new StringWriter();
+        StringBuffer buffer;
+
+        String expectedResponse = "我叫柯睿思";
+
+        controller.executeQueryAcrossAllEndpoints(PROJECT_NAME, QueryString, writer);
+    
+        buffer = writer.getBuffer();
+        System.out.println(expectedResponse);
+        System.out.println(buffer.toString());
+        assertTrue(buffer.toString().contains(expectedResponse));
+    }
+
+    @Test
     public void testEdgeCases()
     {
         StringWriter writer = new StringWriter();

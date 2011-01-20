@@ -64,6 +64,7 @@ public class EndpointHandler extends AbstractHandler
 
             response.setContentType("text/xml");
             response.setStatus(HttpServletResponse.SC_OK);
+            response.setCharacterEncoding("UTF-8");
 
             String thisEndpoint = request.getRequestURL().toString();//+target;
 

@@ -13,6 +13,7 @@
         <param-name>webAppRootKey</param-name>
         <param-value>arnos</param-value>
     </context-param>
+    
     <filter>
         <filter-name>HiddenHttpMethodFilter</filter-name>
         <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
@@ -21,6 +22,25 @@
         <filter-name>HiddenHttpMethodFilter</filter-name>
         <url-pattern>/projects/*</url-pattern>
     </filter-mapping>
+
+    <!-- Needed for force the servlet container generate UTF-8 output -->
+     <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+     </filter>
+     <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/projects/*</url-pattern>
+     </filter-mapping>
+ 
     <listener>
         <description>Spring Log4J listener configuration</description>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>

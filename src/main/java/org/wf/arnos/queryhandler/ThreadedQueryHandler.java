@@ -176,7 +176,7 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         StringBuffer content = new StringBuffer(DEFAULT_SB_LENGTH);
 
-        content.append("<?xml version=\"1.0\"?><sparql xmlns=\"http://www.w3.org/2005/sparql-results#\"><head>");
+        content.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><sparql xmlns=\"http://www.w3.org/2005/sparql-results#\"><head>");
 
         // add head info
         List<String> vars = query.getResultVars();
@@ -241,6 +241,8 @@ public class ThreadedQueryHandler implements QueryHandlerInterface
 
         selectResultList.clear();
 
+        LOG.debug("Returning string: "+content.toString());
+        
         return content.toString();
     }
 

@@ -5,6 +5,9 @@
 
 package org.wf.arnos.queryhandler;
 
+import java.util.Map;
+import java.util.HashMap;
+import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.query.ResultSetRewindable;
 import com.hp.hpl.jena.query.ResultSetFactory;
@@ -221,11 +224,23 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
         
         ResultSetRewindable rsw = ResultSetFactory.makeRewindable(results);
                 
-        assertEquals("one row", 1, rsw.size());
+        assertEquals("two rows", 2, rsw.size());
         
         rsw.reset();
-        int count = rsw.next().getLiteral("count").getInt();
         
-        assertEquals("Counts added", 5, count);
+        Map<String, Integer> expected = new HashMap<String, Integer>();
+        expected.put("ab", 5);
+        expected.put("cd", 9);
+        while (rsw.hasNext()) {
+            QuerySolution sol = rsw.next();
+            String s = sol.getLiteral("s").getString();
+            String o = sol.getLiteral("o").getString();
+            int count = sol.getLiteral("count").getInt();
+            assertTrue("Valid row", expected.containsKey(s + o));
+            assertEquals("Counts were added", (Object) expected.get(s + o), (Object) count);
+            expected.remove(s + o);
+        }
+        
+        assertTrue("Got all results", expected.isEmpty());
     }
 }

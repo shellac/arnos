@@ -463,6 +463,17 @@ public class Sparql {
         + "        <literal>b</literal>\n"
         + "      </binding>\n"
         + "    </result>\n"
+        + "    <result>\n"
+        + "      <binding name=\"count\">\n"
+        + "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">4</literal>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"s\">\n"
+        + "        <literal>c</literal>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"o\">\n"
+        + "        <literal>d</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
         + "  </results>\n"
         + "</sparql>";
     
@@ -531,7 +542,7 @@ public class Sparql {
         
         // Count group by
         endpoint1Mapping.put(SELECT_QUERY_COUNT_GROUP, SELECT_RESULT_1_COUNT_GROUP);
-        endpoint2Mapping.put(SELECT_QUERY_COUNT_GROUP, SELECT_RESULT_1_COUNT_GROUP.replaceAll(">2<", ">3<"));
+        endpoint2Mapping.put(SELECT_QUERY_COUNT_GROUP, SELECT_RESULT_1_COUNT_GROUP.replaceAll(">2<", ">3<").replaceAll(">4<", ">5<"));
         
         // associate with endpoints
         endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);

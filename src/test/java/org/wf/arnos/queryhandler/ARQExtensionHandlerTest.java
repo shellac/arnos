@@ -5,6 +5,10 @@
 
 package org.wf.arnos.queryhandler;
 
+import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.query.ResultSetRewindable;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.Syntax;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
@@ -172,5 +176,56 @@ public class ARQExtensionHandlerTest extends EasyMockSupport
         assertTrue(result.contains("datatype"));
         assertTrue(result.contains("xml:lang"));
     }
+    
+    @Test
+    public void testExtendedSelect()
+    {
+        Query selectQuery = QueryFactory.create(Sparql.SELECT_QUERY_COUNT, Syntax.syntaxARQ);
+        
+        System.out.println("testHandleRegularSelect");
 
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        String result = queryHandler.handleSelect(PROJECT_NAME, selectQuery, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+        
+        ResultSetRewindable rsw = ResultSetFactory.makeRewindable(results);
+        
+        assertEquals("one row", 1, rsw.size());
+        
+        rsw.reset();
+        int count = rsw.next().getLiteral("count").getInt();
+        
+        assertEquals("Counts added", 5, count);
+    }
+    
+    @Test
+    public void testExtendedSelectGroup()
+    {
+        Query selectQuery = QueryFactory.create(Sparql.SELECT_QUERY_COUNT_GROUP, Syntax.syntaxARQ);
+        
+        System.out.println("testHandleRegularSelect");
+
+        List<Endpoint> endpoints = new ArrayList<Endpoint>();
+        // add test endpoints - unit test relies on successful connection with following endpoints
+        endpoints.add(new Endpoint(Sparql.ENDPOINT1_URL));
+        endpoints.add(new Endpoint(Sparql.ENDPOINT2_URL));
+
+        String result = queryHandler.handleSelect(PROJECT_NAME, selectQuery, endpoints);
+
+        ResultSet results = JenaQueryWrapper.getInstance().stringToResultSet(result);
+        
+        ResultSetRewindable rsw = ResultSetFactory.makeRewindable(results);
+                
+        assertEquals("one row", 1, rsw.size());
+        
+        rsw.reset();
+        int count = rsw.next().getLiteral("count").getInt();
+        
+        assertEquals("Counts added", 5, count);
+    }
 }

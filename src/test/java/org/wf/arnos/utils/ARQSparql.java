@@ -18,7 +18,7 @@ public class ARQSparql extends Sparql
     /*** ARQ Extensions ***/
     /*================*/
 
-    public static final String ARQ_SELECT_COUNT = "SELECT  (count(*) as ?testcount)"+
+    public static final String ARQ_SELECT_COUNT = "SELECT  (count(*) as ?count)"+
         "WHERE"+
         "{ GRAPH ?v13"+
         "  { ?s  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "+ "<http://vocab.ouls.ox.ac.uk/projectfunding/projectfunding#Grant> .} "+

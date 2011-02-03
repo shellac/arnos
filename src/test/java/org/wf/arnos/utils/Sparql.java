@@ -31,6 +31,7 @@
  */
 package org.wf.arnos.utils;
 
+import com.hp.hpl.jena.query.Syntax;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,9 +60,9 @@ public class Sparql {
     // minimum number of results we're expecting
     public static final int MIN_LIMIT = 5;
 
-    HashMap endpoint1Mapping = new QueryMap();
-    HashMap endpoint2Mapping = new QueryMap();
-    HashMap endpoint3Mapping = new QueryMap();
+    HashMap endpoint1Mapping = new QueryMap(Syntax.syntaxSPARQL_11);
+    HashMap endpoint2Mapping = new QueryMap(Syntax.syntaxSPARQL_11);
+    HashMap endpoint3Mapping = new QueryMap(Syntax.syntaxSPARQL_11);
 
     Map<String,HashMap> endpointQueryResultMapping = new HashMap<String,HashMap>();
 
@@ -425,7 +426,46 @@ public class Sparql {
         + "    xmlns:ns=\"http://example.org/ns#\"\n"
         + "    xmlns=\"http://example.org/book/\">\n"
         + "</rdf:RDF>";
-
+    
+    /* COUNT */
+    public static final String SELECT_QUERY_COUNT = "select (count(*) as ?count) { ?s ?p ?o }";
+    public static final String SELECT_RESULT_1_COUNT = "<?xml version=\"1.0\"?>\n"
+        + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
+        + "  <head>\n"
+        + "    <variable name=\"count\"/>\n"
+        + "  </head>\n"
+        + "  <results>\n"
+        + "    <result>\n"
+        + "      <binding name=\"count\">\n"
+        + "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">2</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "  </results>\n"
+        + "</sparql>";
+    
+    /* COUNT AND GROUP */
+    public static final String SELECT_QUERY_COUNT_GROUP = "select ?s ?o (count(?p) as ?count) { ?s ?p ?o } GROUP BY ?s ?o";
+    public static final String SELECT_RESULT_1_COUNT_GROUP = "<?xml version=\"1.0\"?>\n"
+        + "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n"
+        + "  <head>\n"
+        + "    <variable name=\"count\"/>\n"
+        + "    <variable name=\"s\"/>\n"
+        + "  </head>\n"
+        + "  <results>\n"
+        + "    <result>\n"
+        + "      <binding name=\"count\">\n"
+        + "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">2</literal>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"s\">\n"
+        + "        <literal>a</literal>\n"
+        + "      </binding>\n"
+        + "      <binding name=\"o\">\n"
+        + "        <literal>b</literal>\n"
+        + "      </binding>\n"
+        + "    </result>\n"
+        + "  </results>\n"
+        + "</sparql>";
+    
 
     /*** UPDATE Query ***/
     /*===============*/
@@ -447,7 +487,7 @@ public class Sparql {
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_DISTINCT,SELECT_RESULT_2_PEOPLE);
         endpoint1Mapping.put(SELECT_QUERY_PEOPLE_ORDERED,SELECT_RESULT_2_PEOPLE);
-
+        
         endpoint2Mapping.put(SELECT_QUERY_BOOKS,SELECT_RESULT_EMPTY_BOOKS);
         endpoint2Mapping.put(SELECT_QUERY_BOOKS_NO_LIMIT,SELECT_RESULT_EMPTY_BOOKS);
         endpoint2Mapping.put(SELECT_QUERY_PEOPLE,SELECT_RESULT_4_PEOPLE);
@@ -484,7 +524,15 @@ public class Sparql {
 
         endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_2, DESCRIBE_RESULT_BOOK_2_ADDITIONAL);
         endpoint3Mapping.put(DESCRIBE_QUERY_BOOK_3, DESCRIBE_RESULT_EMPTY_BOOK);
-
+        
+        // Count
+        endpoint1Mapping.put(SELECT_QUERY_COUNT, SELECT_RESULT_1_COUNT);
+        endpoint2Mapping.put(SELECT_QUERY_COUNT, SELECT_RESULT_1_COUNT.replaceAll(">2<", ">3<"));
+        
+        // Count group by
+        endpoint1Mapping.put(SELECT_QUERY_COUNT_GROUP, SELECT_RESULT_1_COUNT_GROUP);
+        endpoint2Mapping.put(SELECT_QUERY_COUNT_GROUP, SELECT_RESULT_1_COUNT_GROUP.replaceAll(">2<", ">3<"));
+        
         // associate with endpoints
         endpointQueryResultMapping.put(ENDPOINT1_URL, endpoint1Mapping);
         endpointQueryResultMapping.put(ENDPOINT2_URL, endpoint2Mapping);

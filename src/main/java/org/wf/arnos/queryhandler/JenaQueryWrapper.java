@@ -82,7 +82,7 @@ public class JenaQueryWrapper implements QueryWrapperInterface
     /**
      * Default response timeout.
      */
-    private static int READ_TIMEOUT = 30 * 1000;
+    private static int READ_TIMEOUT = 120 * 1000;
 
     /**
      * URL connecction object.
